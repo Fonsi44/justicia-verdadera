@@ -59,7 +59,7 @@ Fundador (Alfons)                  Kilo Code (IA)
 
 **Justicia Verdadera** es una plataforma SaaS cloud-native diseñada para digitalizar, automatizar y potenciar con inteligencia artificial la operativa diaria de los despachos de abogados en Honduras. Cubre la gestión integral del ciclo de vida de un caso legal.
 
-**Estado actual**: Fase 1 completada. MVP funcional con autenticación completa, CRUD de casos/clientes/documentos/eventos/facturación, API REST completa y dashboard con datos reales de BD.
+**Estado actual**: Fase 1 completada. MVP funcional con 6 módulos, API REST 14 endpoints, auth auto-provisioning, dashboard con datos reales. Repo en GitHub — `master` limpio.
 
 ### Datos clave del proyecto
 
@@ -74,8 +74,10 @@ Fundador (Alfons)                  Kilo Code (IA)
 | **DB ORM** | Drizzle ORM v0.45 + Neon DB serverless |
 | **IA** | Vercel AI SDK v6 + @ai-sdk/deepseek |
 | **Modo de construcción** | Solopreneur + Kilo Code (IA pair programmer) |
+| **Repo GitHub** | `https://github.com/Fonsi44/justicia-verdadera` (privado) |
+| **Rama** | `master` — única rama raíz |
 | **Estado actual** | Fase 1 completada — build verde, API funcional, 6 módulos con páginas interactivas |
-| **Ubicación del proyecto** | `app/` (subdirectorio del workspace) |
+| **Última auditoría** | 30 mayo 2026 — estructura limpia, sin duplicados, .git en raíz workspace |
 
 ---
 
@@ -1176,4 +1178,4 @@ app/
 
 > **Documento vivo y ejecutable**: este documento es la fuente de verdad que Kilo Code lee para entender el proyecto y ejecutar las tareas. Cada cambio relevante (decisión de producto, cambio de arquitectura, nuevo módulo) se actualiza aquí. La IA consulta este documento al inicio de cada sesión de desarrollo.
 >
-> **Última actualización**: 30 mayo 2026 — Fase 1 completada. MVP funcional con 6 módulos, API REST con 14 endpoints, auth con auto-provisioning, dashboard con datos reales. Build verde (0 errores typecheck + 0 errores lint).
+> **Última actualización**: 30 mayo 2026 — Fase 1 completada, repositorio limpio en GitHub. Build verde (0 errores typecheck + 0 errores lint).
