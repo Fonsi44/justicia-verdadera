@@ -12,7 +12,7 @@
 |---|---|
 | Proyecto | Justicia Verdadera |
 | Responsable | Alfons Roiget, fundador |
-| Versión del documento | 5.8 — Planificación Fase 2: IA jurídica, RAG, facturación SAR (30 mayo 2026) |
+| Versión del documento | 5.9 — Planificación completa: Fase 2 IA, SAR, backup, RLS, notificaciones, integraciones, onboarding, KPIs (30 mayo 2026) |
 | Fecha de actualización | 30 mayo 2026 |
 | Estado global | Fase 1 completada. Fase 1.5 completada. Auditoría 78 hallazgos resueltos. Service layer implementado. CI/CD + Vercel funcional. Fase 2 planificada. |
 | Fuente de verdad | Solo `master.md` |
@@ -501,6 +501,66 @@ firms
 | Health endpoint | Implementado | `/api/health` verifica DB + 6 servicios externos |
 | Backups | Pendiente de validar | Verificar plan Neon |
 
+### 12bis. Estrategia de backup y disaster recovery
+
+| Concepto | Objetivo | Estado |
+|---|---|---|
+| RPO (Recovery Point Objective) | Máximo 1 hora de pérdida de datos | [PENDIENTE] |
+| RTO (Recovery Time Objective) | Recuperación completa en < 4 horas | [PENDIENTE] |
+| Backup automático | Neon DB: backups diarios automáticos (Plan Launch+). Verificar plan actual. | [PENDIENTE-VALIDAR] |
+| Backup manual | Snapshot pre-migración antes de cada `drizzle-kit push` en producción | [PENDIENTE] |
+| Backup de documentos | UploadThing: almacenamiento redundante. Verificar política de retención. | [PENDIENTE-VALIDAR] |
+| Restauración | Probar restauración completa trimestralmente | [PENDIENTE] |
+| Conservación legal | 5 años mínimo (Código Tributario Art. 112) | [PENDIENTE-IMPLEMENTAR] |
+| Exportación de datos | Herramienta de exportación para despachos (CSV/PDF de casos, facturas, documentos) | [PENDIENTE] |
+
+**Flujo de disaster recovery:**
+```text
+Detección de incidente → Notificar a clientes (status page)
+→ Restaurar DB desde último backup en Neon
+→ Verificar integridad de datos
+→ Re-sincronizar documentos UploadThing si fuera necesario
+→ Post-mortem y mejora del plan
+```
+
+### 12ter. Seguridad multi-tenant con Row-Level Security (RLS)
+
+El aislamiento actual depende exclusivamente del código (`WHERE firmId = ?`). PostgreSQL Row-Level Security añade una capa de defensa en profundidad que impide fugas de datos incluso si hay bugs en la aplicación.
+
+**Implementación planificada:**
+```sql
+-- Habilitar RLS en todas las tablas multi-tenant
+ALTER TABLE cases ENABLE ROW LEVEL SECURITY;
+ALTER TABLE contacts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE documents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
+ALTER TABLE case_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE case_parties ENABLE ROW LEVEL SECURITY;
+ALTER TABLE time_entries ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE document_versions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE templates ENABLE ROW LEVEL SECURITY;
+ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE invoice_items ENABLE ROW LEVEL SECURITY;
+
+-- Política: cada fila solo visible para el firmId del usuario actual
+CREATE POLICY tenant_isolation ON cases
+  FOR ALL
+  USING (firm_id = current_setting('app.current_firm_id')::uuid);
+```
+
+**Estrategia de implementación:**
+1. Fase 1: Implementar setting `app.current_firm_id` en cada request vía proxy.
+2. Fase 2: Activar RLS en tablas no críticas (notifications, templates).
+3. Fase 3: Activar RLS en tablas críticas (cases, documents) tras pruebas exhaustivas.
+4. Fase 4: Auditoría de seguridad externa para verificar aislamiento.
+
+| Aspecto | Estado | Detalle |
+|---|---|---|
+| RLS en PostgreSQL | [PENDIENTE] | Planificado post-MVP, antes de producción |
+| Tenant-specific encryption keys | [PENDIENTE] | Evaluar necesidad real vs complejidad |
+| Data isolation testing | [PENDIENTE] | Tests automáticos que verifican que firmA nunca ve datos de firmB |
+
 ---
 
 ## 13. IA jurídica y RAG — Fase 2
@@ -620,6 +680,84 @@ Crear factura → Asignar número correlativo + CAI
 
 ---
 
+### 13ter. Estrategia de notificaciones multicanal
+
+La tabla `notifications` y `lib/email.ts` están implementadas. Falta diseñar el sistema completo de disparadores y canales.
+
+**Canales de notificación:**
+
+| Canal | Prioridad | Uso | Estado |
+|---|---|---|---|
+| In-app | Alta | Notificaciones en tiempo real dentro del dashboard | Parcial (tabla existe, sin UI de campanita) |
+| Email | Alta | Recordatorios de plazos, facturas, bienvenida | Implementado (`lib/email.ts` con Resend) |
+| WhatsApp | Media | Recordatorios urgentes, notificaciones de cliente | [PENDIENTE] (API WhatsApp Business) |
+| Push | Baja | Notificaciones en móvil si se convierte en PWA | [PENDIENTE] |
+
+**Eventos disparadores de notificación:**
+
+| Evento | Canal | Destinatario | Plantilla |
+|---|---|---|---|
+| `case.deadline_approaching` (48h antes) | Email + In-app | Abogado asignado | ⚠️ plazo próximo |
+| `case.deadline_approaching` (24h antes) | Email + WhatsApp | Abogado asignado | 🚨 plazo urgente |
+| `event.tomorrow` (vista/audiencia mañana) | Email + In-app | Abogado asignado | Recordatorio de vista |
+| `case.new_document` (documento subido) | In-app | Abogados del caso | Nuevo documento disponible |
+| `case.status_changed` | In-app | Abogados del caso | Estado actualizado |
+| `invoice.issued` | Email | Cliente (contacto) | Factura emitida |
+| `invoice.overdue` | Email + In-app | Abogado asignado | Factura vencida |
+| `client.case_update` | Email | Cliente (portal) | Actualización de caso |
+| `system.welcome` | Email | Nuevo usuario | Bienvenida + guía rápida |
+| `system.subscription_expiring` | Email | Owner del despacho | Renovación necesaria |
+
+**Preferencias de notificación por usuario:**
+```text
+Perfil de usuario > Preferencias > Notificaciones
+├── Canales activos: [✓] Email  [✓] In-app  [ ] WhatsApp
+├── Frecuencia: [Instantáneo] [Resumen diario] [Resumen semanal]
+├── Tipos: [✓] Plazos  [✓] Documentos  [✓] Facturación
+└── Horario silencioso: 22:00 – 07:00
+```
+
+**Implementación técnica:**
+- **Disparadores**: hooks en service layer (`afterCreate`, `afterUpdate`) que emiten eventos.
+- **Cola**: Inngest `step.send` para email, `step.run` para in-app.
+- **WhatsApp**: API de WhatsApp Business Cloud (Meta) — requiere número verificado y plantillas aprobadas.
+- **Plantillas**: `@react-email/components` para emails, templates pre-aprobados para WhatsApp.
+
+---
+
+### 13quater. Estrategia de integraciones
+
+**Integraciones planificadas por prioridad:**
+
+| # | Integración | Prioridad | Valor para el abogado | Estado |
+|---|---:|---|---|---|
+| 1 | Google Calendar / Outlook | Alta | Sincronización bidireccional de vistas, audiencias y plazos con el calendario del abogado | [PENDIENTE] |
+| 2 | WhatsApp Business | Alta | Recordatorios de plazos, notificaciones de cliente, comunicación rápida | [PENDIENTE] |
+| 3 | Firma electrónica | Alta | Firma de documentos legales sin impresión ni desplazamiento (SAR-compliant) | [PENDIENTE] |
+| 4 | Correo electrónico (IMAP/SMTP) | Media | Vincular bandeja de entrada del despacho, auto-archivar correos en expedientes | [PENDIENTE] |
+| 5 | Google Drive / OneDrive | Media | Backup secundario de documentos, sincronización con almacenamiento existente | [PENDIENTE] |
+| 6 | Banca en línea (BAC, Ficohsa, Atlántida) | Baja | Conciliación automática de pagos de clientes | [PENDIENTE] |
+
+**Detalle de integraciones prioritarias:**
+
+**Google Calendar / Outlook (OAuth):**
+- Flujo: el abogado conecta su cuenta → los eventos de Justicia Verdadera se sincronizan como eventos de calendario.
+- Bidireccional: cambios en el calendario externo se reflejan en la agenda de JV.
+- Alcance: audiencias, vistas, plazos, reuniones con clientes.
+- Tech: Google Calendar API v3 + Microsoft Graph API para Outlook.
+
+**WhatsApp Business Cloud API:**
+- Flujo: el despacho registra su número de WhatsApp Business → Meta aprueba las plantillas de mensaje.
+- Casos de uso: recordatorio "Mañana tiene audiencia en el Juzgado de Letras Civil a las 9:00 AM", aviso "Su factura FAC-2026-0042 está disponible".
+- Restricciones: solo se puede enviar WhatsApp a usuarios que hayan optado explícitamente.
+
+**Firma electrónica (proveedores hondureños):**
+- Proveedores a evaluar: Firma Virtual S.A., ACERTA (Autoridad Certificadora), GSE (Gestión de Servicios Electrónicos).
+- Flujo: generar documento PDF → enviar a firmantes → firma con certificado digital → documento firmado con validez legal.
+- Requisito legal hondureño: Ley de Firmas Electrónicas (Decreto 149-2013).
+
+---
+
 ## 14. Pipeline documental
 
 ### Flujo Fase 1.5 (implementado)
@@ -666,6 +804,118 @@ Subida del archivo → UploadThing → Guardar metadata + document_version
 
 ---
 
+### 15bis. Gestión de suscripciones SaaS
+
+El SaaS debe gestionar su propia facturación a los despachos a través de un Merchant of Record.
+
+**Flujo de suscripción:**
+```text
+Registro (Google/Microsoft OAuth) → Trial gratuito 14 días
+→ Selección de plan (Starter/Profesional/Despacho) → Checkout Lemon Squeezy
+→ Pago mensual/anual → Activación inmediata de funcionalidades del plan
+→ Webhook `subscription_created` → actualizar firms.subscriptionStatus
+→ Renovación automática mensual → webhook `subscription_payment_success`
+→ Cancelación → webhook `subscription_cancelled` → acceso hasta fin de período
+```
+
+**Límites de uso por plan:**
+| Plan | Usuarios máx | Casos activos | Prompts IA/mes | Documentos | Almacenamiento |
+|---|---|---|---|---|---|
+| Starter | 1 | 20 | 10 | 50 | 500 MB |
+| Profesional | 3 | 100 | 50 | 200 | 2 GB |
+| Despacho | 10 | Ilimitados | 200 | 500 | 10 GB |
+| Enterprise | Ilimitados | Ilimitados | Personalizado | Ilimitados | Personalizado |
+
+**Estados de suscripción:**
+`trial` → `active` → `past_due` → `cancelled` / `expired`
+
+**Gestión de overage (tokens IA):**
+- Si un plan consume más prompts de los incluidos, se bloquea IA hasta siguiente ciclo.
+- Alternativa futura: compra de paquetes de tokens adicionales.
+
+**Facturación al despacho:**
+- Lemon Squeezy emite factura/recibo automático al cliente final (despacho).
+- El despacho recibe email con link de descarga de factura.
+- IVA/Hacienda: Lemon Squeezy gestiona impuestos como MoR — Justicia Verdadera recibe el neto.
+
+| Aspecto | Estado |
+|---|---|
+| Planes creados en Lemon Squeezy | [PENDIENTE] — 3 productos a crear en dashboard |
+| Checkout page integrada | [PENDIENTE] — usar Lemon Squeezy hosted checkout |
+| Webhooks de suscripción | [PENDIENTE] — endpoint `/api/webhooks/lemon-squeezy` ya existe |
+| Límites de plan en código | [PENDIENTE] — middleware que verifique `firms.subscriptionTier` |
+| Trial automático | [PENDIENTE] — activar al registrarse |
+
+### 15ter. Estrategia de onboarding y migración de datos
+
+La adopción por despachos requiere migrar datos existentes desde Excel, sistemas legacy o papel. Sin esto, el SaaS no despega.
+
+**Flujo de onboarding:**
+```text
+Registro → Trial 14 días → Wizard de configuración (3 pasos)
+→ Paso 1: Datos del despacho (nombre, RTN, dirección, logo)
+→ Paso 2: Invitar abogados del equipo (emails)
+→ Paso 3: Importar datos existentes (CSV/Excel) o empezar desde cero
+→ Dashboard con datos de demo pre-cargados → Tutorial guiado
+```
+
+**Herramientas de migración de datos:**
+
+| Herramienta | Formato | Alcance | Estado |
+|---|---|---|---|
+| Importador CSV de casos | `numero,titulo,materia,estado,cliente,fecha_inicio` | Casos activos | [PENDIENTE] |
+| Importador CSV de contactos | `tipo,nombre,apellido,email,telefono,identidad` | Clientes y contrapartes | [PENDIENTE] |
+| Importador CSV de documentos | `nombre,tipo,caso_numero` (archivos en ZIP) | Documentos con metadatos | [PENDIENTE] |
+| Asistente manual guiado | Paso a paso con validación | Para despachos sin datos digitalizados | [PENDIENTE] |
+| API de importación | JSON/REST | Para integraciones personalizadas con sistemas legacy | [PENDIENTE] |
+
+**Datos pre-cargados en trial (seed-mock):**
+- 8 casos de ejemplo con diferentes materias y estados
+- 12 contactos (clientes, contrapartes, testigos)
+- 14 documentos con OCR de textos legales hondureños realistas
+- 3 facturas demo con cálculo ISV
+- Eventos de agenda próximos (vistas, audiencias)
+
+**Soporte de onboarding:**
+- Video tutorial de 5 minutos (primeros pasos)
+- Chat de soporte dentro del dashboard (primeros 30 días)
+- Sesión de onboarding en vivo para planes Despacho y Enterprise
+
+### 15quater. Portal del cliente
+
+Permite que los clientes del despacho consulten el estado de sus casos sin llamar al abogado. Reduce carga administrativa y mejora percepción de servicio.
+
+**Funcionalidades del portal:**
+| Funcionalidad | Descripción | Estado |
+|---|---|---|
+| Autenticación segura | Login con email + código temporal (magic link), sin contraseña | [PENDIENTE] |
+| Vista de casos | Lista de casos del cliente con estado, última actualización | [PENDIENTE] |
+| Detalle de caso | Línea de tiempo de eventos, documentos compartidos | [PENDIENTE] |
+| Documentos | Descarga de documentos que el abogado ha marcado como "compartir con cliente" | [PENDIENTE] |
+| Facturas | Ver facturas pendientes y pagadas, descargar PDF | [PENDIENTE] |
+| Mensajería | Chat directo con el abogado asignado al caso | [PENDIENTE] |
+| Calendario | Próximas vistas/audiencias del cliente | [PENDIENTE] |
+
+**Modelo de datos:**
+```text
+contacts (ya existe) → portal_access (nueva tabla)
+├── contact_id → FK a contacts
+├── access_token (UUID, magic link)
+├── token_expires_at
+├── last_login_at
+└── is_active (bool)
+
+documents (ya existe) → añadir columna shared_with_client (bool)
+cases (ya existe) → añadir columna client_notes (texto visible al cliente)
+```
+
+**Branding por despacho:**
+- El portal se sirve en `tudominio.com/portal` con logo, colores y nombre del despacho.
+- Sin referencias a Justicia Verdadera (white-label).
+- URL personalizada disponible en plan Enterprise.
+
+---
+
 ## 16. Riesgos y bloqueantes
 
 | ID | Riesgo | Impacto | Probabilidad | Estado |
@@ -683,6 +933,12 @@ Subida del archivo → UploadThing → Guardar metadata + document_version
 | R16 | Migraciones Drizzle no controladas | Alto | Media | [PENDIENTE] |
 | R17 | NextAuth v5 beta | Medio | Media | [PARCIAL] |
 | R20 | Documentación desactualizada | Alto | Media | [PENDIENTE] |
+| R21 | Fuga de datos multi-tenant (sin RLS) | Crítico | Baja | [PENDIENTE] — Mitigado en código pero sin RLS |
+| R22 | Pérdida de datos sin backup verificado | Crítico | Media | [PENDIENTE-VALIDAR] |
+| R23 | Falta de onboarding impide adopción | Alto | Alta | [PENDIENTE] |
+| R24 | Churn por falta de notificaciones | Alto | Alta | [PENDIENTE] |
+| R25 | Coste IA fuera de control sin monitoreo | Alto | Media | [PENDIENTE] |
+| R26 | SAR rechaza facturación por formato no compliant | Alto | Alta | [PENDIENTE-VALIDAR] |
 
 ---
 
@@ -716,6 +972,160 @@ Subida del archivo → UploadThing → Guardar metadata + document_version
 | F1.5E-02 | Audit logs | [COMPLETADO] |
 | F1.5E-03 | Tests (13 tests) | [COMPLETADO] |
 | F1.5E-04 | Revisar logs sin PII | [COMPLETADO] |
+
+### Fase 2 — IA jurídica, RAG y automatizaciones — Planificada
+
+| ID | Tarea | Estado |
+|---|---|---|
+| F2A-01 | Implementar pgvector en Neon DB (activar extensión) | [PENDIENTE] |
+| F2A-02 | Crear tabla `legal_documents` con embeddings | [PENDIENTE] |
+| F2A-03 | Pipeline de chunking: split 512 tokens, overlap 50 | [PENDIENTE] |
+| F2A-04 | Generar embeddings con text-embedding-3-small | [PENDIENTE] |
+| F2A-05 | Retrieval híbrido: semántico + keyword (pgvector + tsvector) | [PENDIENTE] |
+| F2B-01 | Scraping de códigos y leyes hondureñas (TSC, Poder Judicial) | [PENDIENTE] |
+| F2B-02 | Scraping de jurisprudencia CSJ (Salas Constitucional, Civil, Penal) | [PENDIENTE] |
+| F2B-03 | Cron job semanal (Vercel Cron) para actualización de corpus | [PENDIENTE] |
+| F2B-04 | Sistema de validación: abogado revisor marca textos como "verificado" | [PENDIENTE] |
+| F2C-01 | Catálogo de 25-30 plantillas legales base (demandas, recursos, contratos) | [PENDIENTE] |
+| F2C-02 | Motor de generación: RAG + datos del caso → borrador automático | [PENDIENTE] |
+| F2C-03 | Editor de borradores con autocompletado IA | [PENDIENTE] |
+| F2C-04 | Exportación a PDF con formato legal hondureño | [PENDIENTE] |
+| F2D-01 | Asistente IA de chat jurídico (streaming con DeepSeek V4) | [PENDIENTE] |
+| F2D-02 | Análisis de documentos: resumen, puntos clave, plazos detectados | [PENDIENTE] |
+| F2D-03 | Detección de contradicciones entre documentos del mismo caso | [PENDIENTE] |
+| F2D-04 | Sugerencia de jurisprudencia relevante al redactar | [PENDIENTE] |
+
+### Fase 2bis — Facturación SAR e integraciones — Planificada
+
+| ID | Tarea | Estado |
+|---|---|---|
+| F2BIS-01 | Añadir columnas SAR a invoices: CAI, rango_cai, estado_sar, cai_response | [PENDIENTE] |
+| F2BIS-02 | Implementar cálculo de retención ISR 12.5% para personas jurídicas | [PENDIENTE] |
+| F2BIS-03 | Exportación CSV de facturas para carga manual en portal SAR | [PENDIENTE] |
+| F2BIS-04 | Integración API SAR cuando esté disponible | [PENDIENTE] |
+| F2BIS-05 | Integración Google Calendar / Outlook (OAuth bidireccional) | [PENDIENTE] |
+| F2BIS-06 | Integración WhatsApp Business Cloud API | [PENDIENTE] |
+| F2BIS-07 | Evaluación e integración de firma electrónica hondureña | [PENDIENTE] |
+| F2BIS-08 | Portal del cliente: auth, casos, documentos, facturas | [PENDIENTE] |
+
+---
+
+### 17bis. Estrategia de testing y QA
+
+**Pirámide de testing:**
+
+| Nivel | Herramienta | Cobertura actual | Objetivo |
+|---|---|---|---|
+| Unit tests | Vitest | 34 tests (services, errors, schema) | 80% de cobertura en `lib/` |
+| Integration tests | Vitest + mocks | 0 tests de integración multi-tenant | Todos los servicios con DB mock |
+| API tests | Vitest + mocks | 6 tests (casos) | Todos los endpoints CRUD |
+| E2E tests | Playwright | 0 tests | Flujos críticos: auth → crear caso → subir documento → OCR |
+| Multi-tenant isolation | Playwright | 0 tests | Verificar que firmA no accede a datos de firmB |
+| Load testing | k6 / Artillery | 0 tests | 100 usuarios concurrentes sin degradación |
+
+**Flujo de QA pre-release:**
+```text
+Desarrollo → lint + typecheck → unit tests → build
+→ Deploy a preview (Vercel) → E2E tests en preview
+→ Revisión manual de features nuevas → Merge a master
+→ CI completo → Deploy a producción
+```
+
+**Política de testing:**
+- Nuevo código en `lib/` requiere test unitario.
+- Nuevo endpoint API requiere test de integración.
+- Features nuevas requieren al menos 1 test E2E.
+- Multi-tenant isolation tests son obligatorios pre-producción.
+- No se despliega a producción con tests fallando.
+
+### 17ter. Estrategia de monitoreo y observabilidad
+
+**Capas de monitoreo:**
+
+| Capa | Herramienta | Estado |
+|---|---|---|
+| Health checks | `/api/health` (DB + 6 servicios) | Implementado |
+| Uptime monitoring | Vercel Analytics + status page externa | [PENDIENTE] |
+| Error tracking | Evaluar alternativas a Sentry (Logflare, Axiom, self-hosted) | [PENDIENTE] |
+| Performance (APM) | Vercel Speed Insights + Web Vitals | [PENDIENTE] |
+| Cost tracking IA | Dashboard de consumo DeepSeek (tokens/día, coste/despacho) | [PENDIENTE] |
+| Alertas | Webhook → email/WhatsApp cuando: DB caída, error rate > 5%, API latency > 2s | [PENDIENTE] |
+
+**Métricas a monitorizar:**
+
+| Métrica | Fuente | Umbral de alerta |
+|---|---|---|
+| API p95 latency | Vercel Analytics | > 2 segundos |
+| Error rate | Logs | > 5% de requests |
+| DB connection pool | Neon dashboard | > 80% ocupación |
+| Redis hit rate | Upstash dashboard | < 90% |
+| DeepSeek API cost/day | AI SDK events | > $10/día |
+| OCR processing failures | Inngest dashboard | > 10% |
+
+**Logging:**
+- Errores: `console.error` con stack trace en desarrollo. En producción → servicio de logs.
+- Auditoría: `audit_logs` table (ya implementado).
+- NO loggear PII, tokens OCR completos, ni secretos.
+
+### 17quater. Estrategia de despliegue y entornos
+
+**Entornos:**
+
+| Entorno | Rama | URL | Base de datos | Uso |
+|---|---|---|---|---|
+| Local | cualquier | `localhost:3000` | Neon dev branch | Desarrollo diario |
+| Preview | PR branches | `*.vercel.app` | Neon preview branch | Revisión de PRs |
+| Staging | `staging` | `staging.justiciaverdadera.com` | Neon staging branch | Pruebas pre-producción |
+| Producción | `master` | `justiciaverdadera.com` | Neon producción | Clientes reales |
+
+**Pipeline CI/CD (GitHub Actions):**
+```text
+Push a cualquier rama:
+  → lint → typecheck → unit tests → build
+
+Push a PR:
+  → lo mismo + Vercel preview deploy automático
+
+Push a master:
+  → lo mismo + Vercel producción deploy automático
+```
+
+**Estrategia de migraciones de BD:**
+- Desarrollo: `drizzle-kit push` (aceptable en etapa temprana).
+- Producción: migraciones generadas con `drizzle-kit generate` + revisadas manualmente.
+- Pre-migración: snapshot/backup de Neon antes de ejecutar.
+- Rollback: restaurar snapshot si la migración falla.
+
+**Feature flags (planificado):**
+- Rollout gradual de features nuevas (10% → 50% → 100%).
+- Deshabilitar feature problemática sin redeploy.
+- Tool: Vercel Edge Config o flags en `firms.settings`.
+
+### 17quinquies. Documentación y help center
+
+**Documentación para usuarios (despachos):**
+
+| Recurso | Formato | Estado |
+|---|---|---|
+| Guía rápida de inicio | Video 5 min + texto | [PENDIENTE] |
+| Manual por módulo | Web (help.justiciaverdadera.com) | [PENDIENTE] |
+| FAQ legal | Preguntas frecuentes sobre IA, validez legal, confidencialidad | [PENDIENTE] |
+| Plantillas de importación | CSV templates descargables con ejemplos | [PENDIENTE] |
+| Webinars de onboarding | Sesiones en vivo mensuales para nuevos despachos | [PENDIENTE] |
+
+**Documentación técnica (desarrolladores):**
+
+| Recurso | Herramienta | Estado |
+|---|---|---|
+| API Reference | OpenAPI/Swagger generado desde tipos TypeScript | [PENDIENTE] |
+| Database schema docs | `drizzle-kit studio` + diagramas | Parcial (master.md sección 10) |
+| Architecture decision records | `docs/adr/` en el repo | [PENDIENTE] |
+| Contributing guide | `CONTRIBUTING.md` | [PENDIENTE] |
+
+**Help center integrado:**
+- Botón "?" flotante en dashboard que abre centro de ayuda contextual.
+- Búsqueda full-text en documentación.
+- Sugerencias automáticas según la página actual (ej: en `/casos` → mostrar "Cómo crear un caso").
 
 ---
 
@@ -923,3 +1333,68 @@ Se definió el alcance completo de Fase 2 en `master.md`:
 - Estrategia de integración SAR (Fase beta CSV → Fase 2 API directa)
 
 **Fuentes oficiales identificadas:** TSC, Poder Judicial, SEFIN, SRE, La Gaceta, SAR.
+
+---
+
+## 20. Métricas de éxito y KPIs
+
+### KPIs técnicos
+
+| Métrica | Objetivo | Herramienta |
+|---|---|---|
+| Uptime | > 99.5% mensual | Vercel Analytics + status page |
+| API p95 latency | < 1 segundo | Vercel Speed Insights |
+| Error rate | < 1% de requests | Logs agregados |
+| Build success rate | > 95% | GitHub Actions |
+| Test coverage | > 80% en `lib/` | Vitest coverage |
+
+### KPIs de producto
+
+| Métrica | Objetivo mes 1 | Objetivo mes 6 |
+|---|---|---|
+| DAU (Daily Active Users) | 5 | 50 |
+| WAUs (Weekly Active Users) | 10 | 100 |
+| Casos creados/mes | 20 | 200 |
+| Documentos subidos/mes | 50 | 500 |
+| Búsquedas OCR/mes | 30 | 300 |
+| Prompts IA usados/mes | 10 | 500 |
+
+### KPIs de negocio
+
+| Métrica | Objetivo mes 3 | Objetivo mes 12 |
+|---|---|---|
+| MRR (Monthly Recurring Revenue) | L. 3,000 | L. 50,000 |
+| Despachos activos | 3 | 30 |
+| Trial → Paid conversion | 20% | 30% |
+| Churn rate mensual | < 10% | < 5% |
+| LTV (Lifetime Value) | — | L. 36,000 |
+| CAC (Customer Acquisition Cost) | — | < L. 5,000 |
+| NPS (Net Promoter Score) | — | > 50 |
+
+### KPIs de onboarding
+
+| Métrica | Objetivo |
+|---|---|
+| Tasa de abandono en wizard | < 30% |
+| Tiempo hasta primer caso creado | < 10 minutos |
+| Tiempo hasta primera factura | < 7 días |
+| % que importa datos existentes | > 50% |
+
+### Dashboard de métricas (interno)
+
+```text
+/admin/metrics
+├── Gráfico MRR (últimos 12 meses)
+├── Despachos por plan (pie chart)
+├── Uso IA por despacho (tokens/día)
+├── Casos creados por día (bar chart)
+├── Tasa de conversión trial → paid (funnel)
+└── Alertas: despacho sin actividad > 7 días → riesgo de churn
+```
+
+### Revisión periódica
+
+- **Semanal**: revisar KPIs de producto y uso IA.
+- **Mensual**: revisar KPIs de negocio (MRR, churn, conversión).
+- **Trimestral**: NPS, LTV/CAC, ajuste de precios si necesario.
+- **Anual**: auditoría completa de métricas y planificación estratégica.
