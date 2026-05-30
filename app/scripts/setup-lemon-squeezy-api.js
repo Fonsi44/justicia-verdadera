@@ -56,9 +56,9 @@ async function main() {
   console.log("Existing discounts:", [...discCodes].join(", ") || "none");
 
   const betas = [
-    { name: "Beta Early Adopter 50%", code: "BETA50", amount: "50", type: "percent", max_redemptions: 20 },
-    { name: "Beta Founder 30%", code: "FOUNDER30", amount: "30", type: "percent", max_redemptions: 50 },
-    { name: "Beta Launch 25%", code: "LAUNCH25", amount: "25", type: "percent", max_redemptions: 100 },
+    { name: "Beta Early Adopter 50%", code: "BETA50", amount: 50, amountType: "percent", isLimitedRedemptions: true, maxRedemptions: 20, duration: "forever" },
+    { name: "Beta Founder 30%", code: "FOUNDER30", amount: 30, amountType: "percent", isLimitedRedemptions: true, maxRedemptions: 50, duration: "forever" },
+    { name: "Beta Launch 25%", code: "LAUNCH25", amount: 25, amountType: "percent", isLimitedRedemptions: true, maxRedemptions: 100, duration: "forever" },
   ];
 
   for (const b of betas) {
@@ -68,14 +68,19 @@ async function main() {
     }
     try {
       const r = await ls.createDiscount({
-        store_id: 391910, name: b.name, code: b.code,
-        amount: b.amount, amount_type: b.type,
-        max_redemptions: b.max_redemptions, status: "active",
+        storeId: 391910,
+        name: b.name,
+        code: b.code,
+        amount: b.amount,
+        amountType: b.amountType,
+        isLimitedRedemptions: b.isLimitedRedemptions,
+        maxRedemptions: b.maxRedemptions,
+        duration: b.duration,
       });
       const d = dd(r);
-      console.log("Created: " + b.code + " (ID: " + (d?.id || "?") + ")");
+      console.log("Created: " + b.code + " (ID: " + (d?.id || r.data?.data?.id || "?") + ") " + (r.error ? "error: " + JSON.stringify(r.error).substring(0, 100) : "ok"));
     } catch (e) {
-      console.log("Error creating " + b.code + ": " + e.message.substring(0, 80));
+      console.log("Error creating " + b.code + ": " + e.message.substring(0, 120));
     }
   }
 
