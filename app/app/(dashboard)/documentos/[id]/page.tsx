@@ -9,7 +9,7 @@ import {
   EyeOff,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { formatDate, formatDateTime } from "@/lib/utils";
+import { formatDateTime } from "@/lib/utils";
 
 interface DocumentDetail {
   id: string;

@@ -1,6 +1,5 @@
 import PageHeader from "@/components/page-header";
 import Link from "next/link";
-import { Settings } from "lucide-react";
 
 const sectionClass = "rounded-xl border bg-card ring-1 ring-foreground/10 p-6 space-y-4";
 

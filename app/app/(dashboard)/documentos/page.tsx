@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { Download, FileText, Upload } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import { exportToCsv } from "@/lib/export-csv";
@@ -86,19 +86,47 @@ const processingStatusLabels: Record<string, string> = {
   retry_pending: "Reintento Pendiente",
 };
 
+interface State {
+  documents: Document[];
+  loading: boolean;
+  totalPages: number;
+  total: number;
+}
+
+type Action =
+  | { type: "FETCH_START" }
+  | { type: "FETCH_SUCCESS"; data: Document[]; totalPages: number; total: number }
+  | { type: "FETCH_ERROR" };
+
+function documentReducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "FETCH_START":
+      return { ...state, loading: true };
+    case "FETCH_SUCCESS":
+      return { documents: action.data, loading: false, totalPages: action.totalPages, total: action.total };
+    case "FETCH_ERROR":
+      return { ...state, loading: false };
+    default:
+      return state;
+  }
+}
+
 export default function DocumentosPage() {
-  const [documents, setDocuments] = useState<Document[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [state, dispatch] = useReducer(documentReducer, {
+    documents: [],
+    loading: true,
+    totalPages: 1,
+    total: 0,
+  });
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [total, setTotal] = useState(0);
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
     setPage(1);
-  }, [search, typeFilter]);
+  };
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -106,17 +134,16 @@ export default function DocumentosPage() {
     if (typeFilter) params.set("type", typeFilter);
     params.set("page", String(page));
     params.set("limit", "20");
-    setLoading(true);
+    dispatch({ type: "FETCH_START" });
     fetch(`/api/documents?${params.toString()}`)
       .then((r) => r.json())
       .then((res) => {
-        setDocuments(res.data ?? []);
-        setTotalPages(res.totalPages ?? 1);
-        setTotal(res.total ?? 0);
+        dispatch({ type: "FETCH_SUCCESS", data: res.data ?? [], totalPages: res.totalPages ?? 1, total: res.total ?? 0 });
       })
-      .catch(console.error)
-      .finally(() => setLoading(false));
+      .catch(() => dispatch({ type: "FETCH_ERROR" }));
   }, [search, typeFilter, page]);
+
+  const { documents, loading, totalPages, total } = state;
 
   return (
     <div className="space-y-6">
@@ -138,11 +165,14 @@ export default function DocumentosPage() {
 
       <SearchAndFilters
         searchValue={search}
-        onSearchChange={setSearch}
-        searchPlaceholder="Buscar documentos..."
-        filters={typeFilterChips}
-        activeFilter={typeFilter || "all"}
-        onFilterChange={(v) => setTypeFilter(v === "all" ? "" : v)}
+          onSearchChange={handleSearchChange}
+          searchPlaceholder="Buscar documentos..."
+          filters={typeFilterChips}
+          activeFilter={typeFilter || "all"}
+          onFilterChange={(v) => {
+            setTypeFilter(v === "all" ? "" : v);
+            setPage(1);
+          }}
         loading={loading}
       />
 
