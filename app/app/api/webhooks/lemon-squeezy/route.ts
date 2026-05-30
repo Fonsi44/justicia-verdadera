@@ -1,12 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const webhookSecret = process.env.LEMON_SQUEEZY_WEBHOOK_SECRET;
-
 export async function POST(req: NextRequest) {
   try {
     const body = await req.text();
-    const signature = req.headers.get("x-signature");
 
     const eventName = req.headers.get("x-event-name") ?? "unknown";
     const eventData = JSON.parse(body);

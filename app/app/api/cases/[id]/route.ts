@@ -1,8 +1,10 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth/require-auth";
 import { cases, caseParties, users, contacts } from "@/database/schema";
 import { eq, and } from "drizzle-orm";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { writeAuditLog } from "@/lib/audit";
 
 export async function GET(
   _req: NextRequest,
@@ -55,12 +57,17 @@ export async function PATCH(
 ) {
   const { id } = await params;
   const session = await getSession();
+  const firmId = session.user.firmId;
+
+  const rateCheck = await checkRateLimit("api", firmId);
+  if (rateCheck instanceof NextResponse) return rateCheck;
+
   const body = await request.json();
 
   const [existing] = await db
     .select({ id: cases.id, firmId: cases.firmId })
     .from(cases)
-    .where(and(eq(cases.id, id), eq(cases.firmId, session.user.firmId)))
+    .where(and(eq(cases.id, id), eq(cases.firmId, firmId)))
     .limit(1);
 
   if (!existing) {
@@ -97,6 +104,14 @@ export async function PATCH(
     .where(eq(cases.id, id))
     .returning();
 
+  await writeAuditLog({
+    firmId,
+    action: "update",
+    entityType: "case",
+    entityId: id,
+    changes: updates,
+  });
+
   return Response.json(updated);
 }
 
@@ -106,11 +121,15 @@ export async function DELETE(
 ) {
   const { id } = await params;
   const session = await getSession();
+  const firmId = session.user.firmId;
+
+  const rateCheck = await checkRateLimit("api", firmId);
+  if (rateCheck instanceof NextResponse) return rateCheck;
 
   const [existing] = await db
     .select({ id: cases.id, firmId: cases.firmId })
     .from(cases)
-    .where(and(eq(cases.id, id), eq(cases.firmId, session.user.firmId)))
+    .where(and(eq(cases.id, id), eq(cases.firmId, firmId)))
     .limit(1);
 
   if (!existing) {
@@ -125,6 +144,14 @@ export async function DELETE(
   }
 
   await db.delete(cases).where(eq(cases.id, id));
+
+  await writeAuditLog({
+    firmId,
+    action: "delete",
+    entityType: "case",
+    entityId: id,
+    changes: { deletedId: id },
+  });
 
   return Response.json({ success: true });
 }

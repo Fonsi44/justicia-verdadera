@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import { invoices, contacts, invoiceItems } from "@/database/schema";
 import { getFirmId } from "@/lib/auth/require-auth";
 import { eq, and, desc, count, sql } from "drizzle-orm";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { writeAuditLog } from "@/lib/audit";
 
 export async function GET(req: NextRequest) {
   try {
@@ -82,6 +84,10 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const firmId = await getFirmId();
+
+    const rateCheck = await checkRateLimit("api", firmId);
+    if (rateCheck instanceof NextResponse) return rateCheck;
+
     const body = await req.json();
     const { caseId, clientId, number, issueDate, dueDate, notes, items } = body;
 
@@ -130,6 +136,14 @@ export async function POST(req: NextRequest) {
         }))
       );
     }
+
+    await writeAuditLog({
+      firmId,
+      action: "create",
+      entityType: "invoice",
+      entityId: inv.id,
+      changes: { clientId, number, subtotal, tax, total },
+    });
 
     return NextResponse.json({ data: inv }, { status: 201 });
   } catch (error) {

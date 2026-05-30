@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import { timeEntries, cases } from "@/database/schema";
 import { getSession, getFirmId } from "@/lib/auth/require-auth";
 import { eq, and, desc, count } from "drizzle-orm";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { writeAuditLog } from "@/lib/audit";
 
 export async function GET(req: NextRequest) {
   try {
@@ -57,6 +59,10 @@ export async function POST(req: NextRequest) {
   try {
     const session = await getSession();
     const firmId = await getFirmId();
+
+    const rateCheck = await checkRateLimit("api", firmId);
+    if (rateCheck instanceof NextResponse) return rateCheck;
+
     const body = await req.json();
     const { caseId, description, startTime, endTime, durationMinutes, hourlyRate, isBillable } = body;
 
@@ -94,6 +100,14 @@ export async function POST(req: NextRequest) {
         isBillable: isBillable ?? true,
       })
       .returning();
+
+    await writeAuditLog({
+      firmId,
+      action: "create",
+      entityType: "time_entry",
+      entityId: entry.id,
+      changes: { caseId, description, durationMinutes: computedDuration },
+    });
 
     return NextResponse.json({ data: entry }, { status: 201 });
   } catch (error) {

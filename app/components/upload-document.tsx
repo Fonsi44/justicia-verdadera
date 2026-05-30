@@ -43,7 +43,7 @@ export default function UploadDocument({ caseId, onSuccess }: UploadDocumentProp
             throw new Error(err.error ?? "Error al guardar el documento");
           }
 
-          const doc = await r.json();
+          await r.json();
           toast.success("Documento subido correctamente");
           onSuccess?.();
           router.refresh();

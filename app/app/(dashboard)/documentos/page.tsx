@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FileText, Upload, X } from "lucide-react";
+import { FileText, Upload } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import PageHeader from "@/components/page-header";
 import SearchAndFilters from "@/components/search-and-filters";

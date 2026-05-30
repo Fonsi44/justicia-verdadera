@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import { invoices, contacts, invoiceItems } from "@/database/schema";
 import { getFirmId } from "@/lib/auth/require-auth";
 import { eq, and } from "drizzle-orm";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { writeAuditLog } from "@/lib/audit";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -58,6 +60,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   try {
     const firmId = await getFirmId();
     const { id } = await params;
+
+    const rateCheck = await checkRateLimit("api", firmId);
+    if (rateCheck instanceof NextResponse) return rateCheck;
+
     const body = await req.json();
 
     const allowedFields = [
@@ -112,6 +118,14 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       return NextResponse.json({ error: "Factura no encontrada" }, { status: 404 });
     }
 
+    await writeAuditLog({
+      firmId,
+      action: "update",
+      entityType: "invoice",
+      entityId: id,
+      changes: updates,
+    });
+
     return NextResponse.json({ data: inv });
   } catch (error) {
     console.error("Error updating invoice:", error);
@@ -124,6 +138,9 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     const firmId = await getFirmId();
     const { id } = await params;
 
+    const rateCheck = await checkRateLimit("api", firmId);
+    if (rateCheck instanceof NextResponse) return rateCheck;
+
     const [inv] = await db
       .delete(invoices)
       .where(and(eq(invoices.id, id), eq(invoices.firmId, firmId)))
@@ -132,6 +149,14 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     if (!inv) {
       return NextResponse.json({ error: "Factura no encontrada" }, { status: 404 });
     }
+
+    await writeAuditLog({
+      firmId,
+      action: "delete",
+      entityType: "invoice",
+      entityId: id,
+      changes: { deletedId: id },
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import { caseEvents, cases } from "@/database/schema";
 import { getFirmId } from "@/lib/auth/require-auth";
 import { eq, and } from "drizzle-orm";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { writeAuditLog } from "@/lib/audit";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -49,6 +51,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   try {
     const firmId = await getFirmId();
     const { id } = await params;
+
+    const rateCheck = await checkRateLimit("api", firmId);
+    if (rateCheck instanceof NextResponse) return rateCheck;
+
     const body = await req.json();
 
     const allowedFields = ["title", "description", "date", "endDate", "location", "type", "isCompleted"];
@@ -84,6 +90,14 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       .where(eq(caseEvents.id, id))
       .returning();
 
+    await writeAuditLog({
+      firmId,
+      action: "update",
+      entityType: "event",
+      entityId: id,
+      changes: updates,
+    });
+
     return NextResponse.json({ data: event });
   } catch (error) {
     console.error("Error updating event:", error);
@@ -95,6 +109,9 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   try {
     const firmId = await getFirmId();
     const { id } = await params;
+
+    const rateCheck = await checkRateLimit("api", firmId);
+    if (rateCheck instanceof NextResponse) return rateCheck;
 
     const [existing] = await db
       .select({ id: caseEvents.id })
@@ -108,6 +125,15 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     }
 
     await db.delete(caseEvents).where(eq(caseEvents.id, id));
+
+    await writeAuditLog({
+      firmId,
+      action: "delete",
+      entityType: "event",
+      entityId: id,
+      changes: { deletedId: id },
+    });
+
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting event:", error);

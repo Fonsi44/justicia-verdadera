@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import { contacts, caseParties, cases, invoices } from "@/database/schema";
 import { getFirmId } from "@/lib/auth/require-auth";
 import { eq, and, count, desc } from "drizzle-orm";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { writeAuditLog } from "@/lib/audit";
 
 export async function GET(
   _request: NextRequest,
@@ -53,6 +55,10 @@ export async function PATCH(
 ) {
   const { id } = await params;
   const firmId = await getFirmId();
+
+  const rateCheck = await checkRateLimit("api", firmId);
+  if (rateCheck instanceof NextResponse) return rateCheck;
+
   const body = await request.json();
 
   const [existing] = await db
@@ -87,6 +93,14 @@ export async function PATCH(
     .where(eq(contacts.id, id))
     .returning();
 
+  await writeAuditLog({
+    firmId,
+    action: "update",
+    entityType: "contact",
+    entityId: id,
+    changes: updates,
+  });
+
   return NextResponse.json({ data: updated });
 }
 
@@ -96,6 +110,9 @@ export async function DELETE(
 ) {
   const { id } = await params;
   const firmId = await getFirmId();
+
+  const rateCheck = await checkRateLimit("api", firmId);
+  if (rateCheck instanceof NextResponse) return rateCheck;
 
   const [existing] = await db
     .select({ id: contacts.id })
@@ -122,6 +139,14 @@ export async function DELETE(
 
   await db.delete(caseParties).where(eq(caseParties.contactId, id));
   await db.delete(contacts).where(eq(contacts.id, id));
+
+  await writeAuditLog({
+    firmId,
+    action: "delete",
+    entityType: "contact",
+    entityId: id,
+    changes: { deletedId: id },
+  });
 
   return NextResponse.json({ success: true });
 }

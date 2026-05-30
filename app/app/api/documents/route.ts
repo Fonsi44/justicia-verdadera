@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { documents, documentVersions, cases } from "@/database/schema";
 import { getFirmId } from "@/lib/auth/require-auth";
-import { eq, and, like, desc, count } from "drizzle-orm";
+import { eq, and, like, desc, count, or, sql } from "drizzle-orm";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { writeAuditLog } from "@/lib/audit";
+import { inngest } from "@/lib/inngest/client";
 
 export async function GET(req: NextRequest) {
   try {
@@ -17,7 +18,14 @@ export async function GET(req: NextRequest) {
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") ?? "20")));
 
     const conditions = [eq(documents.firmId, firmId)];
-    if (search) conditions.push(like(documents.name, `%${search}%`));
+    if (search) {
+      conditions.push(
+        or(
+          like(documents.name, `%${search}%`),
+          sql`to_tsvector('spanish', COALESCE(${documents.ocrText}, '')) @@ plainto_tsquery('spanish', ${search})`,
+        )!,
+      );
+    }
     if (type) conditions.push(eq(documents.type, type as typeof documents.type._.data));
     if (caseId) conditions.push(eq(documents.caseId, caseId));
 
@@ -31,6 +39,8 @@ export async function GET(req: NextRequest) {
         caseId: documents.caseId,
         name: documents.name,
         type: documents.type,
+        processingStatus: documents.processingStatus,
+        ocrText: documents.ocrText,
         currentVersion: documents.currentVersion,
         status: documents.status,
         createdBy: documents.createdBy,
@@ -99,6 +109,15 @@ export async function POST(req: NextRequest) {
         fileSize: fileSize ?? null,
         mimeType: mimeType ?? null,
         changes: "Versión inicial",
+      });
+
+      await inngest.send({
+        name: "document/ocr.process",
+        data: {
+          documentId: doc.id,
+          fileUrl,
+          mimeType: mimeType ?? null,
+        },
       });
     }
 

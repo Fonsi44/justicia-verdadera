@@ -467,30 +467,109 @@ LS_VARIANT_DESPACHO_ID=
 
 ---
 
-## 8. Vercel — Hosting y Deploy
+## 8. Vercel — Hosting, Deploy y GitHub Actions Secrets
 
-> Para producción. No necesario para desarrollo local.
+> Para producción y CI/CD. El proyecto `justicia-verdadera` ya existe en Vercel (cuenta `Fonsi44`). Todos los secrets de GitHub Actions han sido configurados automáticamente con los valores reales del proyecto.
 
-1. Ve a **https://vercel.com/signup**
-2. Regístrate con GitHub (obligatorio para integración con repositorio)
-3. Una vez dentro, haz clic en **"Import Project"**
-4. Conecta tu repositorio de GitHub
-5. Configura:
-   - **Framework**: Next.js (detectado automáticamente)
+### Estado actual (30 mayo 2026)
+
+| Aspecto | Estado | Valor |
+|---|---|---|
+| Cuenta Vercel | ✅ `fonsi44` | Plan Hobby |
+| Proyecto | ✅ Creado | `justicia-verdadera` |
+| Root Directory | ✅ Configurado | `app` |
+| Build Command | ✅ Configurado | `npx drizzle-kit push && next build` |
+| Output Directory | ✅ Configurado | `.next` |
+| Install Command | ✅ Configurado | `npm install` |
+| Git Repository | ✅ Conectado | `Fonsi44/justicia-verdadera` |
+| GitHub Secrets (3) | ✅ Configurados | VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID |
+
+### 8.1 Primer deploy desde dashboard web
+
+1. Ve a **https://vercel.com/Fonsi44/justicia-verdadera**
+2. Haz clic en **"Connect Git Repository"**
+3. Selecciona el repo **`Fonsi44/justicia-verdadera`**
+4. Verifica que la configuración se haya precargado correctamente:
    - **Root Directory**: `app`
    - **Build Command**: `npx drizzle-kit push && next build`
    - **Output Directory**: `.next`
-6. En **"Environment Variables"**, pega TODAS las variables de `.env.local` (excepto las de desarrollo local)
-7. Haz clic en **"Deploy"**
+5. Añade las variables de entorno de producción en **Environment Variables** — necesitas añadir las mismas que en `.env.example` pero con valores reales de producción. Las críticas son:
+   - `DATABASE_URL` — URL de Neon DB en producción
+   - `AUTH_SECRET` — nuevo secret de producción
+   - `AUTH_GOOGLE_ID` + `AUTH_GOOGLE_SECRET`
+   - `DEEPSEEK_API_KEY`
+   - `UPLOADTHING_TOKEN`
+   - `RESEND_API_KEY`
+   - `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`
+6. Haz clic en **"Deploy"**
 
-### Dominio
+### 8.2 GitHub Actions Secrets (ya configurados)
 
-- Vercel proporciona un subdominio gratuito: `justicia-verdadera.vercel.app`
-- Para dominio personalizado: **Settings** → **Domains** → añade tu dominio y configura los DNS
+Los 3 secrets necesarios para el workflow `preview.yml` ya han sido creados automáticamente en GitHub:
 
-### Dashboard
+| Secret | Valor | Estado |
+|---|---|---|
+| `VERCEL_TOKEN` | `vcp_4bac...` (token de acceso total) | ✅ Configurado |
+| `VERCEL_ORG_ID` | `team_VbJlXKlK5jE8fMWx0k7onqpk` | ✅ Configurado |
+| `VERCEL_PROJECT_ID` | `prj_bfw2rfqDLnQntKVOkYFlMQJfy5MM` | ✅ Configurado |
 
-- **https://vercel.com/dashboard**
+**No necesitas hacer nada más.** Los workflows `ci.yml` y `preview.yml` ya están en `.github/workflows/` con la configuración correcta.
+
+> ⚠️ Si alguna vez necesitas regenerar el token, los pasos detallados están a continuación.
+
+### 8.3 Cómo regenerar los secrets manualmente (solo si es necesario)
+
+#### VERCEL_TOKEN
+
+1. Ve a **https://vercel.com/account/tokens**
+2. Haz clic en **"Create Token"**
+3. Nombre: `github-actions-ci`
+4. Scope: `Full Account`
+5. Expiration: `No Expiration`
+6. Haz clic en **"Create"**
+7. **Copia el token** y actualízalo en GitHub Secrets
+
+#### VERCEL_ORG_ID
+
+```bash
+vercel api /v2/user --token=TU_TOKEN
+# Busca "user.id" en la respuesta
+```
+
+O desde el dashboard: **https://vercel.com/Fonsi44/justicia-verdadera/settings**
+
+#### VERCEL_PROJECT_ID
+
+```bash
+vercel api /v9/projects/justicia-verdadera --token=TU_TOKEN
+# Busca "id" en la respuesta
+```
+
+### Resumen rápido
+
+```bash
+npm install -g vercel
+vercel login
+
+# 2. Login (abre navegador)
+vercel login
+
+# 3. Vincular proyecto (después del primer deploy manual)
+cd app
+vercel link
+
+# 4. Ver IDs
+cat .vercel/project.json
+# → projectId = VERCEL_PROJECT_ID
+# → orgId    = VERCEL_ORG_ID
+
+# 5. Crear token en https://vercel.com/account/tokens
+# 6. Añadir los 3 secrets en GitHub.com
+```
+
+### Nota sobre este proyecto
+
+El proyecto `justicia-verdadera` ya existe en Vercel (cuenta `Fonsi44`) pero **nunca se ha desplegado**. Si ejecutas `vercel link` localmente tras autenticarte, debería detectar el proyecto existente automáticamente.
 
 ---
 

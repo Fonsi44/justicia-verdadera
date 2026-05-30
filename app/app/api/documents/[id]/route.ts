@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import { documents, cases } from "@/database/schema";
 import { getFirmId } from "@/lib/auth/require-auth";
 import { eq, and } from "drizzle-orm";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { writeAuditLog } from "@/lib/audit";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -47,6 +49,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   try {
     const firmId = await getFirmId();
     const { id } = await params;
+
+    const rateCheck = await checkRateLimit("api", firmId);
+    if (rateCheck instanceof NextResponse) return rateCheck;
+
     const body = await req.json();
 
     const allowedFields = ["name", "type", "status", "caseId", "currentVersion"];
@@ -69,6 +75,14 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       return NextResponse.json({ error: "Documento no encontrado" }, { status: 404 });
     }
 
+    await writeAuditLog({
+      firmId,
+      action: "update",
+      entityType: "document",
+      entityId: id,
+      changes: updates,
+    });
+
     return NextResponse.json({ data: doc });
   } catch (error) {
     console.error("Error updating document:", error);
@@ -81,6 +95,9 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     const firmId = await getFirmId();
     const { id } = await params;
 
+    const rateCheck = await checkRateLimit("api", firmId);
+    if (rateCheck instanceof NextResponse) return rateCheck;
+
     const [doc] = await db
       .delete(documents)
       .where(and(eq(documents.id, id), eq(documents.firmId, firmId)))
@@ -89,6 +106,14 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     if (!doc) {
       return NextResponse.json({ error: "Documento no encontrado" }, { status: 404 });
     }
+
+    await writeAuditLog({
+      firmId,
+      action: "delete",
+      entityType: "document",
+      entityId: id,
+      changes: { deletedId: id },
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

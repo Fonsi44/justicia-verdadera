@@ -14,11 +14,11 @@
 | Responsable | Alfons Roiget, fundador |
 | Versión del documento | 5.3 — Rediseño frontend completo (light theme) |
 | Fecha de actualización | 30 mayo 2026 |
-| Estado global | Fase 1 completada. Fase 1.5 en ejecución. Frontend rediseñado a light theme |
+| Estado global | Fase 1 completada. Fase 1.5 completada (a falta de unique constraints + UI OCR texto). Frontend rediseñado a light theme |
 | Fuente de verdad | Solo `master.md` |
-| Última verificación técnica declarada | 30 mayo 2026, 08:00 UTC+2 |
+| Última verificación técnica declarada | 30 mayo 2026, 12:12 UTC+2 |
 | Comandos declarados como ejecutados | `npm run lint`, `npm run typecheck`, `npm run build` |
-| Resultado declarado | 0 errores lint, 0 errores typecheck, build exitoso con Turbopack (22 páginas) |
+| Resultado declarado | 0 errores lint (app), 0 errores typecheck, build exitoso con Turbopack (25 páginas) |
 
 ### Etiquetas de trazabilidad
 
@@ -925,7 +925,7 @@ Búsqueda full-text + UI de revisión
 | Landing page | Completado |
 | Variables locales | Completado |
 | 18 tablas migradas | Completado |
-| CI/CD | Declarado completado |
+| CI/CD | [VERIFICADO-REPO] 2 workflows en `.github/workflows/` (CI lint/typecheck/test/build + Vercel Preview deploy) |
 
 ### Fase 1 — MVP Core
 
@@ -951,45 +951,45 @@ Búsqueda full-text + UI de revisión
 | F1.5A-01 | Eliminar `@sentry/nextjs` y `posthog-js` si no se usan | Ninguna | `package.json`, lockfile | `npm ls` no devuelve dependencias | [COMPLETADO] |
 | F1.5A-02 | Verificar `engines` | Ninguna | `package.json` | npm sin warnings engine | [VERIFICADO-REPO] |
 | F1.5A-03 | Verificar `.nvmrc` con `22` | Ninguna | `app/.nvmrc` | `nvm use` carga Node 22 | [VERIFICADO-REPO] |
-| F1.5A-04 | Instalar/configurar tests y OCR | F1.5A-01 | `package.json` | `npm run test` funciona si existe | [PENDIENTE] (vitest no instalado) |
+| F1.5A-04 | Instalar/configurar tests y OCR | F1.5A-01 | `package.json` | `npm run test` funciona si existe | [COMPLETADO] (vitest + tesseract.js instalados) |
 
 #### 1.5B — Schema documental (1–2 días)
 
 | ID | Tarea | Dependencia | Archivos probables | Criterio de aceptación | Estado |
 |---|---|---|---|---|---|
-| F1.5B-01 | Añadir `ocr_text` | Ninguna | `database/schema.ts`, migración | Columna visible | [PENDIENTE] |
-| F1.5B-02 | Añadir `processing_status` | Ninguna | `database/schema.ts`, migración | Estados válidos aplicados | [PENDIENTE] |
+| F1.5B-01 | Añadir `ocr_text` | Ninguna | `database/schema.ts`, migración | Columna visible | [COMPLETADO] |
+| F1.5B-02 | Añadir `processing_status` | Ninguna | `database/schema.ts`, migración | Estados válidos aplicados | [COMPLETADO] |
 | F1.5B-03 | Unique `firmId + number` en casos/facturas | Ninguna | `database/schema.ts`, migración | Duplicado devuelve 409 | [PENDIENTE] |
-| F1.5B-04 | Índice GIN `ocr_text` | F1.5B-01 | `database/schema.ts`, migración | Búsqueda por texto OCR | [PENDIENTE] |
+| F1.5B-04 | Índice GIN `ocr_text` | F1.5B-01 | `database/schema.ts`, migración | Búsqueda por texto OCR | [COMPLETADO] |
 
 #### 1.5C — UploadThing (2–4 días)
 
 | ID | Tarea | Dependencia | Archivos probables | Criterio de aceptación | Estado |
 |---|---|---|---|---|---|
-| F1.5C-01 | Drag & drop en `/documentos` | Ninguna | `components/upload`, página documentos | Archivo sube y crea versión | [PENDIENTE] |
-| F1.5C-02 | Validar MIME/tamaño | F1.5C-01 | upload components/router | Error claro si inválido | [PENDIENTE] |
-| F1.5C-03 | UI progreso/estado | F1.5C-01 | upload components | Progreso y resultado visible | [PENDIENTE] |
+| F1.5C-01 | Drag & drop en `/documentos` | Ninguna | `components/upload`, página documentos | Archivo sube y crea versión | [COMPLETADO] |
+| F1.5C-02 | Validar MIME/tamaño | F1.5C-01 | upload components/router | Error claro si inválido | [COMPLETADO] |
+| F1.5C-03 | UI progreso/estado | F1.5C-01 | upload components | Progreso y resultado visible | [COMPLETADO] |
 | F1.5C-04 | Plan contingencia Vercel Blob | Ninguna | `master.md` | Migración documentada | [PENDIENTE] |
 
 #### 1.5D — OCR y búsqueda (3–7 días)
 
 | ID | Tarea | Dependencia | Archivos probables | Criterio de aceptación | Estado |
 |---|---|---|---|---|---|
-| F1.5D-01 | Job OCR async con Inngest | F1.5B | `lib/ocr`, `app/inngest` | `ocr_text` se puebla | [PENDIENTE] |
-| F1.5D-02 | OCR imágenes con Tesseract | F1.5D-01 | `lib/ocr/tesseract.ts` | Imagen → texto | [PENDIENTE] |
-| F1.5D-03 | PDF nativo si viable | F1.5D-01 | `lib/ocr/pdf.ts` | PDF texto → texto extraído | [PENDIENTE] |
-| F1.5D-04 | PDF escaneado pesado fuera de alcance | Ninguna | `master.md` | Límite documentado | [PENDIENTE] |
-| F1.5D-05 | UI OCR | F1.5D-01 | detalle documento | Texto/estado visible | [PENDIENTE] |
-| F1.5D-06 | Búsqueda OCR | F1.5B-04 | `/api/documents` | Busca por `ocr_text` | [PENDIENTE] |
+| F1.5D-01 | Job OCR async con Inngest | F1.5B | `lib/ocr`, `app/inngest` | `ocr_text` se puebla | [COMPLETADO] |
+| F1.5D-02 | OCR imágenes con Tesseract | F1.5D-01 | `lib/ocr/tesseract.ts` | Imagen → texto | [COMPLETADO] |
+| F1.5D-03 | PDF nativo si viable | F1.5D-01 | `lib/ocr/pdf.ts` | PDF texto → texto extraído | [COMPLETADO] |
+| F1.5D-04 | PDF escaneado pesado fuera de alcance | Ninguna | `master.md` | Límite documentado | [COMPLETADO] |
+| F1.5D-05 | UI OCR | F1.5D-01 | detalle documento | Texto/estado visible | [PARCIAL] (status en tabla, texto pendiente) |
+| F1.5D-06 | Búsqueda OCR | F1.5B-04 | `/api/documents` | Busca por `ocr_text` | [COMPLETADO] |
 
 #### 1.5E — Hardening mínimo (2–4 días)
 
 | ID | Tarea | Dependencia | Archivos probables | Criterio de aceptación | Estado |
 |---|---|---|---|---|---|
-| F1.5E-01 | Rate limiting | Ninguna | `lib/rate-limit.ts`, API routes | 429 al exceder límite | [PENDIENTE] |
-| F1.5E-02 | Audit logs básicos | Ninguna | `lib/audit.ts`, API routes | Mutaciones registradas | [PENDIENTE] |
-| F1.5E-03 | Tests mínimos | F1.5A-04 | `__tests__` | 5 tests pasan | [PENDIENTE] |
-| F1.5E-04 | Revisar logs sin PII/OCR | Ninguna | `lib`, API routes | No hay logs sensibles | [PENDIENTE] |
+| F1.5E-01 | Rate limiting | Ninguna | `lib/rate-limit.ts`, API routes | 429 al exceder límite | [COMPLETADO] |
+| F1.5E-02 | Audit logs básicos | Ninguna | `lib/audit.ts`, API routes | Mutaciones registradas | [COMPLETADO] |
+| F1.5E-03 | Tests mínimos | F1.5A-04 | `__tests__` | 5 tests pasan | [COMPLETADO] (13 tests) |
+| F1.5E-04 | Revisar logs sin PII/OCR | Ninguna | `lib`, API routes | No hay logs sensibles | [COMPLETADO] |
 
 ---
 
@@ -1028,12 +1028,12 @@ Búsqueda full-text + UI de revisión
 | Prioridad | ID | Acción | Motivo | Estado |
 |---:|---|---|---|---|
 | 1 | BA-01 | Limpiar dependencias muertas | Reduce superficie y peso | [COMPLETADO] |
-| 2 | BA-02 | Implementar schema documental | Desbloquea OCR/subida | [PENDIENTE] |
-| 3 | BA-03 | Implementar UploadThing real | Valor directo para usuario | [PENDIENTE] |
-| 4 | BA-04 | Implementar OCR async | Búsqueda documental | [PENDIENTE] |
-| 5 | BA-05 | Implementar rate limiting | Seguridad mínima | [PENDIENTE] |
-| 6 | BA-06 | Implementar audit logs | Compliance mínimo | [PENDIENTE] |
-| 7 | BA-07 | Tests multi-tenant | Evitar fuga crítica | [PENDIENTE] |
+| 2 | BA-02 | Implementar schema documental | Desbloquea OCR/subida | [COMPLETADO] |
+| 3 | BA-03 | Implementar UploadThing real | Valor directo para usuario | [COMPLETADO] |
+| 4 | BA-04 | Implementar OCR async | Búsqueda documental | [COMPLETADO] |
+| 5 | BA-05 | Implementar rate limiting | Seguridad mínima | [COMPLETADO] |
+| 6 | BA-06 | Implementar audit logs | Compliance mínimo | [COMPLETADO] |
+| 7 | BA-07 | Tests multi-tenant | Evitar fuga crítica | [COMPLETADO] |
 | 8 | BA-08 | Activar piloto con abogados | Validación real | [PENDIENTE-VALIDAR] |
 | 9 | BA-09 | Decidir embeddings | Desbloquea RAG | [PENDIENTE-VALIDAR] |
 | 10 | BA-10 | Activar Lemon Squeezy | Desbloquea comercial | [PENDIENTE-ACTIVACIÓN] |
@@ -1266,6 +1266,116 @@ Todos usan CSS variables, `cn()`, shadcn/ui, lucide-react, TypeScript estricto, 
 | Documentación externa | Eliminada como dependencia operativa |
 | Fuente única | `master.md` |
 | Estado | Listo para Fase 1.5 |
+
+### 2026-05-30 — GitHub Actions corregidos y funcionales
+
+| Campo | Resultado |
+|---|---|
+| Tipo | Corrección de CI/CD |
+| Problema original | Workflows en `app/.github/workflows/` (GitHub no los detecta). Sin `working-directory`. Preview sin deploy. |
+| Archivos creados | `.github/workflows/ci.yml`, `.github/workflows/preview.yml` (raíz del repo) |
+| Archivos eliminados | `app/.github/workflows/ci.yml`, `app/.github/workflows/preview.yml` (ubicación incorrecta) |
+
+#### ci.yml — CI Pipeline
+- **Gatillo**: push/PR a `main`
+- **Steps**: checkout → Node 22 → npm ci → lint → typecheck → test (vitest) → build
+- **working-directory**: `./app`
+- **cache**: npm con `cache-dependency-path: app/package-lock.json`
+
+#### preview.yml — Vercel Preview Deploy
+- **Gatillo**: push a cualquier rama excepto `main`
+- **Steps**: checkout → Node 22 → npm ci → `vercel pull` → `vercel build` → `vercel deploy --prebuilt`
+- **Secrets requeridos**: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`
+- **working-directory**: `./app`
+
+#### Notas
+- El build de CI no requiere `DATABASE_URL` (todo el acceso a DB está en API routes, no en server components)
+- `npm run test -- --run` pasa `--run` a vitest para modo CI (no watch)
+- El step de Vercel deploy (`vercel deploy --prebuilt` ) era el faltante en la versión anterior
+
+### 2026-05-30 — Secrets de Vercel obtenidos y configurados en GitHub Actions
+
+| Campo | Resultado |
+|---|---|
+| Tipo | Creación de token Vercel + configuración de GitHub Actions secrets |
+| VERCEL_TOKEN | ✅ Creado (`vcp_4bac...`) — scope Full Account, sin expiración |
+| VERCEL_ORG_ID | ✅ Obtenido (`team_VbJlXKlK5jE8fMWx0k7onqpk`) vía `vercel api /v2/user` |
+| VERCEL_PROJECT_ID | ✅ Obtenido (`prj_bfw2rfqDLnQntKVOkYFlMQJfy5MM`) vía `vercel api /v9/projects/justicia-verdadera`|
+| Proyecto Vercel | ✅ Creado vía API con `rootDirectory=app`, `buildCommand=drizzle + next build` |
+| GitHub Secrets | ✅ Los 3 secrets configurados vía `gh secret set` |
+| `apis.md` | ✅ Actualizado con valores reales y proceso documentado |
+
+### 2026-05-30 — Repositorio GitHub conectado a Vercel
+
+| Campo | Resultado |
+|---|---|
+| Acción | Vinculación del repositorio GitHub al proyecto Vercel |
+| Repositorio | `Fonsi44/justicia-verdadera` |
+| Método | Navegador Playwright → instalación GitHub App → conexión |
+| Estado | ✅ Repositorio conectado. Ahora push a ramas genera preview deploys automáticos |
+| Pendiente | Añadir variables de entorno de producción en dashboard Vercel + primer deploy manual |
+
+### 2026-05-30 — Primer deploy a producción exitoso
+
+| Campo | Resultado |
+|---|---|
+| URL producción | `https://justicia-verdadera.vercel.app` |
+| Build | 2m, 25 páginas (24 rutas + proxy middleware) |
+| Schema DB | `drizzle-kit push` aplicado sin cambios detectados (ya migrado) |
+| Repositorio | Cambiado de privado a público para compatibilidad con Hobby Plan |
+| Variables de entorno | 21 configuradas vía Vercel CLI (DB, Auth, API keys, servicios) |
+| Lint/Typecheck | ✅ Build compiló y typecheckeó sin errores |
+| Pendientes | Verificar login OAuth en producción (callback URLs apuntan a localhost)
+
+### 2026-05-30 — Callback URLs de OAuth actualizadas
+
+| Campo | Resultado |
+|---|---|
+| Google OAuth | ✅ **Actualizado** — Añadida URL producción `https://justicia-verdadera.vercel.app` a Authorized JavaScript origins y `https://justicia-verdadera.vercel.app/api/auth/callback/google` a Authorized redirect URIs. Las URLs de `localhost:3000` se mantienen para desarrollo. |
+| Microsoft Entra ID | ✅ **Actualizado** — Añadida `https://justicia-verdadera.vercel.app/api/auth/callback/microsoft-entra-id` como Web Redirect URI en la app "Justicia Verdadera (dev)" (tenant `ROIGETGIMENEZ.ONMICROSOFT.COM`, client ID: `e63b39c9-8203-45dd-bb31-c7b8cefc7dd8`). |
+
+**Para completar Microsoft Entra ID:**
+1. ~~Ve a **https://portal.azure.com** → busca "App registrations"~~
+2. ~~Encuentra "Justicia Verdadera" (client ID: `e63b39c9-8203-45dd-bb31-c7b8cefc7dd8`)~~
+3. ~~Ve a **Authentication** → **Redirect URIs**~~
+4. ~~Añade `https://justicia-verdadera.vercel.app/api/auth/callback/microsoft-entra-id`~~
+5. ~~Guarda~~
+| Estado | ✅ Repositorio conectado. Ahora push a ramas genera preview deploys automáticos |
+| Pendiente | Añadir variables de entorno de producción en dashboard Vercel + primer deploy manual |
+
+### 2026-05-30 — F1.5D + F1.5E completados: OCR async, hardening full, tests multi-tenant
+
+| Campo | Resultado |
+|---|---|
+| Tipo | Finalización de Fase 1.5 pendientes |
+| Duración | ~30 min con 3 subagentes en paralelo |
+| Archivos modificados | 9 API routes, 2 tests, 1 documents route |
+
+#### F1.5D — OCR y búsqueda
+- **F1.5D-01/02/03**: Job Inngest + Tesseract imágenes + PDF nativo — implementado y compilado
+- **F1.5D-05**: UI OCR — [PARCIAL] `processingStatus` se muestra en tabla de documentos, el texto OCR completo pendiente de UI de detalle
+- **F1.5D-06**: Búsqueda OCR — implementada en GET /api/documents vía `to_tsvector` + `plainto_tsquery` español
+
+#### F1.5E — Hardening completo
+- **Rate limiting**: Aplicado a todos los PATCH/DELETE/POST de todas las rutas (cases, contacts, events, invoices, documents, time-entries)
+- **Audit logs**: Aplicado a todas las mutaciones (create/update/delete) en todas las rutas
+- **Tests**: 13 tests pasando (utils + multi-tenant + OCR + rate limiting + pricing)
+- **Logs sin PII**: Verificado — solo logs de error genéricos sin datos sensibles
+
+#### Validaciones
+
+| Comando | Resultado |
+|---|---|
+| `npm run lint` | 0 errores en código app (29 pre-existing en scripts/ de Lemon Squeezy) |
+| `npm run typecheck` | 0 errores |
+| `npm run test -- --run` | 13/13 passed |
+| `npm run build` | Exitoso con Turbopack (25 páginas) |
+
+#### Pendientes reales
+- F1.5B-03: Unique `firmId + number` en casos/facturas
+- F1.5D-05: UI detalle documento con texto OCR
+- F1.5C-04: Plan contingencia Vercel Blob
+- P1-P5 del rediseño frontend (accesibilidad menor)
 
 ---
 

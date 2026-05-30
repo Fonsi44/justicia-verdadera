@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import { contacts, caseParties } from "@/database/schema";
 import { getFirmId } from "@/lib/auth/require-auth";
 import { and, eq, or, ilike, count, desc, inArray, type SQL } from "drizzle-orm";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { writeAuditLog } from "@/lib/audit";
 
 type ContactType = "persona_natural" | "persona_juridica" | "institucion";
 
@@ -76,6 +78,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const firmId = await getFirmId();
+
+    const rateCheck = await checkRateLimit("api", firmId);
+    if (rateCheck instanceof NextResponse) return rateCheck;
+
   const body = await request.json();
 
   const { type, firstName, lastName, companyName, identityNumber, email, phone, address, notes } = body;
@@ -99,6 +105,14 @@ export async function POST(request: NextRequest) {
       notes: notes ?? null,
     })
     .returning();
+
+  await writeAuditLog({
+    firmId,
+    action: "create",
+    entityType: "contact",
+    entityId: contact.id,
+    changes: { type, firstName: firstName ?? null, lastName: lastName ?? null, email: email ?? null },
+  });
 
   return NextResponse.json({ data: { ...contact, caseCount: 0 } }, { status: 201 });
   } catch (error) {

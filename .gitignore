@@ -36,3 +36,5 @@ next-env.d.ts
 # Kilo Code (generado localmente)
 .kilo/node_modules/
 .kilo/package-lock.json
+
+.vercel
