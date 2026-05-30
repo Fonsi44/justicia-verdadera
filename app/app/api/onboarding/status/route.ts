@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getFirmId, handleUnauthorized } from "@/lib/auth/require-auth";
 import { db } from "@/lib/db";
 import { firms } from "@/database/schema";
 import { eq } from "drizzle-orm";
 import { AppError } from "@/lib/errors";
 
-export async function GET(_request: NextRequest) {
+export async function GET() {
   try {
     const firmId = await getFirmId();
 

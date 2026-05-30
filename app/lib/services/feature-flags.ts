@@ -94,6 +94,6 @@ export function getGlobalFeatureFlags(): Partial<FeatureFlags> {
   return {};
 }
 
-export function isFeatureEnabledGlobal(_flag: FeatureFlagName): boolean {
+export function isFeatureEnabledGlobal(): boolean {
   return true;
 }

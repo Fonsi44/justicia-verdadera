@@ -116,6 +116,7 @@ export async function getEventById(firmId: string, id: string) {
       notifiedAt: caseEvents.notifiedAt,
       createdBy: caseEvents.createdBy,
       createdAt: caseEvents.createdAt,
+      googleEventId: caseEvents.googleEventId,
       case: { id: cases.id, number: cases.number, title: cases.title },
     })
     .from(caseEvents)

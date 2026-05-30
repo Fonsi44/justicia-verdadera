@@ -11,7 +11,7 @@ import { caseEvents, cases } from "@/database/schema";
 
 export async function GET(req: NextRequest) {
   try {
-    const _firmId = await getFirmId();
+    await getFirmId();
 
     const { searchParams } = new URL(req.url);
     const accessToken = searchParams.get("accessToken");
