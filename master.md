@@ -44,7 +44,7 @@ Esta versión corrige los problemas detectados en la versión anterior del docum
 - Normalización de Fase 1.5 a una estimación única de 2–4 semanas.
 - Actualización de estados OCR definitivos.
 - Refuerzo de privacidad, seguridad, autonomía y control multi-tenant.
-- Paddle queda como pasarela principal pendiente de activación; Stripe queda archivado/no principal.
+- Lemon Squeezy queda como pasarela principal (Merchant of Record); Stripe queda archivado/no principal.
 - Riesgos ampliados y priorizados.
 - Confirmación de `master.md` como único documento operativo.
 
@@ -60,7 +60,7 @@ Kilo Code debe ejecutar el proyecto con autonomía controlada siguiendo estas re
 4. **No modificar código fuera del alcance de la tarea activa.**
 5. **No traducir identificadores técnicos.**
 6. **No enviar PII ni OCR completo a modelos de IA externos.**
-7. **No implementar checkout hasta tener Paddle o alternativa MoR validada.**
+7. **No implementar checkout hasta tener Lemon Squeezy o alternativa MoR validada.**
 8. **No activar IA jurídica sin proveedor de embeddings, corpus curado y abogado revisor.**
 9. **No procesar OCR pesado en API routes.**
 10. **Registrar decisiones, bloqueos, cambios y resultados en este documento.**
@@ -149,12 +149,12 @@ Fundador (Alfons)                         Kilo Code (IA)
 | DeepSeek V4 | `DEEPSEEK_API_KEY` | Verificado | API responde, completions OK |
 | Upstash Redis | `UPSTASH_REDIS_*` | Verificado | Ping REST exitoso |
 | Resend | `RESEND_API_KEY` | Verificado | Email de prueba enviado correctamente |
-| Stripe | `STRIPE_SECRET_KEY` | Archivado | Test/lazy-init. No es pasarela principal |
+| Stripe | `STRIPE_SECRET_KEY` | Archivado | No es pasarela principal. Ver Lemon Squeezy. |
+| Lemon Squeezy | `LEMON_SQUEEZY_API_KEY` | Pendiente | Merchant of Record, apto para Honduras |
 | Google OAuth | `AUTH_GOOGLE_*` | Verificado | Configurado y verificado |
 | Microsoft Entra ID | `AUTH_MICROSOFT_ENTRA_ID_*` | Verificado | Configurado y verificado. OAuth funcional con cuentas Microsoft personales y empresariales. |
 | UploadThing | `UPLOADTHING_TOKEN` | Verificado | Token renovado y verificado |
 | Inngest | `INNGEST_EVENT_KEY` | Configurado | Instalado; OCR async pendiente |
-| Paddle | Pendiente | Cuenta, productos, checkout y webhooks pendientes |
 
 ### Fase actual
 
@@ -181,7 +181,7 @@ Fundador (Alfons)                         Kilo Code (IA)
 | Auth | NextAuth.js v5 beta, JWT, Google + Microsoft Entra ID | [VERIFICADO-REPO] Google y Microsoft Entra ID verificados |
 | ORM | Drizzle ORM v0.45.2 + Neon DB | [VERIFICADO-REPO] |
 | IA | Vercel AI SDK v6 + `@ai-sdk/deepseek` | [VERIFICADO-REPO] |
-| Pagos | Paddle MoR como opción principal | [PENDIENTE-ACTIVACIÓN] |
+| Pagos | Lemon Squeezy MoR como opción principal | [PENDIENTE-ACTIVACIÓN] |
 | Fuente documental | `master.md` únicamente | [VERIFICADO] |
 
 ---
@@ -277,7 +277,7 @@ Fundador (Alfons)                         Kilo Code (IA)
 | `tesseract.js` | Instalar | OCR básico de imágenes | [PENDIENTE] |
 | `vitest` | Instalar/configurar | Tests unitarios | [PENDIENTE] |
 | `@playwright/test` | Instalar/configurar solo si se usará | E2E mínimo | [PENDIENTE] |
-| SDK/API Paddle | Definir después de activar cuenta | Pasarela comercial | [PENDIENTE-ACTIVACIÓN] |
+| SDK/API Lemon Squeezy | Definir después de activar cuenta | Pasarela comercial | [PENDIENTE-ACTIVACIÓN] |
 
 ---
 
@@ -326,11 +326,15 @@ RESEND_API_KEY=
 RESEND_FROM_EMAIL=
 INNGEST_EVENT_KEY=
 
-# Stripe heredado/archivado mientras exista lazy-init:
+# Stripe archivado (no usar — Lemon Squeezy es la pasarela principal):
 STRIPE_SECRET_KEY=
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
 
-# Paddle pendiente de activación comercial:
+# Lemon Squeezy (Merchant of Record — pendiente activación):
+LEMON_SQUEEZY_API_KEY=
+LEMON_SQUEEZY_WEBHOOK_SECRET=
+
+# Paddle archivado (reemplazado por Lemon Squeezy):
 PADDLE_API_KEY=
 PADDLE_WEBHOOK_SECRET=
 PADDLE_ENVIRONMENT=
@@ -397,7 +401,7 @@ Vercel
         ├── UploadThing
         ├── Inngest
         ├── DeepSeek V4 Flash/Pro
-        └── Paddle MoR pendiente de activación
+        └── Lemon Squeezy MoR pendiente de activación
 ```
 
 ### Principios técnicos
@@ -860,8 +864,7 @@ Búsqueda full-text + UI de revisión
 | Fase | Estrategia | Estado |
 |---|---|---|
 | Beta | Transferencia bancaria local / pagos manuales | Decisión operativa inicial |
-| Lanzamiento comercial | Paddle como Merchant of Record principal | [PENDIENTE-ACTIVACIÓN] |
-| Alternativa | Lemon Squeezy si Paddle no aprueba o no encaja | [PENDIENTE-VALIDAR] |
+| Lanzamiento comercial | Lemon Squeezy como Merchant of Record principal | [PENDIENTE-ACTIVACIÓN] |
 | Stripe | Archivado/no principal; solo entidad soportada o soporte oficial futuro | [PARCIAL] |
 
 **Regla:** no implementar checkout ni suscripciones automáticas en Fase 1.5.
@@ -872,9 +875,9 @@ Búsqueda full-text + UI de revisión
 
 | ID | Riesgo | Impacto | Probabilidad | Mitigación | Owner | Estado |
 |---|---|---|---|---|---|---|
-| R1 | Pasarela comercial pendiente de activación | Crítico | Alta | Paddle MoR principal; Lemon Squeezy alternativa; pagos manuales beta | Fundador | [PENDIENTE-ACTIVACIÓN] |
-| R2 | Paddle no aprueba la cuenta | Alto | Media | Preparar documentación de identidad, empresa y producto | Fundador | [PENDIENTE-VALIDAR] |
-| R3 | Stripe no acepta cuentas Honduras | Bajo | Alta | Stripe no es opción principal; usar Paddle MoR | Fundador | Descartado como principal |
+| R1 | Pasarela comercial pendiente de activación | Crítico | Alta | Lemon Squeezy MoR principal; pagos manuales beta | Fundador | [PENDIENTE-ACTIVACIÓN] |
+| R2 | Lemon Squeezy no aprueba la cuenta | Alto | Media | Preparar documentación de identidad, empresa y producto | Fundador | [PENDIENTE-VALIDAR] |
+| R3 | Stripe no acepta cuentas Honduras | Bajo | Alta | Stripe no es opción principal; usar Lemon Squeezy MoR | Fundador | Descartado como principal |
 | R4 | Coste/disponibilidad de IA | Alto | Media | Capa de abstracción de proveedor | Fundador | Monitoreo |
 | R5 | Corpus legal deficiente | Alto | Alta | Fuentes oficiales + abogado revisor | Abogado revisor | Planificado |
 | R6 | Protección de datos | Alto | Media | Política privacidad, minimización, no PII en IA | Fundador + abogado | [PENDIENTE-VALIDAR] |
@@ -902,7 +905,7 @@ Búsqueda full-text + UI de revisión
 
 ### Bloqueantes antes de lanzamiento comercial
 
-- Paddle activo o alternativa MoR validada.
+- Lemon Squeezy activo o alternativa MoR validada.
 - Términos de uso y privacidad revisados.
 - Piloto real con 5–10 despachos.
 
@@ -1015,7 +1018,7 @@ Búsqueda full-text + UI de revisión
 - 5–10 despachos piloto durante mínimo 30 días.
 - 0 incidencias de multi-tenant leakage.
 - Términos y privacidad revisados por abogado.
-- Paddle activo o alternativa MoR validada.
+- Lemon Squeezy activo o alternativa MoR validada.
 - IA jurídica solo activada con corpus validado y abogado revisor.
 
 ---
@@ -1033,7 +1036,7 @@ Búsqueda full-text + UI de revisión
 | 7 | BA-07 | Tests multi-tenant | Evitar fuga crítica | [PENDIENTE] |
 | 8 | BA-08 | Activar piloto con abogados | Validación real | [PENDIENTE-VALIDAR] |
 | 9 | BA-09 | Decidir embeddings | Desbloquea RAG | [PENDIENTE-VALIDAR] |
-| 10 | BA-10 | Activar Paddle | Desbloquea comercial | [PENDIENTE-ACTIVACIÓN] |
+| 10 | BA-10 | Activar Lemon Squeezy | Desbloquea comercial | [PENDIENTE-ACTIVACIÓN] |
 
 ---
 

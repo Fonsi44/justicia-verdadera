@@ -13,7 +13,8 @@
 | Upstash Redis | ✅ Funcionando |
 | UploadThing | ✅ Token renovado |
 | Resend | ✅ Funcionando |
-| Stripe | ✅ Funcionando (modo test) — ⚠️ Verificar si acepta cuentas de Honduras |
+| Stripe | ⚠️ Archivado — reemplazado por Lemon Squeezy |
+| Lemon Squeezy | ⚠️ Pendiente de configurar cuenta y webhooks |
 | Inngest | ✅ Verificado (pospuesto a Fase 2) |
 | Vercel | ⚠️ Pendiente de despliegue |
 
@@ -339,66 +340,92 @@ Resend solo enviará emails a direcciones verificadas en modo testing. Para veri
 
 ---
 
-## 7. Stripe — Pagos y Suscripciones
+## 7. Lemon Squeezy — Pagos y Suscripciones (Merchant of Record)
 
-> Procesador de pagos para las suscripciones SaaS. Solo necesitas modo test para desarrollo.
+> **Lemon Squeezy** actúa como **Merchant of Record (MoR)**. Esto significa que ellos procesan los pagos, gestionan impuestos globales (VAT, IVA, sales tax), emiten facturas y asumen la responsabilidad fiscal. Perfecto para proyectos en Honduras, ya que no necesitas estar en un país soportado por Stripe.
 
-1. Ve a **https://dashboard.stripe.com/register**
-2. Regístrate con email
-3. **IMPORTANTE**: Una vez registrado, asegúrate de estar en **modo test**
-   - En la barra lateral izquierda, verás un toggle "View test data" / "View live data"
-   - Activa **"View test data"** (debe aparecer un banner amarillo "Test mode")
-4. En el menú lateral, ve a **"Developers"** → **"API keys"**
-5. Copia:
-   - **Publishable key** (empieza por `pk_test_...`) → `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
-   - **Secret key** (empieza por `sk_test_...`) → `STRIPE_SECRET_KEY`
-6. Pega en `.env.local`:
-   ```
-   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_xxxxxxxxxxxxxxxxxxxx
-   STRIPE_SECRET_KEY=sk_test_xxxxxxxxxxxxxxxxxxxx
-   ```
+### ¿Por qué Lemon Squeezy y no Stripe?
 
-### Crear productos y precios
+| Razón | Detalle |
+|---|---|
+| Honduras no soportado por Stripe | Stripe no permite cuentas de empresas registradas en Honduras. Lemon Squeezy sí. |
+| Merchant of Record | Lemon Squeezy gestiona impuestos, facturación y compliance global. Tú solo recibes el pago neto. |
+| Checkout listo | Checkout page hosted, sin implementar desde cero. |
+| Webhooks y API | API REST y webhooks para integrar suscripciones. |
+| Coste | ~5% + $0.50 por transacción. Sin costes mensuales fijos. |
 
-1. Ve a **https://dashboard.stripe.com/test/products**
-2. Haz clic en **"Add product"**
-3. Crea 3 productos (uno por plan):
+### Paso a paso
+
+1. Ve a **https://lemonsqueezy.com**
+2. Haz clic en **"Get Started"** (esquina superior derecha)
+3. Regístrate con tu email o GitHub
+4. Una vez dentro del dashboard, ve a **"Settings"** → **"Store"**
+5. Configura tu tienda:
+   - **Store name**: `Justicia Verdadera`
+   - **Currency**: `USD`
+   - **Locale**: `es`
+6. Ve a **"Products"** → **"Create your first product"**
+7. Crea 3 productos (uno por plan):
 
    **Plan Starter:**
-   - Name: `Justicia Verdadera — Starter`
-   - Description: `1 usuario, 20 casos activos, 10 prompts IA/mes`
-   - Price: `$29.00 USD` — Recurring → Monthly
-   - Guarda el **Price ID** (ej: `price_...`)
+   - **Name**: `Justicia Verdadera — Starter`
+   - **Description**: `1 usuario, 20 casos activos, 10 prompts IA/mes`
+   - **Price**: `$29.00 USD` — Recurring → Monthly
+   - **Variant name**: `Mensual`
 
    **Plan Profesional:**
-   - Name: `Justicia Verdadera — Profesional`
-   - Description: `3 usuarios, 100 casos activos, 50 prompts IA/mes`
-   - Price: `$79.00 USD` — Recurring → Monthly
+   - **Name**: `Justicia Verdadera — Profesional`
+   - **Description**: `3 usuarios, 100 casos activos, 50 prompts IA/mes`
+   - **Price**: `$79.00 USD` — Recurring → Monthly
 
    **Plan Despacho:**
-   - Name: `Justicia Verdadera — Despacho`
-   - Description: `10 usuarios, casos ilimitados, 200 prompts IA/mes`
-   - Price: `$199.00 USD` — Recurring → Monthly
+   - **Name**: `Justicia Verdadera — Despacho`
+   - **Description**: `10 usuarios, casos ilimitados, 200 prompts IA/mes`
+   - **Price**: `$199.00 USD` — Recurring → Monthly
 
-4. Los Price IDs se usarán más adelante en el código.
+8. Guarda los **Product ID** y **Variant ID** de cada plan (los necesitarás en el código).
 
-### Documentación relevante
+### Obtener API Key
 
-### Verificación de cuenta para Honduras
+1. Ve a **"Settings"** → **"API"**
+2. Haz clic en **"Generate API key"**
+3. Dale nombre: `justicia-verdadera-dev`
+4. Copia la key. Pega en `.env.local`:
+   ```
+   LEMON_SQUEEZY_API_KEY=tu_api_key
+   ```
 
-**IMPORTANTE**: Stripe no permite crear cuentas a empresas registradas en Honduras. Antes de lanzar a producción, verificar la elegibilidad en **https://stripe.com/global**. Si Honduras no aparece en la lista de países soportados, las alternativas son:
+### Configurar Webhooks (para desarrollo)
 
-- **MercadoPago** (https://www.mercadopago.com): Acepta cuentas de Honduras, muy usado en Latinoamérica. API sólida, soporta suscripciones. Comisiones ~3.99% + $0.50.
-- **Lemon Squeezy** (https://www.lemonsqueezy.com): Actúa como "Merchant of Record" (revendedor oficial). Gestiona impuestos globales automáticamente. Comisiones ~5% + $0.50.
-- **Stripe Atlas**: Permite crear una LLC en EEUU (~$500 una sola vez) y usar Stripe a través de ella.
+1. Ve a **"Settings"** → **"Webhooks"**
+2. Haz clic en **"Create webhook"**
+3. Configura:
+   - **URL**: `http://localhost:3000/api/webhooks/lemon-squeezy`
+   - **Events**: selecciona `order_created`, `subscription_created`, `subscription_updated`, `subscription_cancelled`
+4. Copia el **Signing Secret**. Pega en `.env.local`:
+   ```
+   LEMON_SQUEEZY_WEBHOOK_SECRET=tu_signing_secret
+   ```
 
-### Documentación relevante
+### Integración técnica
 
-- Dashboard test: **https://dashboard.stripe.com/test**
-- API keys: **https://dashboard.stripe.com/test/apikeys**
-- Productos: **https://dashboard.stripe.com/test/products**
-- Webhooks: **https://dashboard.stripe.com/test/webhooks**
-- Documentación: **https://docs.stripe.com**
+```bash
+# Instalar SDK opcional (si decides usarlo)
+npm install @lemonsqueezy/lemonsqueezy.js
+```
+
+> **Nota**: La integración de Lemon Squeezy está planificada para implementarse cuando se active el checkout comercial. Durante Fase 1.5 no hay checkout automático.
+
+### Panel de Lemon Squeezy
+
+- Dashboard: **https://app.lemonsqueezy.com**
+- Productos: **https://app.lemonsqueezy.com/products**
+- API keys: **https://app.lemonsqueezy.com/settings/api**
+- Webhooks: **https://app.lemonsqueezy.com/settings/webhooks**
+
+### Documentación
+
+- **https://docs.lemonsqueezy.com**
 
 ---
 
@@ -465,12 +492,12 @@ Marca cada servicio conforme lo configures:
 [ ] 1. Neon DB          → https://neon.tech               → DATABASE_URL
 [ ] 2. AUTH_SECRET      → Local (npx auth secret o crypto) → AUTH_SECRET
 [ ] 3. Google OAuth     → https://console.cloud.google.com → AUTH_GOOGLE_ID + SECRET
-[ ] 4. Microsoft Entra ID → https://portal.azure.com       → AUTH_MICROSOFT_ENTRA_ID_ID + SECRET
+[ ] 4. Microsoft Entra ID → https://portal.azure.org       → AUTH_MICROSOFT_ENTRA_ID_ID + SECRET
 [ ] 5. DeepSeek         → https://platform.deepseek.com    → DEEPSEEK_API_KEY
 [ ] 6. Upstash Redis    → https://console.upstash.com      → UPSTASH_REDIS_REST_URL + TOKEN
 [ ] 7. UploadThing      → https://uploadthing.com          → UPLOADTHING_TOKEN
 [ ] 8. Resend           → https://resend.com               → RESEND_API_KEY + FROM_EMAIL
-[ ] 9. Stripe           → https://dashboard.stripe.com     → STRIPE_SECRET_KEY + PUBLISHABLE_KEY
+[ ] 9. Lemon Squeezy    → https://lemonsqueezy.com         → LEMON_SQUEEZY_API_KEY
 [ ] 10. Inngest         → https://app.inngest.com          → INNGEST_EVENT_KEY
 [ ] 11. Vercel (prod)   → https://vercel.com               → Reemplazar variables con valores de producción
 ```
@@ -487,6 +514,6 @@ Configura los servicios en este orden para ir desbloqueando funcionalidad progre
 6. **Upstash Redis** — rate limiting y cache
 7. **UploadThing** — subida de archivos y documentos
 8. **Resend** — envío de emails (bienvenida, notificaciones, facturas)
-9. **Stripe** — pagos y suscripciones (verificar antes si acepta Honduras)
+9. **Lemon Squeezy** — pasarela de pagos MoR (apta para Honduras)
 10. **Inngest** — workflows automatizados (pospuesto a Fase 2)
 11. **Vercel** — deploy a producción
