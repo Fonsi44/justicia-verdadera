@@ -315,45 +315,37 @@ export default function DashboardPage() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={[
-                    { name: "Civil", value: 8 }, { name: "Penal", value: 5 },
-                    { name: "Laboral", value: 4 }, { name: "Familia", value: 3 },
-                    { name: "Mercantil", value: 2 }, { name: "Otro", value: 2 },
-                  ]}
+                  data={stats?.casesByMatter?.length ? stats.casesByMatter : [{ name: "Sin datos", value: 1 }]}
                   cx="50%" cy="50%" innerRadius={60} outerRadius={90}
                   paddingAngle={3} dataKey="value"
                 >
-                  {["#2563eb", "#dc2626", "#d97706", "#059669", "#7c3aed", "#6b7280"].map((c, i) => (
-                    <Cell key={i} fill={c} />
+                  {(stats?.casesByMatter?.length ? stats.casesByMatter : [{ name: "Sin datos", value: 1 }]).map((_, i) => (
+                    <Cell key={i} fill={["#2563eb", "#dc2626", "#d97706", "#059669", "#7c3aed", "#6b7280", "#0891b2", "#be185d"][i % 8]} />
                   ))}
                 </Pie>
                 <Tooltip />
               </PieChart>
             </ResponsiveContainer>
           </div>
-          <div className="flex flex-wrap justify-center gap-3 mt-2">
-            {["Civil", "Penal", "Laboral", "Familia", "Mercantil", "Otro"].map((m, i) => (
-              <div key={m} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: ["#2563eb", "#dc2626", "#d97706", "#059669", "#7c3aed", "#6b7280"][i] }} />
-                {m}
-              </div>
-            ))}
-          </div>
+          {stats?.casesByMatter?.length ? (
+            <div className="flex flex-wrap justify-center gap-3 mt-2">
+              {stats.casesByMatter.map((m, i) => (
+                <div key={m.name} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: ["#2563eb", "#dc2626", "#d97706", "#059669", "#7c3aed", "#6b7280", "#0891b2", "#be185d"][i % 8] }} />
+                  {m.name} ({m.value})
+                </div>
+              ))}
+            </div>
+          ) : null}
         </SectionCard>
 
         <SectionCard title="Actividad mensual">
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={[
-                { name: "Ene", casos: 4, docs: 8 },
-                { name: "Feb", casos: 3, docs: 6 },
-                { name: "Mar", casos: 6, docs: 12 },
-                { name: "Abr", casos: 5, docs: 9 },
-                { name: "May", casos: 7, docs: 14 },
-              ]}>
+              <BarChart data={stats?.monthlyActivity?.length ? stats.monthlyActivity : []}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
-                <YAxis tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
+                <YAxis tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" allowDecimals={false} />
                 <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
                 <Bar dataKey="casos" fill="#2563eb" radius={[4, 4, 0, 0]} name="Casos" />
                 <Bar dataKey="docs" fill="#7ea8c4" radius={[4, 4, 0, 0]} name="Documentos" />

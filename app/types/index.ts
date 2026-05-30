@@ -197,6 +197,11 @@ export interface DashboardStats {
   totalDocuments: number;
   recentCases: CaseData[];
   upcomingDeadlines: EventData[];
+  casesByMatter: Array<{ name: string; value: number }>;
+  monthlyActivity: Array<{ name: string; casos: number; docs: number }>;
+  currentSpending: string;
+  spendingLimit: string;
+  isvRate: number;
 }
 
 export interface FirmData {

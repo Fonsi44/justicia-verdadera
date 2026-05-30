@@ -2,6 +2,7 @@ import { db } from "@/lib/db";
 import { cases, users } from "@/database/schema";
 import { eq, and, ilike, or, desc, count, sql, isNull } from "drizzle-orm";
 import { NotFoundError } from "@/lib/errors";
+import { notifyCaseCreated } from "@/lib/services/notifications.service";
 
 export interface CaseFilters {
   search?: string;
@@ -101,6 +102,11 @@ export async function createCase(firmId: string, input: CreateCaseInput) {
       estimatedValue: input.estimatedValue ?? null,
     } as typeof cases.$inferInsert)
     .returning();
+
+  // Auto-notify assigned lawyer
+  if (newCase && input.assignedLawyerId) {
+    notifyCaseCreated(firmId, newCase.id, input.number, input.title, [input.assignedLawyerId]).catch(() => {});
+  }
 
   return newCase;
 }
