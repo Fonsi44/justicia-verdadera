@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FileText, Upload } from "lucide-react";
+import { Download, FileText, Upload } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { exportToCsv } from "@/lib/export-csv";
 import PageHeader from "@/components/page-header";
 import SearchAndFilters from "@/components/search-and-filters";
 import LoadingSkeleton from "@/components/loading-skeleton";
@@ -144,6 +145,31 @@ export default function DocumentosPage() {
         onFilterChange={(v) => setTypeFilter(v === "all" ? "" : v)}
         loading={loading}
       />
+
+      {!loading && documents.length > 0 && (
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const headers = ["Nombre", "Tipo", "Estado", "OCR", "Caso Vinculado", "Versión", "Fecha"];
+              const rows = documents.map(doc => [
+                doc.name,
+                typeLabels[doc.type] ?? doc.type,
+                statusLabels[doc.status] ?? doc.status,
+                doc.processingStatus ? (processingStatusLabels[doc.processingStatus] ?? doc.processingStatus) : "-",
+                doc.case?.number ?? "-",
+                `v${doc.currentVersion}`,
+                formatDate(doc.createdAt),
+              ]);
+              exportToCsv("documentos", headers, rows);
+            }}
+          >
+            <Download className="h-4 w-4" />
+            Exportar CSV
+          </Button>
+        </div>
+      )}
 
       <div className="overflow-hidden rounded-xl border bg-card ring-1 ring-foreground/10">
         {loading ? (
