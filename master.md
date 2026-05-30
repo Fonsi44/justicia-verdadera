@@ -760,3 +760,34 @@ Se aplicaron los hallazgos restantes de la auditoría:
 - `npm run typecheck`: 0 errores
 - `npm run test`: 19 tests pasando
 - `npm run build`: exitoso, 37 rutas
+
+### 2026-05-30 — Service layer + OCR fallback + ISV dinámico
+
+Se completó la capa de servicios para todos los módulos principales:
+
+- **7 servicios** creados: `cases.service.ts`, `contacts.service.ts`, `documents.service.ts`, `events.service.ts`, `invoices.service.ts`, `dashboard.service.ts`, `errors.ts`
+- **10 archivos route** refactorizados a servicios (casos, contacts, documentos, events, invoices)
+- **OCR fallback síncrono**: `runSyncOcr()` en `documents.service.ts` cuando Inngest no está configurado
+- **OCR PDF mejorado**: fallback `extractTextFromImage` para PDFs sin capa de texto (escaneados)
+- **ISV dinámico**: `getFirmIsvRate()` consulta `firms.isvRate` desde BD (default 15%)
+- **Service tests**: 15 nuevos tests en `services.test.ts` (errores, schema, OCR, version-limit)
+- **Dashboard service**: `getDashboardStats()` con 9 métricas en 1 query paralela
+
+Verificación: lint 0, typecheck 0, tests 34, build 37 rutas.
+
+### 2026-05-30 — Error boundaries + loading skeletons + mobile responsive
+
+**UX improvements:**
+- **ErrorBoundary**: componente React que captura errores en dashboard con botones reintentar/recargar
+- **Loading skeletons**: 5 `loading.tsx` (casos, clientes, documentos, agenda, dashboard) usando `TableSkeleton`, `CardSkeleton`, `DashboardSkeleton`
+- **LoadingSkeleton**: soporte `variant` (table/list/card) con retrocompatibilidad
+
+**Mobile responsive:**
+- **Hamburguesa móvil**: sidebar slide-over desde la izquierda con overlay y botón cerrar
+- **Bottom nav bar**: barra de navegación inferior con 5 iconos principales en `<lg`
+- **SidebarContent**: componente reutilizable compartido entre desktop y mobile
+- **Responsive padding**: `p-4 lg:p-6`, header `px-4 lg:px-6`, body `pb-14 lg:pb-0`
+
+**master.md actualizado**: v5.7 con RBAC, 19 tablas, service layer, 34 tests, soft-delete, health endpoint.
+
+Verificación: lint 0, typecheck 0, tests 34, build 37 rutas.
