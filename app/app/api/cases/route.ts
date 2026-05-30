@@ -1,8 +1,10 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getFirmId } from "@/lib/auth/require-auth";
 import { cases, users } from "@/database/schema";
 import { eq, and, ilike, or, desc, count, sql } from "drizzle-orm";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { writeAuditLog } from "@/lib/audit";
 
 export async function GET(request: NextRequest) {
   try {
@@ -81,6 +83,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const firmId = await getFirmId();
+
+    const rateCheck = await checkRateLimit("api", firmId);
+    if (rateCheck instanceof NextResponse) return rateCheck;
+
   const body = await request.json();
 
   if (!body.number || !body.title || !body.matter || !body.startDate) {
@@ -106,6 +112,14 @@ export async function POST(request: NextRequest) {
       estimatedValue: body.estimatedValue ?? null,
     })
     .returning();
+
+  await writeAuditLog({
+    firmId,
+    action: "create",
+    entityType: "case",
+    entityId: newCase.id,
+    changes: { number: body.number, title: body.title, matter: body.matter },
+  });
 
   return Response.json(newCase, { status: 201 });
   } catch (error) {

@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import { documents, documentVersions, cases } from "@/database/schema";
 import { getFirmId } from "@/lib/auth/require-auth";
 import { eq, and, like, desc, count } from "drizzle-orm";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { writeAuditLog } from "@/lib/audit";
 
 export async function GET(req: NextRequest) {
   try {
@@ -63,6 +65,10 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const firmId = await getFirmId();
+
+    const rateCheck = await checkRateLimit("upload", firmId);
+    if (rateCheck instanceof NextResponse) return rateCheck;
+
     const body = await req.json();
     const { caseId, name, type, mimeType, fileUrl, fileKey, fileSize } = body;
 
@@ -96,14 +102,15 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const result = await db
-      .select()
-      .from(documents)
-      .leftJoin(documentVersions, eq(documents.id, documentVersions.documentId))
-      .where(eq(documents.id, doc.id))
-      .limit(1);
+    await writeAuditLog({
+      firmId,
+      action: "create",
+      entityType: "document",
+      entityId: doc.id,
+      changes: { name, type, fileUrl: fileUrl ?? null },
+    });
 
-    return NextResponse.json({ data: result[0] }, { status: 201 });
+    return NextResponse.json({ data: doc }, { status: 201 });
   } catch (error) {
     console.error("Error creating document:", error);
     return NextResponse.json({ error: "Error al crear documento" }, { status: 500 });
