@@ -26,6 +26,7 @@ export async function createNotification(input: CreateNotificationInput) {
       title: input.title,
       body: input.body,
       caseId: input.caseId ?? undefined,
+      channel: input.sendEmail ? "email" : "in_app",
     } as typeof notifications.$inferInsert)
     .returning();
 

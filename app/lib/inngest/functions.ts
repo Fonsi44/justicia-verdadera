@@ -7,6 +7,12 @@ const DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingm
 
 const configured = !!process.env.INNGEST_EVENT_KEY;
 
+export {
+  processNotification,
+  scheduledEventReminder,
+  scheduledInvoiceCheck,
+} from "@/lib/inngest/notifications";
+
 export const processDocumentOcr = configured
   ? inngest.createFunction(
       {
