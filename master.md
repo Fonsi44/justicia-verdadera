@@ -150,7 +150,7 @@ Fundador (Alfons)                         Kilo Code (IA)
 | Upstash Redis | `UPSTASH_REDIS_*` | Verificado | Ping REST exitoso |
 | Resend | `RESEND_API_KEY` | Verificado | Email de prueba enviado correctamente |
 | Stripe | `STRIPE_SECRET_KEY` | Archivado | No es pasarela principal. Ver Lemon Squeezy. |
-| Lemon Squeezy | `LEMON_SQUEEZY_API_KEY` | Pendiente | Merchant of Record, apto para Honduras |
+| Lemon Squeezy | `LEMON_SQUEEZY_API_KEY` | Verificado — Pendiente crear productos en dashboard | Merchant of Record, apto para Honduras |
 | Google OAuth | `AUTH_GOOGLE_*` | Verificado | Configurado y verificado |
 | Microsoft Entra ID | `AUTH_MICROSOFT_ENTRA_ID_*` | Verificado | Configurado y verificado. OAuth funcional con cuentas Microsoft personales y empresariales. |
 | UploadThing | `UPLOADTHING_TOKEN` | Verificado | Token renovado y verificado |

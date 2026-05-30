@@ -14,7 +14,7 @@
 | UploadThing | ✅ Token renovado |
 | Resend | ✅ Funcionando |
 | Stripe | ⚠️ Archivado — reemplazado por Lemon Squeezy |
-| Lemon Squeezy | ⚠️ Pendiente de configurar cuenta y webhooks |
+| Lemon Squeezy | ✅ Verificado — Pendiente crear productos en dashboard |
 | Inngest | ✅ Verificado (pospuesto a Fase 2) |
 | Vercel | ⚠️ Pendiente de despliegue |
 
@@ -415,6 +415,44 @@ npm install @lemonsqueezy/lemonsqueezy.js
 ```
 
 > **Nota**: La integración de Lemon Squeezy está planificada para implementarse cuando se active el checkout comercial. Durante Fase 1.5 no hay checkout automático.
+
+### Verificación técnica (30 mayo 2026)
+
+```bash
+node scripts/verify-lemon-squeezy.js
+```
+
+| Aspecto | Estado |
+|---|---|
+| Tienda creada | ✅ JUSTICIA VERDADERA (Store ID: 391910) |
+| País | ✅ Honduras (HN) |
+| Conexión API | ✅ API Key funciona correctamente |
+| Webhook configurado | ✅ URL, secret y eventos activados |
+| Planes de suscripción (3) | ⚠️ Pendiente crear en dashboard |
+| Checkout comercial | ⚠️ Pendiente (Fase 2) |
+
+Los planes de suscripción NO pueden crearse por API. Debes crearlos manualmente:
+
+```bash
+# Abre el dashboard para crear productos:
+node scripts/setup-lemon-squeezy.js
+```
+
+O directamente: **https://app.lemonsqueezy.com/products**
+
+### Product IDs
+
+Después de crear los productos, guarda los IDs en `.env.local`:
+
+```env
+STORE_ID=391910
+LS_PRODUCT_STARTER_ID=
+LS_PRODUCT_PROFESIONAL_ID=
+LS_PRODUCT_DESPACHO_ID=
+LS_VARIANT_STARTER_ID=
+LS_VARIANT_PROFESIONAL_ID=
+LS_VARIANT_DESPACHO_ID=
+```
 
 ### Panel de Lemon Squeezy
 
