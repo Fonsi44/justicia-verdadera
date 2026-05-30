@@ -24,6 +24,7 @@ interface Document {
   type: string;
   currentVersion: number;
   status: string;
+  processingStatus: string | null;
   createdAt: string;
   updatedAt: string;
   case: { id: string; number: string; title: string } | null;
@@ -70,6 +71,17 @@ const statusLabels: Record<string, string> = {
   final: "Final",
   firmado: "Firmado",
   archivado: "Archivado",
+};
+
+const processingStatusLabels: Record<string, string> = {
+  pending: "Pendiente",
+  uploaded: "Subido",
+  ocr_processing: "Procesando OCR",
+  ocr_complete: "OCR Completado",
+  ocr_skipped: "OCR Omitido",
+  manual_review: "Revisión Manual",
+  error: "Error",
+  retry_pending: "Reintento Pendiente",
 };
 
 export default function DocumentosPage() {
@@ -152,6 +164,9 @@ export default function DocumentosPage() {
                 <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Estado
                 </th>
+                <th className="px-6 py-4 text-center text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  OCR
+                </th>
                 <th className="px-6 py-4 text-left text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   Caso vinculado
                 </th>
@@ -169,6 +184,7 @@ export default function DocumentosPage() {
                   key={doc.id}
                   className="cursor-pointer transition-colors hover:bg-muted/50 animate-fade-in-up"
                   style={{ animationDelay: `${i * 0.05}s` }}
+                  onClick={() => window.location.href = `/documentos/${doc.id}`}
                 >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -209,6 +225,20 @@ export default function DocumentosPage() {
                       }
                       size="sm"
                     />
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    {doc.processingStatus ? (
+                      <span className={`inline-flex items-center gap-1 rounded px-2 py-0.5 text-xs ${
+                        doc.processingStatus === "ocr_complete" ? "bg-emerald-100 text-emerald-700" :
+                        doc.processingStatus === "ocr_processing" ? "bg-amber-100 text-amber-700" :
+                        doc.processingStatus === "error" || doc.processingStatus === "retry_pending" ? "bg-red-100 text-red-700" :
+                        "bg-muted text-muted-foreground"
+                      }`}>
+                        {processingStatusLabels[doc.processingStatus] ?? doc.processingStatus}
+                      </span>
+                    ) : (
+                      <span className="text-muted-foreground/40">&mdash;</span>
+                    )}
                   </td>
                   <td className="px-6 py-4 text-sm text-muted-foreground">
                     {doc.case ? (

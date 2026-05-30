@@ -20,6 +20,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         type: documents.type,
         currentVersion: documents.currentVersion,
         status: documents.status,
+        ocrText: documents.ocrText,
+        processingStatus: documents.processingStatus,
         createdBy: documents.createdBy,
         createdAt: documents.createdAt,
         updatedAt: documents.updatedAt,

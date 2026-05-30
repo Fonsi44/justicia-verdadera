@@ -170,7 +170,7 @@ export default function FacturacionPage() {
               {invoices.map((inv, i) => (
                 <tr
                   key={inv.id}
-                  className="cursor-pointer transition-colors hover:bg-muted/50 animate-fade-in-up"
+                  className="transition-colors hover:bg-muted/50 animate-fade-in-up"
                   style={{ animationDelay: `${i * 0.05}s` }}
                 >
                   <td className="px-6 py-4">

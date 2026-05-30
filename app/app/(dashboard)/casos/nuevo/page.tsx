@@ -156,7 +156,7 @@ export default function NuevoCasoPage() {
                 value={watchedMatter}
                 onValueChange={(v) => setValue("matter", v ?? "", { shouldValidate: true })}
               >
-                <SelectTrigger>
+                <SelectTrigger aria-label="Materia">
                   <SelectValue placeholder="Selecciona materia" />
                 </SelectTrigger>
                 <SelectContent>
@@ -177,7 +177,7 @@ export default function NuevoCasoPage() {
                 value={watchedPriority}
                 onValueChange={(v) => setValue("priority", v ?? "media")}
               >
-                <SelectTrigger>
+                <SelectTrigger aria-label="Prioridad">
                   <SelectValue placeholder="Selecciona prioridad" />
                 </SelectTrigger>
                 <SelectContent>
@@ -211,7 +211,7 @@ export default function NuevoCasoPage() {
                 value={watchedAssignedLawyerId}
                 onValueChange={(v) => setValue("assignedLawyerId", v ?? "")}
               >
-                <SelectTrigger>
+                <SelectTrigger aria-label="Abogado asignado">
                   <SelectValue placeholder="Selecciona abogado" />
                 </SelectTrigger>
                 <SelectContent>

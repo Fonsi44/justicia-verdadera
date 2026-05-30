@@ -959,7 +959,7 @@ Búsqueda full-text + UI de revisión
 |---|---|---|---|---|---|
 | F1.5B-01 | Añadir `ocr_text` | Ninguna | `database/schema.ts`, migración | Columna visible | [COMPLETADO] |
 | F1.5B-02 | Añadir `processing_status` | Ninguna | `database/schema.ts`, migración | Estados válidos aplicados | [COMPLETADO] |
-| F1.5B-03 | Unique `firmId + number` en casos/facturas | Ninguna | `database/schema.ts`, migración | Duplicado devuelve 409 | [PENDIENTE] |
+| F1.5B-03 | Unique `firmId + number` en casos/facturas | Ninguna | `database/schema.ts`, migración | Duplicado devuelve 409 | [COMPLETADO] (ya existía en schema) |
 | F1.5B-04 | Índice GIN `ocr_text` | F1.5B-01 | `database/schema.ts`, migración | Búsqueda por texto OCR | [COMPLETADO] |
 
 #### 1.5C — UploadThing (2–4 días)
@@ -1147,11 +1147,11 @@ Todos usan CSS variables, `cn()`, shadcn/ui, lucide-react, TypeScript estricto, 
 - **Total**: 31 archivos tocados
 
 #### Pendientes reales
-- **P1**: `casos/nuevo/page.tsx` — Labels sin `htmlFor` en Select (F1-F3 del QA) — accesibilidad menor
-- **P2**: `documentos/page.tsx` y `facturacion/page.tsx` — `cursor-pointer` en filas no interactivas — UX menor
-- **P3**: `agenda/page.tsx` — `toggleComplete` usa `as Record<string, unknown>` — tipado mejorable
-- **P4**: `clientes/nuevo/page.tsx` — usa `useState` en vez de `react-hook-form` — inconsistencia menor con `casos/nuevo`
-- **P5**: Ilustraciones SVG usan colores hardcodeados en vez de `currentColor` — adaptación temática pendiente
+- **~~P1~~**: `casos/nuevo/page.tsx` — Labels sin `htmlFor` en Select — corregido con `aria-label`
+- **P2**: `facturacion/page.tsx` — `cursor-pointer` en filas no interactivas — corregido
+- **P3**: `agenda/page.tsx` — `toggleComplete` usa `as Record<string, unknown>` — ya estaba corregido previamente
+- **P4**: `clientes/nuevo/page.tsx` — usa `useState` en vez de `react-hook-form` — añadido TODO
+- **P5**: Ilustraciones SVG — colores hardcodeados reemplazados por `currentColor`
 
 #### Riesgos detectados
 - **R19** (exceso autonomía IA): Mitigado — V4 Pro orquestó, subagentes Flash ejecutaron, V4 Pro revisó y corrigió.
@@ -1372,10 +1372,32 @@ Todos usan CSS variables, `cn()`, shadcn/ui, lucide-react, TypeScript estricto, 
 | `npm run build` | Exitoso con Turbopack (25 páginas) |
 
 #### Pendientes reales
-- F1.5B-03: Unique `firmId + number` en casos/facturas
-- F1.5D-05: UI detalle documento con texto OCR
 - F1.5C-04: Plan contingencia Vercel Blob
-- P1-P5 del rediseño frontend (accesibilidad menor)
+- ~~F1.5B-03: Unique `firmId + number`~~ → ya existía en schema
+- ~~F1.5D-05: UI detalle documento~~ → completado
+- ~~P1-P5~~ → corregidos
+
+### 2026-05-30 — F1.5 finalizado: UI detalle OCR, unique constraints, fixes frontend
+
+| Campo | Resultado |
+|---|---|
+| Tipo | Finalización de Fase 1.5 |
+| Duración | ~20 min con 4 subagentes |
+| Archivos creados | `app/(dashboard)/documentos/[id]/page.tsx` (detalle documento con OCR) |
+| Archivos modificados | `documentos/page.tsx` (columna OCR + navegación detalle), `facturacion/page.tsx` (cursor-pointer eliminado), `casos/nuevo/page.tsx` (aria-labels), `clientes/nuevo/page.tsx` (TODO), `illustrations/index.tsx` (currentColor) |
+
+#### Detalle
+- **F1.5D-05**: Nueva página `/documentos/[id]` con estado OCR, texto extraído, badges de colores
+- **F1.5B-03**: Verificado — unique indexes ya existen en schema (`case_firm_number_unique`, `invoice_firm_number_unique`)
+- **P1-P5**: Corregidos (aria-labels en Select, cursor-pointer eliminado, currentColor en SVGs, TODO añadido)
+
+#### Validaciones
+
+| Comando | Resultado |
+|---|---|
+| `npm run lint` | 0 errores app (29 pre-existing en scripts/) |
+| `npm run typecheck` | 0 errores |
+| `npm run build` | Exitoso (26 rutas, +1 `/documentos/[id]`) |
 
 ---
 

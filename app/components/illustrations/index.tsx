@@ -179,14 +179,14 @@ export function HeroIllustration({ className }: { className?: string }) {
 
       <circle cx="300" cy="200" r="200" fill="url(#hero-glow)" opacity="0.05" />
 
-      <circle cx="80" cy="60" r="3" fill="#0d9488" opacity="0.3" />
-      <circle cx="520" cy="350" r="4" fill="#1e3a5f" opacity="0.15" />
-      <circle cx="560" cy="80" r="2.5" fill="#0d9488" opacity="0.2" />
+      <circle cx="80" cy="60" r="3" fill="currentColor" opacity="0.3" />
+      <circle cx="520" cy="350" r="4" fill="currentColor" opacity="0.15" />
+      <circle cx="560" cy="80" r="2.5" fill="currentColor" opacity="0.2" />
       <circle cx="40" cy="350" r="2" fill="#7ea8c4" opacity="0.25" />
-      <circle cx="480" cy="120" r="2" fill="#0d9488" opacity="0.15" />
+      <circle cx="480" cy="120" r="2" fill="currentColor" opacity="0.15" />
 
-      <rect x="260" y="280" width="60" height="1.5" rx="0.75" fill="#0d9488" opacity="0.15" />
-      <rect x="420" y="140" width="40" height="1.5" rx="0.75" fill="#1e3a5f" opacity="0.12" />
+      <rect x="260" y="280" width="60" height="1.5" rx="0.75" fill="currentColor" opacity="0.15" />
+      <rect x="420" y="140" width="40" height="1.5" rx="0.75" fill="currentColor" opacity="0.12" />
 
       <rect x="60" y="345" width="130" height="12" rx="2" fill="url(#hero-building)" opacity="0.85" />
       <rect x="70" y="333" width="110" height="12" rx="2" fill="url(#hero-building)" opacity="0.65" />
@@ -250,57 +250,57 @@ export function DashboardIllustration({ className }: { className?: string }) {
 
       <circle cx="200" cy="150" r="160" fill="url(#dash-glow)" opacity="0.04" />
 
-      <rect x="30" y="25" width="340" height="8" rx="4" fill="#1e3a5f" opacity="0.08" />
-      <circle cx="42" cy="29" r="2.5" fill="#1e3a5f" opacity="0.15" />
-      <rect x="55" y="27" width="60" height="4" rx="2" fill="#1e3a5f" opacity="0.06" />
+      <rect x="30" y="25" width="340" height="8" rx="4" fill="currentColor" opacity="0.08" />
+      <circle cx="42" cy="29" r="2.5" fill="currentColor" opacity="0.15" />
+      <rect x="55" y="27" width="60" height="4" rx="2" fill="currentColor" opacity="0.06" />
 
-      <rect x="30" y="50" width="50" height="230" rx="6" fill="#1e3a5f" fillOpacity="0.04" stroke="#1e3a5f" strokeWidth="1" strokeOpacity="0.08" />
-      <rect x="40" y="65" width="30" height="4" rx="2" fill="#0d9488" opacity="0.3" />
-      <rect x="40" y="80" width="30" height="4" rx="2" fill="#1e3a5f" opacity="0.1" />
-      <rect x="40" y="95" width="30" height="4" rx="2" fill="#1e3a5f" opacity="0.1" />
-      <rect x="40" y="110" width="30" height="4" rx="2" fill="#1e3a5f" opacity="0.1" />
+      <rect x="30" y="50" width="50" height="230" rx="6" fill="currentColor" fillOpacity="0.04" stroke="currentColor" strokeWidth="1" strokeOpacity="0.08" />
+      <rect x="40" y="65" width="30" height="4" rx="2" fill="currentColor" opacity="0.3" />
+      <rect x="40" y="80" width="30" height="4" rx="2" fill="currentColor" opacity="0.1" />
+      <rect x="40" y="95" width="30" height="4" rx="2" fill="currentColor" opacity="0.1" />
+      <rect x="40" y="110" width="30" height="4" rx="2" fill="currentColor" opacity="0.1" />
 
-      <rect x="95" y="55" width="90" height="65" rx="6" fill="#ffffff" stroke="#1e3a5f" strokeWidth="1" opacity="0.12" />
-      <rect x="105" y="65" width="20" height="20" rx="4" fill="#0d9488" opacity="0.15" />
-      <rect x="132" y="67" width="40" height="4" rx="2" fill="#1e3a5f" opacity="0.15" />
-      <rect x="132" y="76" width="30" height="3" rx="1.5" fill="#1e3a5f" opacity="0.08" />
-      <text x="110" y="100" fontSize="18" fontWeight="700" fill="#1e3a5f" opacity="0.5" fontFamily="system-ui">128</text>
-      <rect x="105" y="108" width="30" height="3" rx="1.5" fill="#1e3a5f" opacity="0.1" />
+      <rect x="95" y="55" width="90" height="65" rx="6" fill="#ffffff" stroke="currentColor" strokeWidth="1" opacity="0.12" />
+      <rect x="105" y="65" width="20" height="20" rx="4" fill="currentColor" opacity="0.15" />
+      <rect x="132" y="67" width="40" height="4" rx="2" fill="currentColor" opacity="0.15" />
+      <rect x="132" y="76" width="30" height="3" rx="1.5" fill="currentColor" opacity="0.08" />
+      <text x="110" y="100" fontSize="18" fontWeight="700" fill="currentColor" opacity="0.5" fontFamily="system-ui">128</text>
+      <rect x="105" y="108" width="30" height="3" rx="1.5" fill="currentColor" opacity="0.1" />
 
-      <rect x="195" y="55" width="90" height="65" rx="6" fill="#ffffff" stroke="#1e3a5f" strokeWidth="1" opacity="0.12" />
+      <rect x="195" y="55" width="90" height="65" rx="6" fill="#ffffff" stroke="currentColor" strokeWidth="1" opacity="0.12" />
       <rect x="205" y="65" width="20" height="20" rx="4" fill="#7ea8c4" opacity="0.15" />
-      <rect x="232" y="67" width="40" height="4" rx="2" fill="#1e3a5f" opacity="0.15" />
-      <rect x="232" y="76" width="30" height="3" rx="1.5" fill="#1e3a5f" opacity="0.08" />
-      <text x="210" y="100" fontSize="18" fontWeight="700" fill="#1e3a5f" opacity="0.5" fontFamily="system-ui">45</text>
-      <rect x="205" y="108" width="30" height="3" rx="1.5" fill="#1e3a5f" opacity="0.1" />
+      <rect x="232" y="67" width="40" height="4" rx="2" fill="currentColor" opacity="0.15" />
+      <rect x="232" y="76" width="30" height="3" rx="1.5" fill="currentColor" opacity="0.08" />
+      <text x="210" y="100" fontSize="18" fontWeight="700" fill="currentColor" opacity="0.5" fontFamily="system-ui">45</text>
+      <rect x="205" y="108" width="30" height="3" rx="1.5" fill="currentColor" opacity="0.1" />
 
-      <rect x="295" y="55" width="80" height="65" rx="6" fill="#ffffff" stroke="#1e3a5f" strokeWidth="1" opacity="0.12" />
+      <rect x="295" y="55" width="80" height="65" rx="6" fill="#ffffff" stroke="currentColor" strokeWidth="1" opacity="0.12" />
       <rect x="305" y="65" width="20" height="20" rx="4" fill="#b8956e" opacity="0.15" />
-      <rect x="332" y="67" width="40" height="4" rx="2" fill="#1e3a5f" opacity="0.15" />
-      <rect x="332" y="76" width="30" height="3" rx="1.5" fill="#1e3a5f" opacity="0.08" />
-      <text x="310" y="100" fontSize="18" fontWeight="700" fill="#1e3a5f" opacity="0.5" fontFamily="system-ui">8</text>
-      <rect x="305" y="108" width="30" height="3" rx="1.5" fill="#1e3a5f" opacity="0.1" />
+      <rect x="332" y="67" width="40" height="4" rx="2" fill="currentColor" opacity="0.15" />
+      <rect x="332" y="76" width="30" height="3" rx="1.5" fill="currentColor" opacity="0.08" />
+      <text x="310" y="100" fontSize="18" fontWeight="700" fill="currentColor" opacity="0.5" fontFamily="system-ui">8</text>
+      <rect x="305" y="108" width="30" height="3" rx="1.5" fill="currentColor" opacity="0.1" />
 
-      <rect x="95" y="135" width="200" height="145" rx="6" fill="#ffffff" stroke="#1e3a5f" strokeWidth="1" opacity="0.08" />
-      <rect x="108" y="150" width="40" height="4" rx="2" fill="#1e3a5f" opacity="0.12" />
+      <rect x="95" y="135" width="200" height="145" rx="6" fill="#ffffff" stroke="currentColor" strokeWidth="1" opacity="0.08" />
+      <rect x="108" y="150" width="40" height="4" rx="2" fill="currentColor" opacity="0.12" />
 
-      <rect x="110" y="170" width="24" height="70" rx="3" fill="url(#dash-chart)" stroke="#0d9488" strokeWidth="1.5" />
-      <rect x="142" y="195" width="24" height="45" rx="3" fill="url(#dash-chart)" stroke="#0d9488" strokeWidth="1.5" />
-      <rect x="174" y="160" width="24" height="80" rx="3" fill="url(#dash-chart)" stroke="#0d9488" strokeWidth="1.5" />
-      <rect x="206" y="185" width="24" height="55" rx="3" fill="url(#dash-chart)" stroke="#0d9488" strokeWidth="1.5" />
-      <rect x="238" y="205" width="24" height="35" rx="3" fill="url(#dash-chart)" stroke="#0d9488" strokeWidth="1.5" />
+      <rect x="110" y="170" width="24" height="70" rx="3" fill="url(#dash-chart)" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="142" y="195" width="24" height="45" rx="3" fill="url(#dash-chart)" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="174" y="160" width="24" height="80" rx="3" fill="url(#dash-chart)" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="206" y="185" width="24" height="55" rx="3" fill="url(#dash-chart)" stroke="currentColor" strokeWidth="1.5" />
+      <rect x="238" y="205" width="24" height="35" rx="3" fill="url(#dash-chart)" stroke="currentColor" strokeWidth="1.5" />
 
-      <line x1="108" y1="250" x2="268" y2="250" stroke="#1e3a5f" strokeWidth="1" opacity="0.08" />
+      <line x1="108" y1="250" x2="268" y2="250" stroke="currentColor" strokeWidth="1" opacity="0.08" />
 
-      <rect x="310" y="135" width="55" height="145" rx="6" fill="#ffffff" stroke="#1e3a5f" strokeWidth="1" opacity="0.08" />
+      <rect x="310" y="135" width="55" height="145" rx="6" fill="#ffffff" stroke="currentColor" strokeWidth="1" opacity="0.08" />
       <rect x="320" y="148" width="35" height="4" rx="2" fill="#7ea8c4" opacity="0.3" />
-      <rect x="320" y="162" width="35" height="3" rx="1.5" fill="#1e3a5f" opacity="0.08" />
-      <rect x="320" y="175" width="35" height="3" rx="1.5" fill="#1e3a5f" opacity="0.08" />
+      <rect x="320" y="162" width="35" height="3" rx="1.5" fill="currentColor" opacity="0.08" />
+      <rect x="320" y="175" width="35" height="3" rx="1.5" fill="currentColor" opacity="0.08" />
       <rect x="320" y="195" width="20" height="20" rx="4" fill="#7ea8c4" opacity="0.1" />
       <rect x="320" y="225" width="20" height="20" rx="4" fill="#b8956e" opacity="0.1" />
       <rect x="320" y="255" width="20" height="20" rx="4" fill="#8b9d83" opacity="0.1" />
 
-      <circle cx="400" cy="29" r="2.5" fill="#0d9488" opacity="0.15" />
+      <circle cx="400" cy="29" r="2.5" fill="currentColor" opacity="0.15" />
     </svg>
   );
 }
@@ -317,20 +317,20 @@ export function EmptyCasesIllustration({ className }: { className?: string }) {
 
       <circle cx="150" cy="100" r="90" fill="url(#cases-glow)" opacity="0.04" />
 
-      <rect x="80" y="50" width="140" height="105" rx="8" stroke="#1e3a5f" strokeWidth="2" fill="none" opacity="0.15" strokeDasharray="6 4" />
-      <rect x="85" y="55" width="130" height="95" rx="6" stroke="#1e3a5f" strokeWidth="1.5" fill="none" opacity="0.08" />
+      <rect x="80" y="50" width="140" height="105" rx="8" stroke="currentColor" strokeWidth="2" fill="none" opacity="0.15" strokeDasharray="6 4" />
+      <rect x="85" y="55" width="130" height="95" rx="6" stroke="currentColor" strokeWidth="1.5" fill="none" opacity="0.08" />
 
-      <path d="M110 50 L110 35 L190 35 L190 50" stroke="#1e3a5f" strokeWidth="2" fill="none" opacity="0.15" strokeLinejoin="round" />
-      <line x1="130" y1="42" x2="170" y2="42" stroke="#1e3a5f" strokeWidth="2" strokeLinecap="round" opacity="0.1" />
+      <path d="M110 50 L110 35 L190 35 L190 50" stroke="currentColor" strokeWidth="2" fill="none" opacity="0.15" strokeLinejoin="round" />
+      <line x1="130" y1="42" x2="170" y2="42" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.1" />
 
-      <line x1="110" y1="80" x2="190" y2="80" stroke="#1e3a5f" strokeWidth="1.5" opacity="0.08" strokeLinecap="round" />
-      <line x1="110" y1="95" x2="180" y2="95" stroke="#1e3a5f" strokeWidth="1.5" opacity="0.06" strokeLinecap="round" />
-      <line x1="110" y1="110" x2="170" y2="110" stroke="#1e3a5f" strokeWidth="1.5" opacity="0.05" strokeLinecap="round" />
+      <line x1="110" y1="80" x2="190" y2="80" stroke="currentColor" strokeWidth="1.5" opacity="0.08" strokeLinecap="round" />
+      <line x1="110" y1="95" x2="180" y2="95" stroke="currentColor" strokeWidth="1.5" opacity="0.06" strokeLinecap="round" />
+      <line x1="110" y1="110" x2="170" y2="110" stroke="currentColor" strokeWidth="1.5" opacity="0.05" strokeLinecap="round" />
 
-      <circle cx="150" cy="130" r="12" stroke="#0d9488" strokeWidth="1.5" fill="none" opacity="0.3" />
-      <line x1="158" y1="138" x2="164" y2="144" stroke="#0d9488" strokeWidth="1.5" strokeLinecap="round" opacity="0.3" />
+      <circle cx="150" cy="130" r="12" stroke="currentColor" strokeWidth="1.5" fill="none" opacity="0.3" />
+      <line x1="158" y1="138" x2="164" y2="144" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.3" />
 
-      <circle cx="60" cy="170" r="2" fill="#0d9488" opacity="0.12" />
+      <circle cx="60" cy="170" r="2" fill="currentColor" opacity="0.12" />
       <circle cx="240" cy="50" r="2" fill="#7ea8c4" opacity="0.1" />
     </svg>
   );
@@ -348,22 +348,22 @@ export function EmptyDocsIllustration({ className }: { className?: string }) {
 
       <circle cx="150" cy="100" r="90" fill="url(#edocs-glow)" opacity="0.04" />
 
-      <path d="M95 45 L155 45 L175 65 L175 155 L95 155 Z" stroke="#1e3a5f" strokeWidth="2" fill="none" strokeLinejoin="round" opacity="0.12" strokeDasharray="6 4" />
-      <path d="M155 45 L155 65 L175 65" stroke="#1e3a5f" strokeWidth="2" fill="none" strokeLinejoin="round" opacity="0.12" strokeDasharray="6 4" />
+      <path d="M95 45 L155 45 L175 65 L175 155 L95 155 Z" stroke="currentColor" strokeWidth="2" fill="none" strokeLinejoin="round" opacity="0.12" strokeDasharray="6 4" />
+      <path d="M155 45 L155 65 L175 65" stroke="currentColor" strokeWidth="2" fill="none" strokeLinejoin="round" opacity="0.12" strokeDasharray="6 4" />
 
-      <line x1="108" y1="80" x2="162" y2="80" stroke="#1e3a5f" strokeWidth="1.5" opacity="0.06" strokeLinecap="round" />
-      <line x1="108" y1="95" x2="152" y2="95" stroke="#1e3a5f" strokeWidth="1.5" opacity="0.05" strokeLinecap="round" />
-      <line x1="108" y1="110" x2="158" y2="110" stroke="#1e3a5f" strokeWidth="1.5" opacity="0.04" strokeLinecap="round" />
-      <line x1="108" y1="125" x2="130" y2="125" stroke="#1e3a5f" strokeWidth="1.5" opacity="0.04" strokeLinecap="round" />
+      <line x1="108" y1="80" x2="162" y2="80" stroke="currentColor" strokeWidth="1.5" opacity="0.06" strokeLinecap="round" />
+      <line x1="108" y1="95" x2="152" y2="95" stroke="currentColor" strokeWidth="1.5" opacity="0.05" strokeLinecap="round" />
+      <line x1="108" y1="110" x2="158" y2="110" stroke="currentColor" strokeWidth="1.5" opacity="0.04" strokeLinecap="round" />
+      <line x1="108" y1="125" x2="130" y2="125" stroke="currentColor" strokeWidth="1.5" opacity="0.04" strokeLinecap="round" />
 
-      <circle cx="200" cy="120" r="30" stroke="#0d9488" strokeWidth="2" fill="none" opacity="0.2" />
-      <circle cx="200" cy="120" r="22" stroke="#0d9488" strokeWidth="1.5" fill="none" opacity="0.12" />
-      <line x1="222" y1="142" x2="232" y2="152" stroke="#0d9488" strokeWidth="2" strokeLinecap="round" opacity="0.2" />
-      <line x1="195" y1="115" x2="195" y2="125" stroke="#0d9488" strokeWidth="1.5" strokeLinecap="round" opacity="0.3" />
-      <line x1="190" y1="120" x2="200" y2="120" stroke="#0d9488" strokeWidth="1.5" strokeLinecap="round" opacity="0.3" />
+      <circle cx="200" cy="120" r="30" stroke="currentColor" strokeWidth="2" fill="none" opacity="0.2" />
+      <circle cx="200" cy="120" r="22" stroke="currentColor" strokeWidth="1.5" fill="none" opacity="0.12" />
+      <line x1="222" y1="142" x2="232" y2="152" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.2" />
+      <line x1="195" y1="115" x2="195" y2="125" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.3" />
+      <line x1="190" y1="120" x2="200" y2="120" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.3" />
 
       <circle cx="85" cy="170" r="2" fill="#7ea8c4" opacity="0.1" />
-      <circle cx="230" cy="60" r="2" fill="#0d9488" opacity="0.1" />
+      <circle cx="230" cy="60" r="2" fill="currentColor" opacity="0.1" />
     </svg>
   );
 }
@@ -372,38 +372,38 @@ export function LegalPatternSVG({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
       <g opacity="0.08">
-        <line x1="12" y1="25" x2="12" y2="18" stroke="#1e3a5f" strokeWidth="1.2" strokeLinecap="round" />
-        <path d="M7 25 L12 18 L17 25" stroke="#1e3a5f" strokeWidth="1.2" strokeLinejoin="round" fill="none" />
-        <line x1="7" y1="25" x2="17" y2="25" stroke="#1e3a5f" strokeWidth="1.2" strokeLinecap="round" />
+        <line x1="12" y1="25" x2="12" y2="18" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+        <path d="M7 25 L12 18 L17 25" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" fill="none" />
+        <line x1="7" y1="25" x2="17" y2="25" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
 
-        <line x1="62" y1="25" x2="62" y2="18" stroke="#1e3a5f" strokeWidth="1.2" strokeLinecap="round" />
-        <path d="M57 25 L62 18 L67 25" stroke="#1e3a5f" strokeWidth="1.2" strokeLinejoin="round" fill="none" />
-        <line x1="57" y1="25" x2="67" y2="25" stroke="#1e3a5f" strokeWidth="1.2" strokeLinecap="round" />
+        <line x1="62" y1="25" x2="62" y2="18" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+        <path d="M57 25 L62 18 L67 25" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" fill="none" />
+        <line x1="57" y1="25" x2="67" y2="25" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
 
-        <line x1="112" y1="25" x2="112" y2="18" stroke="#1e3a5f" strokeWidth="1.2" strokeLinecap="round" />
-        <path d="M107 25 L112 18 L117 25" stroke="#1e3a5f" strokeWidth="1.2" strokeLinejoin="round" fill="none" />
-        <line x1="107" y1="25" x2="117" y2="25" stroke="#1e3a5f" strokeWidth="1.2" strokeLinecap="round" />
+        <line x1="112" y1="25" x2="112" y2="18" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+        <path d="M107 25 L112 18 L117 25" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" fill="none" />
+        <line x1="107" y1="25" x2="117" y2="25" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
 
-        <line x1="162" y1="25" x2="162" y2="18" stroke="#1e3a5f" strokeWidth="1.2" strokeLinecap="round" />
-        <path d="M157 25 L162 18 L167 25" stroke="#1e3a5f" strokeWidth="1.2" strokeLinejoin="round" fill="none" />
-        <line x1="157" y1="25" x2="167" y2="25" stroke="#1e3a5f" strokeWidth="1.2" strokeLinecap="round" />
+        <line x1="162" y1="25" x2="162" y2="18" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+        <path d="M157 25 L162 18 L167 25" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round" fill="none" />
+        <line x1="157" y1="25" x2="167" y2="25" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
 
-        <rect x="28" y="55" width="12" height="16" rx="1.5" stroke="#0d9488" strokeWidth="1" fill="none" />
-        <path d="M34 55 L34 71" stroke="#0d9488" strokeWidth="1" />
-        <path d="M28 61 L40 61" stroke="#0d9488" strokeWidth="1" />
+        <rect x="28" y="55" width="12" height="16" rx="1.5" stroke="currentColor" strokeWidth="1" fill="none" />
+        <path d="M34 55 L34 71" stroke="currentColor" strokeWidth="1" />
+        <path d="M28 61 L40 61" stroke="currentColor" strokeWidth="1" />
 
-        <rect x="78" y="55" width="12" height="16" rx="1.5" stroke="#0d9488" strokeWidth="1" fill="none" />
-        <path d="M84 55 L84 71" stroke="#0d9488" strokeWidth="1" />
-        <path d="M78 61 L90 61" stroke="#0d9488" strokeWidth="1" />
+        <rect x="78" y="55" width="12" height="16" rx="1.5" stroke="currentColor" strokeWidth="1" fill="none" />
+        <path d="M84 55 L84 71" stroke="currentColor" strokeWidth="1" />
+        <path d="M78 61 L90 61" stroke="currentColor" strokeWidth="1" />
 
-        <rect x="128" y="55" width="12" height="16" rx="1.5" stroke="#0d9488" strokeWidth="1" fill="none" />
-        <path d="M134 55 L134 71" stroke="#0d9488" strokeWidth="1" />
-        <path d="M128 61 L140 61" stroke="#0d9488" strokeWidth="1" />
+        <rect x="128" y="55" width="12" height="16" rx="1.5" stroke="currentColor" strokeWidth="1" fill="none" />
+        <path d="M134 55 L134 71" stroke="currentColor" strokeWidth="1" />
+        <path d="M128 61 L140 61" stroke="currentColor" strokeWidth="1" />
 
-        <text x="44" y="50" fontSize="10" fill="#1e3a5f" fontFamily="serif" textAnchor="middle">¶</text>
-        <text x="94" y="50" fontSize="10" fill="#1e3a5f" fontFamily="serif" textAnchor="middle">¶</text>
-        <text x="144" y="50" fontSize="10" fill="#1e3a5f" fontFamily="serif" textAnchor="middle">¶</text>
-        <text x="194" y="50" fontSize="10" fill="#1e3a5f" fontFamily="serif" textAnchor="middle">¶</text>
+        <text x="44" y="50" fontSize="10" fill="currentColor" fontFamily="serif" textAnchor="middle">¶</text>
+        <text x="94" y="50" fontSize="10" fill="currentColor" fontFamily="serif" textAnchor="middle">¶</text>
+        <text x="144" y="50" fontSize="10" fill="currentColor" fontFamily="serif" textAnchor="middle">¶</text>
+        <text x="194" y="50" fontSize="10" fill="currentColor" fontFamily="serif" textAnchor="middle">¶</text>
       </g>
     </svg>
   );
