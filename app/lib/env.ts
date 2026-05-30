@@ -13,6 +13,9 @@ const envSchema = z.object({
   LEMON_SQUEEZY_API_KEY: z.string().optional(),
   LEMON_SQUEEZY_WEBHOOK_SECRET: z.string().optional(),
   STRIPE_SECRET_KEY: z.string().optional(),
+  WHATSAPP_ACCESS_TOKEN: z.string().optional(),
+  WHATSAPP_PHONE_NUMBER_ID: z.string().optional(),
+  FIRMA_ELECTRONICA_PROVIDER: z.string().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;
