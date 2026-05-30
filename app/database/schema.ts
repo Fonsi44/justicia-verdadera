@@ -195,6 +195,7 @@ export const caseEvents = pgTable(
     isCompleted: boolean("is_completed").default(false),
     notifiedAt: timestamp("notified_at"),
     createdBy: uuid("created_by").references(() => users.id),
+    googleEventId: text("google_event_id"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => [index("case_event_case_date_idx").on(table.caseId, table.date)]
