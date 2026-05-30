@@ -17,6 +17,13 @@
 | Lemon Squeezy | ✅ Verificado — Pendiente crear productos en dashboard |
 | Inngest | ✅ Verificado (pospuesto a Fase 2) |
 | Vercel | ⚠️ Pendiente de despliegue |
+| Google Calendar | ⚠️ Planificado — Fase 2bis |
+| Microsoft Graph (Outlook) | ⚠️ Planificado — Fase 2bis |
+| WhatsApp Business Cloud | ⚠️ Planificado — Fase 2bis |
+| Firma electrónica HN | ⚠️ Planificado — Fase 2bis |
+| pgvector (Neon) | ⚠️ Planificado — Fase 2A |
+| Embeddings API | ⚠️ Planificado — Fase 2A |
+| SAR (Hacienda Honduras) | ⚠️ Planificado — Fase 2bis |
 
 ---
 
@@ -601,6 +608,410 @@ El proyecto `justicia-verdadera` ya existe en Vercel (cuenta `Fonsi44`) pero **n
 
 ---
 
+## 10. Google Calendar API — Sincronización de Calendario
+
+> Sincronización bidireccional entre la agenda de Justicia Verdadera y Google Calendar del abogado. Audiencias, vistas, plazos y reuniones aparecen automáticamente en su calendario personal.
+
+### Paso a paso
+
+1. Ve a **https://console.cloud.google.com**
+2. Selecciona el mismo proyecto que creaste para Google OAuth (`justicia-verdadera`)
+3. Ve al menú lateral → **"APIs & Services"** → **"Library"**
+4. Busca **"Google Calendar API"** y haz clic en **"Enable"**
+5. Una vez habilitada, ve a **"APIs & Services"** → **"Credentials"**
+6. Haz clic en **"Create Credentials"** → **"OAuth client ID"**
+7. Configura (o usa el mismo que Google OAuth si quieres unificar):
+   - **Application type**: `Web application`
+   - **Name**: `Justicia Verdadera Calendar (dev)`
+   - **Authorized redirect URIs**: añade `http://localhost:3000/api/integrations/google-calendar/callback`
+8. Haz clic en **"Create"**
+9. Anota:
+   - **Client ID** → `GOOGLE_CALENDAR_CLIENT_ID`
+   - **Client Secret** → `GOOGLE_CALENDAR_CLIENT_SECRET`
+10. Pega en `.env.local`:
+    ```
+    GOOGLE_CALENDAR_CLIENT_ID=tu_client_id.apps.googleusercontent.com
+    GOOGLE_CALENDAR_CLIENT_SECRET=tu_client_secret
+    ```
+
+### Scopes necesarios
+
+Durante la autorización OAuth, solicita estos scopes:
+- `https://www.googleapis.com/auth/calendar.events` — Leer/crear eventos
+- `https://www.googleapis.com/auth/calendar.readonly` — Solo lectura (modo seguro)
+
+### Flujo de integración
+
+```text
+Abogado conecta cuenta Google → OAuth consent (scopes calendar)
+→ Guardar refresh_token en users.google_calendar_token
+→ Crear eventos en Google Calendar al crear evento en JV
+→ Webhook de Google notifica cambios en Calendar → reflejar en JV
+```
+
+### Variables de entorno adicionales
+
+```env
+GOOGLE_CALENDAR_CLIENT_ID=
+GOOGLE_CALENDAR_CLIENT_SECRET=
+```
+
+### Documentación
+
+- **https://developers.google.com/calendar/api/v3/reference**
+- **https://developers.google.com/calendar/api/guides/overview**
+
+---
+
+## 11. Microsoft Graph API — Outlook Calendar
+
+> Sincronización con el calendario de Outlook/Office 365. Muchos despachos hondureños usan Office 365 como suite corporativa. Se integra vía Microsoft Graph API usando la misma app registration de Entra ID o una nueva.
+
+### Opción A — Usar la misma App Registration de Entra ID
+
+1. Ve a **https://portal.azure.com** → **Microsoft Entra ID** → **App registrations**
+2. Selecciona la app `Justicia Verdadera (dev)`
+3. Ve a **"API permissions"** → **"Add a permission"**
+4. Selecciona **"Microsoft Graph"** → **"Delegated permissions"**
+5. Añade estos scopes:
+   - `Calendars.ReadWrite` — Leer y escribir eventos de calendario
+   - `offline_access` — Para obtener refresh_token
+6. Haz clic en **"Add permissions"**
+7. Haz clic en **"Grant admin consent"**
+
+### Variables de entorno
+
+Si usas la misma app registration, no necesitas credenciales adicionales. Los tokens de Entra ID ya incluyen los scopes de calendario.
+
+Si creas una app separada (recomendado para producción):
+
+```env
+MS_GRAPH_CLIENT_ID=tu_client_id
+MS_GRAPH_CLIENT_SECRET=tu_client_secret
+MS_GRAPH_TENANT_ID=tu_tenant_id
+```
+
+### Endpoints relevantes
+
+- Listar eventos: `GET /me/calendar/events`
+- Crear evento: `POST /me/calendar/events`
+- Webhook suscripción: `POST /subscriptions`
+
+### Documentación
+
+- **https://learn.microsoft.com/en-us/graph/api/resources/event**
+- **https://learn.microsoft.com/en-us/graph/outlook-calendar-concept-overview**
+
+---
+
+## 12. WhatsApp Business Cloud API — Notificaciones
+
+> Meta (Facebook) ofrece la API de WhatsApp Business Cloud para enviar mensajes a clientes. Permite enviar recordatorios de plazos, notificaciones de facturas y actualizaciones de casos vía WhatsApp.
+
+### Requisitos previos
+
+- Un número de teléfono **no registrado** en WhatsApp personal o Business app.
+- Una cuenta de **Meta Business** (Facebook Business Manager).
+- Verificación de negocio (puede tardar unos días).
+
+### Paso a paso
+
+1. Ve a **https://business.facebook.com**
+2. Crea o selecciona tu cuenta de **Business Manager**
+3. Ve a **"Configuración de la empresa"** → **"WhatsApp"** → **"Cuentas de WhatsApp"**
+4. Haz clic en **"Agregar"** → **"Crear cuenta de WhatsApp Business"**
+5. Sigue el asistente:
+   - **Nombre del negocio**: `Justicia Verdadera`
+   - **Categoría**: `Legal Services`
+   - **Número de teléfono**: añade un número hondureño (+504 XXXXXXXX)
+   - **Verificación**: recibirás un SMS o llamada con código
+6. Una vez creada, ve a **"Configuración"** → **"WhatsApp"** → **"API setup"**
+7. Copia:
+   - **Phone Number ID** → `WHATSAPP_PHONE_NUMBER_ID`
+   - **WhatsApp Business Account ID** → `WHATSAPP_BUSINESS_ACCOUNT_ID`
+8. Ve a **"System Users"** (en Business Manager) → **"Add"**
+   - Asigna rol **"Admin"** a la cuenta de WhatsApp
+   - Genera un **token de acceso permanente**
+   - Copia el token → `WHATSAPP_ACCESS_TOKEN`
+9. Pega en `.env.local`:
+   ```
+   WHATSAPP_PHONE_NUMBER_ID=
+   WHATSAPP_BUSINESS_ACCOUNT_ID=
+   WHATSAPP_ACCESS_TOKEN=
+   ```
+
+### Crear plantillas de mensaje
+
+WhatsApp requiere que los mensajes proactivos usen **plantillas pre-aprobadas**. Ejemplos:
+
+| Nombre plantilla | Contenido | Variables |
+|---|---|---|
+| `recordatorio_audiencia` | "Recordatorio: Mañana {{1}} a las {{2}} tiene audiencia en {{3}}. Caso: {{4}}" | Fecha, hora, juzgado, número de caso |
+| `factura_disponible` | "Su factura {{1}} por L. {{2}} está disponible. Fecha límite: {{3}}" | Número, monto, fecha vencimiento |
+| `documento_nuevo` | "Se ha añadido el documento '{{1}}' a su caso {{2}}. Revíselo en el portal." | Nombre doc, número caso |
+
+1. Ve a **"WhatsApp Manager"** → **"Plantillas de mensajes"**
+2. Crea cada plantilla con las variables necesarias
+3. Espera aprobación de Meta (24-48h)
+
+### Enviar mensaje vía API
+
+```bash
+curl -X POST "https://graph.facebook.com/v22.0/$WHATSAPP_PHONE_NUMBER_ID/messages" \
+  -H "Authorization: Bearer $WHATSAPP_ACCESS_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messaging_product": "whatsapp",
+    "to": "504XXXXXXXX",
+    "type": "template",
+    "template": {
+      "name": "recordatorio_audiencia",
+      "language": { "code": "es" },
+      "components": [{
+        "type": "body",
+        "parameters": [
+          { "type": "text", "text": "15 de junio" },
+          { "type": "text", "text": "9:00 AM" },
+          { "type": "text", "text": "Juzgado de Letras Civil" },
+          { "type": "text", "text": "CV-2026-0042" }
+        ]
+      }]
+    }
+  }'
+```
+
+### Costes
+
+- WhatsApp Business Cloud: gratuito para los primeros **1,000 mensajes/mes**.
+- Mensajes adicionales: ~$0.005-0.08/mensaje (varía por país).
+- Honduras: tarifa estándar (~$0.05/mensaje).
+
+### Documentación
+
+- **https://developers.facebook.com/docs/whatsapp/cloud-api**
+- **https://developers.facebook.com/docs/whatsapp/message-templates/guidelines**
+
+---
+
+## 13. Firma Electrónica Hondureña
+
+> Honduras reconoce la firma electrónica como legalmente vinculante (Ley de Firmas Electrónicas, Decreto 149-2013). Los proveedores autorizados emiten certificados digitales que permiten firmar documentos PDF con validez jurídica.
+
+### Proveedores a evaluar
+
+| Proveedor | Sitio | Certificación | Estado |
+|---|---|---|---|
+| **Firma Virtual S.A.** | `https://www.firmavirtual.hn` | Autoridad Certificadora registrada | [PENDIENTE-EVALUAR] |
+| **ACERTA** | `https://www.acertahn.com` | Autoridad de Certificación | [PENDIENTE-EVALUAR] |
+| **GSE** | `https://www.gse.hn` | Gestión de Servicios Electrónicos | [PENDIENTE-EVALUAR] |
+
+### Proceso de integración planificado
+
+```text
+1. Seleccionar proveedor con API REST o SDK
+2. Obtener credenciales de integración (API key, certificado digital)
+3. Flujo: generar PDF → hash del documento → firma con API del proveedor
+   → certificado incrustado en PDF → documento firmado
+```
+
+### Variables de entorno esperadas
+
+```env
+FIRMA_ELECTRONICA_PROVIDER=firma_virtual|acerta|gse
+FIRMA_ELECTRONICA_API_KEY=
+FIRMA_ELECTRONICA_API_URL=
+FIRMA_ELECTRONICA_CERT_PATH=
+```
+
+### Requisitos legales
+
+- Certificado digital emitido por Autoridad Certificadora acreditada.
+- Firma debe cumplir estándar PKCS#7 o PAdES (PDF Advanced Electronic Signatures).
+- El documento firmado debe incluir timestamp y metadata del certificado.
+- Conservación mínima de 5 años (Código Tributario Art. 112).
+
+### Nota
+
+La integración con firma electrónica es **Fase 2bis**. Mientras tanto, los documentos pueden descargarse en PDF y firmarse manualmente o con herramientas externas.
+
+---
+
+## 14. pgvector — Vector Store en Neon DB
+
+> `pgvector` es una extensión de PostgreSQL que permite almacenar y buscar vectores de embeddings. Esencial para el sistema RAG de IA jurídica (búsqueda semántica de jurisprudencia).
+
+### Activar la extensión
+
+Neon DB soporta `pgvector` nativamente. Solo necesitas ejecutar:
+
+```sql
+CREATE EXTENSION IF NOT EXISTS vector;
+```
+
+O desde Drizzle:
+
+```bash
+cd app
+npx drizzle-kit push
+```
+
+La extensión ya está incluida en el plan de Neon (Launch+). **No requiere configuración adicional ni API keys.**
+
+### Crear tabla de documentos legales
+
+```sql
+CREATE TABLE legal_documents (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  source TEXT NOT NULL,          -- Fuente: 'codigo_civil', 'sentencia_csj', etc.
+  title TEXT NOT NULL,           -- Título del documento legal
+  content TEXT NOT NULL,         -- Texto completo
+  chunk_index INTEGER NOT NULL,  -- Índice del chunk dentro del documento
+  embedding vector(1536),        -- Vector de 1536 dimensiones (text-embedding-3-small)
+  metadata JSONB,                -- Metadatos: fecha, sala, ponente, etc.
+  created_at TIMESTAMP DEFAULT now()
+);
+
+-- Índice para búsqueda de similitud
+CREATE INDEX ON legal_documents USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
+```
+
+### Búsqueda semántica
+
+```sql
+SELECT title, content, metadata,
+       1 - (embedding <=> query_embedding) AS similarity
+FROM legal_documents
+ORDER BY embedding <=> query_embedding
+LIMIT 5;
+```
+
+> **Nota**: El operador `<=>` es distancia coseno. `1 - distancia` da la similitud.
+
+### Documentación
+
+- **https://neon.tech/docs/extensions/pgvector**
+- **https://github.com/pgvector/pgvector**
+
+---
+
+## 15. Embeddings API — text-embedding-3-small
+
+> Para generar vectores de embeddings desde el texto legal. Usamos el modelo `text-embedding-3-small` de OpenAI (1536 dimensiones, ~$0.02/1M tokens). Alternativa: modelo local con sentence-transformers.
+
+### Opción A — OpenAI (recomendado para empezar)
+
+1. Ve a **https://platform.openai.com**
+2. Regístrate o inicia sesión
+3. Ve a **https://platform.openai.com/api-keys**
+4. Haz clic en **"Create new secret key"**
+5. Nombre: `justicia-verdadera-embeddings`
+6. Pega en `.env.local`:
+   ```
+   OPENAI_API_KEY=sk-proj-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+   ```
+
+### Coste estimado
+
+- text-embedding-3-small: **$0.02 / 1M tokens**
+- Un documento legal típico tiene ~2,000 tokens → $0.00004 por documento
+- 1,000 documentos legales → ~$0.04
+- Muy económico para el corpus legal hondureño completo
+
+### Opción B — Modelo local (sin coste recurrente)
+
+Si prefieres no depender de OpenAI:
+
+```bash
+npm install @xenova/transformers
+```
+
+```typescript
+import { pipeline } from "@xenova/transformers";
+
+const embedder = await pipeline(
+  "feature-extraction",
+  "Xenova/all-MiniLM-L6-v2" // 384 dimensiones, gratuito
+);
+
+const embedding = await embedder(textoLegal, {
+  pooling: "mean",
+  normalize: true,
+});
+```
+
+**Pros**: gratuito, sin API key, sin latencia de red.
+**Contras**: 384 dimensiones (menos precisión que 1536), carga el modelo en memoria (~80MB).
+
+### Variables de entorno
+
+```env
+# Opción A (OpenAI):
+OPENAI_API_KEY=
+
+# Opción B (local, no requiere API key):
+EMBEDDINGS_PROVIDER=local
+```
+
+### Documentación
+
+- OpenAI: **https://platform.openai.com/docs/guides/embeddings**
+- Xenova: **https://huggingface.co/Xenova/all-MiniLM-L6-v2**
+
+---
+
+## 16. SAR — Servicio de Administración de Rentas (Honduras)
+
+> El SAR es la autoridad fiscal hondureña. La facturación electrónica está en proceso de implementación obligatoria. Justicia Verdadera necesita generar facturas compatibles con el formato SAR.
+
+### Estado actual
+
+| Concepto | Estado |
+|---|---|
+| Factura electrónica obligatoria | En fase de implementación progresiva en Honduras |
+| Formato estándar | XML basado en estándar UBL 2.1 |
+| API pública SAR | **No disponible aún** (mayo 2026) |
+| Método actual | Portal web SAR para carga manual de facturas |
+
+### Estrategia (Fase 2bis)
+
+**Fase beta — Exportación CSV:**
+- Generar archivo CSV compatible con el formato de carga del portal SAR.
+- El despacho sube manualmente el CSV al portal `www.sar.gob.hn`.
+- Formato columnas: RTN emisor, CAI, número factura, fecha, RTN receptor, subtotal, ISV, total.
+
+**Fase 2 — Integración API (cuando esté disponible):**
+- Monitorear `www.sar.gob.hn` para el endpoint de API de facturación electrónica.
+- Implementar envío automático de facturas vía API REST.
+- Recibir respuesta de validación SAR (aceptada/rechazada).
+
+### Variables de entorno esperadas
+
+```env
+SAR_API_URL=
+SAR_API_KEY=
+SAR_CERT_PATH=
+SAR_CAI_CURRENT=
+SAR_CAI_RANGE_FROM=
+SAR_CAI_RANGE_TO=
+SAR_CAI_EXPIRATION=
+```
+
+### Obtención del CAI
+
+El CAI (Código de Autorización de Impresión) se obtiene directamente del SAR:
+
+1. El despacho solicita el CAI en la oficina del SAR correspondiente a su domicilio fiscal.
+2. El SAR asigna un rango de CAI (ej: `CAI-0801-2026-00001` a `CAI-0801-2026-01000`).
+3. El CAI tiene fecha de vencimiento (generalmente 1 año).
+4. El despacho debe ingresar el CAI manualmente en la configuración de Justicia Verdadera.
+
+### Documentación
+
+- **https://www.sar.gob.hn** — portal oficial
+- **https://www.sar.gob.hn/facturacion-electronica** — información de facturación electrónica
+
+---
+
 ## Resumen Rápido — Checklist de Registro
 
 Marca cada servicio conforme lo configures:
@@ -617,6 +1028,14 @@ Marca cada servicio conforme lo configures:
 [ ] 9. Lemon Squeezy    → https://lemonsqueezy.com         → LEMON_SQUEEZY_API_KEY
 [ ] 10. Inngest         → https://app.inngest.com          → INNGEST_EVENT_KEY
 [ ] 11. Vercel (prod)   → https://vercel.com               → Reemplazar variables con valores de producción
+
+[ ] 12. Google Calendar → https://console.cloud.google.com  → GOOGLE_CALENDAR_CLIENT_ID + SECRET
+[ ] 13. Microsoft Graph → https://portal.azure.com         → MS_GRAPH_CLIENT_ID + SECRET
+[ ] 14. WhatsApp Cloud  → https://business.facebook.com    → WHATSAPP_ACCESS_TOKEN + IDs
+[ ] 15. Firma Electrónica → https://firmavirtual.hn       → FIRMA_ELECTRONICA_API_KEY (Fase 2bis)
+[ ] 16. pgvector (Neon) → Sin registro (extensión nativa)  → N/A
+[ ] 17. OpenAI (embeddings) → https://platform.openai.com  → OPENAI_API_KEY (Fase 2A)
+[ ] 18. SAR (Hacienda)  → https://www.sar.gob.hn          → SAR_CAI_CURRENT (Fase 2bis)
 ```
 
 ## Orden recomendado de configuración
@@ -634,3 +1053,10 @@ Configura los servicios en este orden para ir desbloqueando funcionalidad progre
 9. **Lemon Squeezy** — pasarela de pagos MoR (apta para Honduras)
 10. **Inngest** — workflows automatizados (pospuesto a Fase 2)
 11. **Vercel** — deploy a producción
+12. **Google Calendar** — sincronización bidireccional de agenda (Fase 2bis)
+13. **Microsoft Graph** — sincronización con calendario Outlook (Fase 2bis)
+14. **WhatsApp Cloud** — notificaciones y recordatorios (Fase 2bis)
+15. **Firma Electrónica** — firma digital de documentos legales (Fase 2bis)
+16. **pgvector** — extensión PostgreSQL para búsqueda semántica (Fase 2A)
+17. **OpenAI Embeddings** — generación de vectores para texto legal (Fase 2A)
+18. **SAR (Hacienda)** — facturación electrónica y declaraciones (Fase 2bis)
