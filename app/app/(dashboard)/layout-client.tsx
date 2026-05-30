@@ -13,12 +13,14 @@ import {
   LogOut,
   Menu,
   X,
+  Sparkles,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useState } from "react";
 import type { Session } from "next-auth";
 import NotificationsDropdown from "@/components/notifications-dropdown";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { HelpWidget } from "@/components/help-widget";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -80,7 +82,7 @@ function SidebarContent({
           </Link>
         ))}
       </nav>
-      <div className="border-t border-sidebar-border p-3">
+      <div className="border-t border-sidebar-border p-3 space-y-1">
         <Link
           href="/config"
           onClick={onClose}
@@ -88,6 +90,14 @@ function SidebarContent({
         >
           <Settings className="h-4 w-4 text-muted-foreground group-hover:text-sidebar-foreground transition-colors duration-200" />
           Configuración
+        </Link>
+        <Link
+          href="/config/ai-usage"
+          onClick={onClose}
+          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-all duration-200 group"
+        >
+          <Sparkles className="h-4 w-4 text-muted-foreground group-hover:text-sidebar-foreground transition-colors duration-200" />
+          Uso de IA
         </Link>
       </div>
     </>
@@ -227,6 +237,9 @@ export default function DashboardLayoutClient({
 
       {/* Mobile bottom navigation */}
       <MobileBottomNav />
+
+      {/* Floating help button */}
+      <HelpWidget />
     </div>
   );
 }
