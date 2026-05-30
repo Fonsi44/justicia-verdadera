@@ -27,7 +27,11 @@ export const firms = pgTable(
     address: text("address"),
     taxId: text("tax_id"),
     isvRate: numeric("isv_rate").default("15"),
-    settings: jsonb("settings").$type<{ theme?: string; language?: string }>(),
+    settings: jsonb("settings").$type<{
+      theme?: string;
+      language?: string;
+      onboarding?: { stepsCompleted: string[]; currentStep: string };
+    }>(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
@@ -227,6 +231,7 @@ export const documents = pgTable(
     processingStatus: text("processing_status", {
       enum: ["pending", "uploaded", "ocr_processing", "ocr_complete", "ocr_skipped", "manual_review", "error", "retry_pending"],
     }).default("pending").notNull(),
+    sharedWithClient: boolean("shared_with_client").default(false),
     deletedAt: timestamp("deleted_at"),
     createdBy: uuid("created_by").references(() => users.id),
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -504,6 +509,26 @@ export const verificationTokens = pgTable(
     expires: timestamp("expires").notNull(),
   },
   (table) => [uniqueIndex("vt_identifier_token").on(table.identifier, table.token)]
+);
+
+// ─── PORTAL TOKENS ───────────────────────────
+export const portalTokens = pgTable(
+  "portal_tokens",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    contactId: uuid("contact_id")
+      .references(() => contacts.id, { onDelete: "cascade" })
+      .notNull(),
+    firmId: uuid("firm_id")
+      .references(() => firms.id)
+      .notNull(),
+    token: text("token").unique().notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+    lastLoginAt: timestamp("last_login_at"),
+    isActive: boolean("is_active").default(true),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [index("portal_token_idx").on(table.token)]
 );
 
 // ─── EMBEDDINGS & VECTOR (pgvector) ─────
