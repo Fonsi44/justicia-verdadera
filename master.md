@@ -1429,6 +1429,13 @@ Todos usan CSS variables, `cn()`, shadcn/ui, lucide-react, TypeScript estricto, 
 | Archivo creado | `app/(dashboard)/config/page.tsx` |
 | Contenido | 3 secciones: Información del Despacho (mock), Suscripción, Preferencias |
 
+### 2026-05-30 — CSV export + mejoras dashboard
+
+| Campo | Resultado |
+|---|---|
+| Archivos creados | `lib/export-csv.ts` (utilidad de exportación) |
+| Mejoras | Botón "Exportar CSV" en documentos/page.tsx (descarga lista visible como CSV con BOM UTF-8) |
+
 ---
 
 ## 23. Estado final
