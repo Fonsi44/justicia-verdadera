@@ -4,8 +4,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { writeAuditLog } from "@/lib/audit";
 import { AppError } from "@/lib/errors";
 import { listContacts, createContact } from "@/lib/services/contacts.service";
-
-const VALID_TYPES = ["persona_natural", "persona_juridica", "institucion"];
+import { contactCreateSchema } from "@/lib/validations/index";
 
 export async function GET(request: NextRequest) {
   try {
@@ -37,20 +36,23 @@ export async function POST(request: NextRequest) {
     if (rateCheck instanceof NextResponse) return rateCheck;
 
     const body = await request.json();
-    const { type } = body;
-
-    if (!type || !VALID_TYPES.includes(type)) {
-      return NextResponse.json({ error: "Tipo de contacto inválido" }, { status: 400 });
+    const parsed = contactCreateSchema.safeParse(body);
+    if (!parsed.success) {
+      const fields: Record<string, string> = {};
+      for (const issue of parsed.error.issues) {
+        fields[issue.path.join(".")] = issue.message;
+      }
+      return NextResponse.json({ error: "Datos inválidos", code: "VALIDATION_ERROR", fields }, { status: 400 });
     }
 
-    const contact = await createContact(firmId, body);
+    const contact = await createContact(firmId, parsed.data);
 
     await writeAuditLog({
       firmId,
       action: "create",
       entityType: "contact",
       entityId: contact.id,
-      changes: { type, firstName: body.firstName ?? null, lastName: body.lastName ?? null, email: body.email ?? null },
+      changes: { type: parsed.data.type, firstName: parsed.data.firstName ?? null, lastName: parsed.data.lastName ?? null, email: parsed.data.email ?? null },
     });
 
     return NextResponse.json({ data: contact }, { status: 201 });

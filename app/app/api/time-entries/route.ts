@@ -5,6 +5,7 @@ import { getSession, getFirmId, handleUnauthorized } from "@/lib/auth/require-au
 import { eq, and, desc, count, or, gte, lte, isNull } from "drizzle-orm";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { writeAuditLog } from "@/lib/audit";
+import { timeEntryCreateSchema } from "@/lib/validations/index";
 
 export async function GET(req: NextRequest) {
   try {
@@ -67,14 +68,16 @@ export async function POST(req: NextRequest) {
     if (rateCheck instanceof NextResponse) return rateCheck;
 
     const body = await req.json();
-    const { caseId, description, startTime, endTime, durationMinutes, hourlyRate, isBillable } = body;
-
-    if (!caseId || !description || !startTime) {
-      return NextResponse.json(
-        { error: "caseId, description y startTime son requeridos" },
-        { status: 400 }
-      );
+    const parsed = timeEntryCreateSchema.safeParse(body);
+    if (!parsed.success) {
+      const fields: Record<string, string> = {};
+      for (const issue of parsed.error.issues) {
+        fields[issue.path.join(".")] = issue.message;
+      }
+      return NextResponse.json({ error: "Datos inválidos", code: "VALIDATION_ERROR", fields }, { status: 400 });
     }
+
+    const { caseId, description, startTime, endTime, durationMinutes, hourlyRate, isBillable } = parsed.data;
 
     const [caseExists] = await db
       .select({ id: cases.id, firmId: cases.firmId })

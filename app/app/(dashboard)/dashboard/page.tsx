@@ -21,6 +21,7 @@ import StatCard from "@/components/stat-card";
 import SectionCard from "@/components/section-card";
 import EmptyState from "@/components/empty-state";
 import PageHeader from "@/components/page-header";
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -304,6 +305,61 @@ export default function DashboardPage() {
               })}
             </div>
           )}
+        </SectionCard>
+      </div>
+
+      {/* Charts */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <SectionCard title="Casos por materia">
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={[
+                    { name: "Civil", value: 8 }, { name: "Penal", value: 5 },
+                    { name: "Laboral", value: 4 }, { name: "Familia", value: 3 },
+                    { name: "Mercantil", value: 2 }, { name: "Otro", value: 2 },
+                  ]}
+                  cx="50%" cy="50%" innerRadius={60} outerRadius={90}
+                  paddingAngle={3} dataKey="value"
+                >
+                  {["#2563eb", "#dc2626", "#d97706", "#059669", "#7c3aed", "#6b7280"].map((c, i) => (
+                    <Cell key={i} fill={c} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="flex flex-wrap justify-center gap-3 mt-2">
+            {["Civil", "Penal", "Laboral", "Familia", "Mercantil", "Otro"].map((m, i) => (
+              <div key={m} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: ["#2563eb", "#dc2626", "#d97706", "#059669", "#7c3aed", "#6b7280"][i] }} />
+                {m}
+              </div>
+            ))}
+          </div>
+        </SectionCard>
+
+        <SectionCard title="Actividad mensual">
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={[
+                { name: "Ene", casos: 4, docs: 8 },
+                { name: "Feb", casos: 3, docs: 6 },
+                { name: "Mar", casos: 6, docs: 12 },
+                { name: "Abr", casos: 5, docs: 9 },
+                { name: "May", casos: 7, docs: 14 },
+              ]}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
+                <YAxis tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
+                <Tooltip contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
+                <Bar dataKey="casos" fill="#2563eb" radius={[4, 4, 0, 0]} name="Casos" />
+                <Bar dataKey="docs" fill="#7ea8c4" radius={[4, 4, 0, 0]} name="Documentos" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </SectionCard>
       </div>
 

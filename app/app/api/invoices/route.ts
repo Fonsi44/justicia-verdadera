@@ -4,6 +4,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { writeAuditLog } from "@/lib/audit";
 import { AppError } from "@/lib/errors";
 import { listInvoices, createInvoice } from "@/lib/services/invoices.service";
+import { invoiceCreateSchema } from "@/lib/validations/index";
 
 export async function GET(req: NextRequest) {
   try {
@@ -36,23 +37,23 @@ export async function POST(req: NextRequest) {
     if (rateCheck instanceof NextResponse) return rateCheck;
 
     const body = await req.json();
-    const { clientId, number, issueDate, dueDate } = body;
-
-    if (!clientId || !number || !issueDate || !dueDate) {
-      return NextResponse.json(
-        { error: "clientId, number, issueDate y dueDate son requeridos" },
-        { status: 400 }
-      );
+    const parsed = invoiceCreateSchema.safeParse(body);
+    if (!parsed.success) {
+      const fields: Record<string, string> = {};
+      for (const issue of parsed.error.issues) {
+        fields[issue.path.join(".")] = issue.message;
+      }
+      return NextResponse.json({ error: "Datos inválidos", code: "VALIDATION_ERROR", fields }, { status: 400 });
     }
 
-    const { inv, subtotal, tax, total } = await createInvoice(firmId, body);
+    const { inv, subtotal, tax, total } = await createInvoice(firmId, parsed.data);
 
     await writeAuditLog({
       firmId,
       action: "create",
       entityType: "invoice",
       entityId: inv.id,
-      changes: { clientId, number, subtotal, tax, total },
+      changes: { clientId: parsed.data.clientId, number: parsed.data.number, subtotal, tax, total },
     });
 
     return NextResponse.json({ data: inv }, { status: 201 });

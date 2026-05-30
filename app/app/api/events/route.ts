@@ -4,6 +4,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { writeAuditLog } from "@/lib/audit";
 import { AppError } from "@/lib/errors";
 import { listEvents, createEvent } from "@/lib/services/events.service";
+import { eventCreateSchema } from "@/lib/validations/index";
 
 export async function GET(req: NextRequest) {
   try {
@@ -38,23 +39,23 @@ export async function POST(req: NextRequest) {
     if (rateCheck instanceof NextResponse) return rateCheck;
 
     const body = await req.json();
-    const { caseId, type, title, date } = body;
-
-    if (!caseId || !type || !title || !date) {
-      return NextResponse.json(
-        { error: "caseId, type, title y date son requeridos" },
-        { status: 400 }
-      );
+    const parsed = eventCreateSchema.safeParse(body);
+    if (!parsed.success) {
+      const fields: Record<string, string> = {};
+      for (const issue of parsed.error.issues) {
+        fields[issue.path.join(".")] = issue.message;
+      }
+      return NextResponse.json({ error: "Datos inválidos", code: "VALIDATION_ERROR", fields }, { status: 400 });
     }
 
-    const event = await createEvent(firmId, body);
+    const event = await createEvent(firmId, parsed.data);
 
     await writeAuditLog({
       firmId,
       action: "create",
       entityType: "event",
       entityId: event.id,
-      changes: { caseId, type, title, date },
+      changes: { caseId: parsed.data.caseId, type: parsed.data.type, title: parsed.data.title, date: parsed.data.date },
     });
 
     return NextResponse.json({ data: event }, { status: 201 });
