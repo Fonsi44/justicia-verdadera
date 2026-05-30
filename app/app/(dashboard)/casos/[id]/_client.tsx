@@ -328,7 +328,7 @@ export function CaseDetailClient() {
           { label: displayCase.number },
         ]}
         actions={
-          <Link href={`/casos/${id}/editar`}>
+          <Link href={`/casos/${id}`}>
             <Button variant="outline" size="sm">
               <Edit3 className="h-4 w-4" />
               Editar

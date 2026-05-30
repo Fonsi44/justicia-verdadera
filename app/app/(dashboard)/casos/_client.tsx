@@ -188,7 +188,7 @@ export function CasesClient() {
                 {cases.map((caso, i) => (
                   <tr
                     key={caso.id}
-                    className="transition-colors hover:bg-muted/50 animate-fade-in-up cursor-pointer"
+                    className="group transition-colors hover:bg-muted/50 animate-fade-in-up cursor-pointer"
                     style={{ animationDelay: `${i * 0.06}s` }}
                     tabIndex={0}
                     role="link"

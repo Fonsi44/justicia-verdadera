@@ -98,7 +98,7 @@ export default async function ContactDetailPage({
           { label: name },
         ]}
         actions={
-          <Link href={`/clientes/${id}/editar`}>
+          <Link href={`/clientes/${id}`}>
             <Button variant="outline" size="sm">
               <Edit className="h-4 w-4" />
               Editar

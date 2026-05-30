@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   Receipt,
   Plus,
@@ -13,7 +14,6 @@ import StatCard from "@/components/stat-card";
 import LoadingSkeleton from "@/components/loading-skeleton";
 import EmptyState from "@/components/empty-state";
 import StatusBadge from "@/components/status-badge";
-import { Button } from "@/components/ui/button";
 
 interface Invoice {
   id: string;
@@ -77,10 +77,13 @@ export default function FacturacionPage() {
         title="Facturaci&oacute;n"
         description="Gestiona facturas, pagos y cuentas por cobrar"
         actions={
-          <Button>
+          <Link
+            href="/facturacion/nueva"
+            className="inline-flex h-8 items-center justify-center gap-1.5 rounded-lg bg-primary px-2.5 text-sm font-medium text-primary-foreground transition-all hover:bg-primary/80"
+          >
             <Plus className="h-4 w-4" />
             Nueva factura
-          </Button>
+          </Link>
         }
       />
 
