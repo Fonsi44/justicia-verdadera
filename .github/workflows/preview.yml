@@ -24,5 +24,5 @@ jobs:
           cache-dependency-path: app/package-lock.json
       - run: npm install
       - run: npx vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
-      - run: npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      - run: next build
       - run: npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
