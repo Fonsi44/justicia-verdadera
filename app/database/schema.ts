@@ -11,6 +11,7 @@ import {
   jsonb,
   index,
   uniqueIndex,
+  customType,
 } from "drizzle-orm/pg-core";
 
 // ─── FIRMS ─────────────────────────────────────
@@ -487,4 +488,52 @@ export const verificationTokens = pgTable(
     expires: timestamp("expires").notNull(),
   },
   (table) => [uniqueIndex("vt_identifier_token").on(table.identifier, table.token)]
+);
+
+// ─── EMBEDDINGS & VECTOR (pgvector) ─────
+// Columna vector personalizada para pgvector (1536 dims)
+const vector = customType<{
+  data: number[];
+  config: { dimensions?: number };
+  configRequired: false;
+  driverData: string;
+}>({
+  dataType(config) {
+    const dims = config?.dimensions ?? 1536;
+    return `vector(${dims})`;
+  },
+  fromDriver(value: string) {
+    if (!value) return [];
+    return value
+      .replace(/[\[\]]/g, "")
+      .split(",")
+      .map(Number);
+  },
+  toDriver(value: number[]) {
+    return `[${value.join(",")}]`;
+  },
+});
+
+export const legalDocuments = pgTable(
+  "legal_documents",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    source: text("source").notNull(),
+    title: text("title").notNull(),
+    content: text("content").notNull(),
+    chunkIndex: integer("chunk_index").default(0).notNull(),
+    embedding: vector("embedding", { dimensions: 1536 }),
+    metadata: jsonb("metadata").$type<{
+      fecha?: string;
+      sala?: string;
+      ponente?: string;
+      fuenteUrl?: string;
+    }>(),
+    verifiedBy: uuid("verified_by").references(() => users.id),
+    verifiedAt: timestamp("verified_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("legal_docs_source_idx").on(table.source),
+  ]
 );

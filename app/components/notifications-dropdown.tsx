@@ -1,190 +1,124 @@
-"use client"
+"use client";
 
-import { useEffect, useState, useRef } from "react"
-import { Bell, Clock, Calendar, Receipt, FileText, MessageSquare } from "lucide-react"
-import { formatDistanceToNow } from "date-fns"
-import { es } from "date-fns/locale"
-import { cn } from "@/lib/utils"
-import { Skeleton } from "@/components/ui/skeleton"
+import { useEffect, useState } from "react";
+import { Bell } from "lucide-react";
+import Link from "next/link";
+import { formatDate } from "@/lib/utils";
 
 interface Notification {
-  id: string
-  type: string
-  title: string
-  body: string | null
-  isRead: boolean
-  caseId: string | null
-  createdAt: string
-}
-
-const typeIcons: Record<string, typeof Bell> = {
-  plazo: Clock,
-  vista: Calendar,
-  audiencia: Calendar,
-  factura: Receipt,
-  documento: FileText,
-  sistema: Bell,
-  mensaje: MessageSquare,
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  isRead: boolean;
+  caseId: string | null;
+  createdAt: string;
 }
 
 export default function NotificationsDropdown() {
-  const [notifications, setNotifications] = useState<Notification[]>([])
-  const [loading, setLoading] = useState(true)
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [open, setOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
+    let cancelled = false;
     async function fetchNotifications() {
       try {
-        const res = await fetch("/api/notifications?unreadOnly=false&limit=5")
-        if (!res.ok) throw new Error("Failed to fetch")
-        const data = await res.json()
-        setNotifications(Array.isArray(data) ? data : data.notifications ?? [])
+        const res = await fetch("/api/notifications?limit=5&unreadOnly=true");
+        if (!res.ok) return;
+        const json = await res.json();
+        if (cancelled) return;
+        setNotifications(json.data ?? []);
+        setUnreadCount(json.unreadCount ?? json.data?.filter((n: Notification) => !n.isRead).length ?? 0);
       } catch {
-        setNotifications([])
-      } finally {
-        setLoading(false)
+        // silently fail
       }
     }
-    fetchNotifications()
-  }, [])
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
-        setOpen(false)
-      }
-    }
-    if (open) {
-      document.addEventListener("mousedown", handleClickOutside)
-    }
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [open])
-
-  const unreadCount = notifications.filter((n) => !n.isRead).length
-
-  function formatRelative(dateStr: string) {
-    try {
-      return formatDistanceToNow(new Date(dateStr), { addSuffix: true, locale: es })
-    } catch {
-      return ""
-    }
-  }
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 60000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
 
   async function markAsRead(id: string) {
+    await fetch(`/api/notifications/${id}`, { method: "PATCH" });
     setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)),
-    )
-    try {
-      await fetch(`/api/notifications/${id}`, { method: "PATCH" })
-    } catch {
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, isRead: false } : n)),
-      )
-    }
+      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
+    );
+    setUnreadCount((prev) => Math.max(0, prev - 1));
   }
 
   return (
-    <div ref={ref} className="relative">
+    <div className="relative">
       <button
-        aria-label={`Notificaciones${unreadCount > 0 ? `, ${unreadCount} sin leer` : ""}`}
-        onClick={() => setOpen((v) => !v)}
-        className="relative text-muted-foreground hover:text-foreground transition-colors"
+        onClick={() => setOpen(!open)}
+        className="relative text-muted-foreground hover:text-foreground transition-colors p-1"
+        aria-label={`Notificaciones (${unreadCount} sin leer)`}
       >
         <Bell className="h-4 w-4" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-none text-white">
-            {unreadCount}
+          <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+            {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
 
       {open && (
-        <div
-          className={cn(
-            "absolute right-0 top-full mt-2",
-            "w-80 max-h-96 overflow-y-auto rounded-xl border bg-card shadow-lg ring-1 ring-foreground/10",
-            "animate-fade-in-up origin-top-right",
-          )}
-        >
-          <div className="sticky top-0 z-10 border-b bg-card px-4 py-3">
-            <h3 className="text-sm font-semibold text-foreground">Notificaciones</h3>
-          </div>
-
-          {loading ? (
-            <div className="space-y-3 p-4">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="flex gap-3">
-                  <Skeleton className="size-8 shrink-0 rounded-full" />
-                  <div className="flex flex-1 flex-col gap-1.5">
-                    <Skeleton className="h-3.5 w-36" />
-                    <Skeleton className="h-3 w-48" />
-                  </div>
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 mt-2 w-80 rounded-lg border bg-card shadow-lg z-20">
+            <div className="p-3 border-b">
+              <h3 className="text-sm font-semibold text-foreground">Notificaciones</h3>
+            </div>
+            <div className="max-h-80 overflow-y-auto">
+              {notifications.length === 0 ? (
+                <div className="p-6 text-center text-sm text-muted-foreground">
+                  <Bell className="h-8 w-8 mx-auto mb-2 opacity-30" />
+                  No tienes notificaciones
                 </div>
-              ))}
+              ) : (
+                notifications.map((n) => (
+                  <div
+                    key={n.id}
+                    onClick={() => markAsRead(n.id)}
+                    className={`flex items-start gap-3 px-3 py-2.5 border-b last:border-0 cursor-pointer transition-colors hover:bg-accent/50 ${
+                      !n.isRead ? "bg-primary/5" : ""
+                    }`}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-medium text-foreground truncate">
+                        {n.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
+                        {n.body}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground mt-1">
+                        {formatDate(n.createdAt)}
+                      </p>
+                    </div>
+                    {!n.isRead && (
+                      <span className="shrink-0 mt-1.5 h-2 w-2 rounded-full bg-primary" />
+                    )}
+                  </div>
+                ))
+              )}
             </div>
-          ) : notifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center px-4 py-10 text-center">
-              <Bell className="mb-2 size-8 text-muted-foreground/40" aria-hidden="true" />
-              <p className="text-sm text-muted-foreground">No hay notificaciones</p>
-            </div>
-          ) : (
-            <ul role="list" className="divide-y divide-border">
-              {notifications.map((notification) => {
-                const Icon = typeIcons[notification.type] ?? Bell
-                return (
-                  <li key={notification.id}>
-                    <button
-                      onClick={() => {
-                        if (!notification.isRead) markAsRead(notification.id)
-                      }}
-                      className={cn(
-                        "flex w-full gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50",
-                        !notification.isRead && "bg-muted",
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          "flex size-8 shrink-0 items-center justify-center rounded-full",
-                          !notification.isRead
-                            ? "bg-primary/10 text-primary"
-                            : "bg-muted text-muted-foreground",
-                        )}
-                      >
-                        <Icon className="size-4" />
-                      </span>
-                      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                        <div className="flex items-start justify-between gap-2">
-                          <span className="truncate text-sm font-medium text-foreground">
-                            {notification.title}
-                          </span>
-                          <time className="shrink-0 text-[11px] text-muted-foreground">
-                            {formatRelative(notification.createdAt)}
-                          </time>
-                        </div>
-                        {notification.body && (
-                          <span className="line-clamp-2 text-xs text-muted-foreground">
-                            {notification.body}
-                          </span>
-                        )}
-                      </div>
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
-          )}
-
-          <div className="sticky bottom-0 border-t bg-card px-4 py-2.5">
-            <a
-              href="/notificaciones"
-              className="block text-center text-xs font-medium text-primary transition-colors hover:text-primary/80"
-            >
-              Ver todas las notificaciones
-            </a>
+            {notifications.length > 0 && (
+              <div className="p-2 border-t">
+                <Link
+                  href="/notificaciones"
+                  onClick={() => setOpen(false)}
+                  className="block text-center text-xs text-primary hover:underline py-1"
+                >
+                  Ver todas las notificaciones →
+                </Link>
+              </div>
+            )}
           </div>
-        </div>
+        </>
       )}
     </div>
-  )
+  );
 }
