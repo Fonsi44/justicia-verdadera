@@ -12,9 +12,9 @@
 |---|---|
 | Proyecto | Justicia Verdadera |
 | Responsable | Alfons Roiget, fundador |
-| Versión del documento | 5.4 — Auditoría completa del repositorio (30 mayo 2026) |
+| Versión del documento | 5.5 — CI/CD arreglado, GitHub Actions operativo (30 mayo 2026) |
 | Fecha de actualización | 30 mayo 2026 |
-| Estado global | Fase 1 completada. Fase 1.5 completada. Frontend rediseñado a light theme. Auditoría repo ejecutada. |
+| Estado global | Fase 1 completada. Fase 1.5 completada. Frontend rediseñado a light theme. Auditoría repo ejecutada. CI/CD funcional. |
 | Fuente de verdad | Solo `master.md` |
 | Última verificación técnica declarada | 30 mayo 2026 |
 | Comandos declarados como ejecutados | `npm run lint`, `npm run typecheck`, `npm run build` |
@@ -604,6 +604,22 @@ Subida del archivo → UploadThing → Guardar metadata + document_version
 ---
 
 ## 18. Log operativo
+
+### 2026-05-30 — CI/CD arreglado, GitHub Actions operativo
+
+CI pipeline arreglado y pasando correctamente:
+
+- **CI (GitHub Actions):** ✅ `npm install` → `npm run lint` → `npm run typecheck` → `npm run test` → `npm run build` — todo pasa con 0 errores.
+- **Fix `npm ci` → `npm install`:** lockfile generado en Windows no era compatible con Linux CI.
+- **Fix CI env vars:** Faltaban env vars (`DATABASE_URL`, etc.) en el paso `npm run build`.
+- **Fix lint:** 36 problemas resueltos (scripts/ excluidos de linting, imports sin uso eliminados, refactor useReducer en documentos/page.tsx).
+- **Fix typecheck:** 3 errores TS resueltos (getSession → getSessionAPI, maxTokens → maxOutputTokens, stripe module).
+- **Fix tests:** mocks de auth y db reescritos para pruebas de API routes (19 tests pasando).
+- **Fix lockfile:** `stripe` y `shadcn` reinstalados (no estaban en lockfile).
+- **Vercel Preview workflow eliminado:** Vercel GitHub integration maneja previews automáticamente.
+- **`vercel.json`:** buildCommand simplificado a `"next build"` (sin `drizzle-kit migrate`).
+
+Build: 37 rutas, 0 errores.
 
 ### 2026-05-30 — Auditoría completa archivo-por-archivo y actualización de `master.md`
 
