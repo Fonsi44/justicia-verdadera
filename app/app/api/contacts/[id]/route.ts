@@ -7,6 +7,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { writeAuditLog } from "@/lib/audit";
 import { AppError } from "@/lib/errors";
 import { getContactById, updateContact, softDeleteContact } from "@/lib/services/contacts.service";
+import { contactUpdateSchema } from "@/lib/validations/update.schemas";
 
 export async function GET(
   _request: NextRequest,
@@ -55,27 +56,27 @@ export async function PATCH(
 
     const body = await request.json();
 
-    const updates: Record<string, unknown> = {};
-    const allowedFields = [
-      "type", "firstName", "lastName", "companyName",
-      "identityNumber", "email", "phone", "address", "notes",
-    ];
-    for (const field of allowedFields) {
-      if (field in body) updates[field] = body[field] ?? null;
+    const parsed = contactUpdateSchema.safeParse(body);
+    if (!parsed.success) {
+      const fields: Record<string, string> = {};
+      for (const issue of parsed.error.issues) {
+        fields[issue.path.join(".")] = issue.message;
+      }
+      return NextResponse.json({ error: "Datos inválidos", code: "VALIDATION_ERROR", fields }, { status: 400 });
     }
 
-    if (Object.keys(updates).length === 0) {
+    if (Object.keys(parsed.data).length === 0) {
       return NextResponse.json({ error: "No hay campos para actualizar" }, { status: 400 });
     }
 
-    const updated = await updateContact(firmId, id, updates);
+    const updated = await updateContact(firmId, id, parsed.data);
 
     await writeAuditLog({
       firmId,
       action: "update",
       entityType: "contact",
       entityId: id,
-      changes: updates,
+      changes: parsed.data,
     });
 
     return NextResponse.json({ data: updated });

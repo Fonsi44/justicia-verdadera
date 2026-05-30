@@ -7,6 +7,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { writeAuditLog } from "@/lib/audit";
 import { AppError } from "@/lib/errors";
 import { getCaseById, updateCase, softDeleteCase } from "@/lib/services/cases.service";
+import { caseUpdateSchema } from "@/lib/validations/update.schemas";
 
 export async function GET(
   _req: NextRequest,
@@ -47,29 +48,27 @@ export async function PATCH(
 
     const body = await request.json();
 
-    const allowedFields = [
-      "number", "courtNumber", "title", "description", "matter",
-      "status", "priority", "assignedLawyerId", "startDate", "endDate",
-      "estimatedValue", "metadata",
-    ];
-
-    const updates: Record<string, unknown> = {};
-    for (const field of allowedFields) {
-      if (field in body) updates[field] = body[field];
+    const parsed = caseUpdateSchema.safeParse(body);
+    if (!parsed.success) {
+      const fields: Record<string, string> = {};
+      for (const issue of parsed.error.issues) {
+        fields[issue.path.join(".")] = issue.message;
+      }
+      return NextResponse.json({ error: "Datos inválidos", code: "VALIDATION_ERROR", fields }, { status: 400 });
     }
 
-    if (Object.keys(updates).length === 0) {
+    if (Object.keys(parsed.data).length === 0) {
       return Response.json({ error: "No hay campos para actualizar" }, { status: 400 });
     }
 
-    const updated = await updateCase(firmId, id, updates);
+    const updated = await updateCase(firmId, id, parsed.data);
 
     await writeAuditLog({
       firmId,
       action: "update",
       entityType: "case",
       entityId: id,
-      changes: updates,
+      changes: parsed.data,
     });
 
     return Response.json(updated);

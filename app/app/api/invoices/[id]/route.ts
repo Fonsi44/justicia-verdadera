@@ -4,6 +4,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { writeAuditLog } from "@/lib/audit";
 import { AppError } from "@/lib/errors";
 import { getInvoiceById, updateInvoice, softDeleteInvoice } from "@/lib/services/invoices.service";
+import { invoiceUpdateSchema } from "@/lib/validations/update.schemas";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -30,24 +31,27 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     const body = await req.json();
 
-    const updates: Record<string, unknown> = {};
-    const allowedFields = ["issueDate", "dueDate", "paidAt", "notes", "caseId", "clientId", "number", "status"];
-    for (const key of allowedFields) {
-      if (body[key] !== undefined) updates[key] = body[key];
+    const parsed = invoiceUpdateSchema.safeParse(body);
+    if (!parsed.success) {
+      const fields: Record<string, string> = {};
+      for (const issue of parsed.error.issues) {
+        fields[issue.path.join(".")] = issue.message;
+      }
+      return NextResponse.json({ error: "Datos inválidos", code: "VALIDATION_ERROR", fields }, { status: 400 });
     }
 
-    if (Object.keys(updates).length === 0) {
+    if (Object.keys(parsed.data).length === 0) {
       return NextResponse.json({ error: "No hay campos para actualizar" }, { status: 400 });
     }
 
-    const inv = await updateInvoice(firmId, id, updates);
+    const inv = await updateInvoice(firmId, id, parsed.data);
 
     await writeAuditLog({
       firmId,
       action: "update",
       entityType: "invoice",
       entityId: id,
-      changes: updates,
+      changes: parsed.data,
     });
 
     return NextResponse.json({ data: inv });
