@@ -1421,6 +1421,14 @@ Todos usan CSS variables, `cn()`, shadcn/ui, lucide-react, TypeScript estricto, 
 | `npm run typecheck` | 0 errores |
 | `npm run build` | Exitoso (28 rutas) |
 
+### 2026-05-30 — Página de configuración creada
+
+| Campo | Resultado |
+|---|---|
+| Tipo | Nueva página de configuración del despacho |
+| Archivo creado | `app/(dashboard)/config/page.tsx` |
+| Contenido | 3 secciones: Información del Despacho (mock), Suscripción, Preferencias |
+
 ---
 
 ## 23. Estado final
