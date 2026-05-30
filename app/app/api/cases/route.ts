@@ -7,6 +7,7 @@ import {
   listCases,
   createCase,
 } from "@/lib/services/cases.service";
+import { caseCreateSchema } from "@/lib/validations/case.schema";
 
 export async function GET(request: NextRequest) {
   try {
@@ -41,14 +42,19 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    if (!body.number || !body.title || !body.matter || !body.startDate) {
-      return Response.json(
-        { error: "Campos requeridos: number, title, matter, startDate" },
-        { status: 400 },
+    const parsed = caseCreateSchema.safeParse(body);
+    if (!parsed.success) {
+      const fields: Record<string, string> = {};
+      for (const issue of parsed.error.issues) {
+        fields[issue.path.join(".")] = issue.message;
+      }
+      return NextResponse.json(
+        { error: "Datos inválidos", code: "VALIDATION_ERROR", fields },
+        { status: 400 }
       );
     }
 
-    const newCase = await createCase(firmId, body);
+    const newCase = await createCase(firmId, parsed.data);
 
     await writeAuditLog({
       firmId,
