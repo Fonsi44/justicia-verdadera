@@ -1,6 +1,6 @@
 import NextAuth, { type DefaultSession } from "next-auth";
-import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
+import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { users, firms } from "@/database/schema";
@@ -82,13 +82,13 @@ async function tryCreateFirmAndUser(
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
-    GitHub({
-      clientId: process.env.AUTH_GITHUB_ID,
-      clientSecret: process.env.AUTH_GITHUB_SECRET,
-    }),
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
       clientSecret: process.env.AUTH_GOOGLE_SECRET,
+    }),
+    MicrosoftEntraID({
+      clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_ID,
+      clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET,
     }),
   ],
   pages: {

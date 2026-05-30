@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Plus, Search, Briefcase } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { Plus, Briefcase, ChevronRight } from "lucide-react";
 import {
   Select,
   SelectTrigger,
@@ -11,6 +10,12 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import PageHeader from "@/components/page-header";
+import SearchAndFilters from "@/components/search-and-filters";
+import EmptyState from "@/components/empty-state";
+import StatusBadge from "@/components/status-badge";
+import LoadingSkeleton from "@/components/loading-skeleton";
 import { useCases } from "@/hooks/use-cases";
 import type { CaseData } from "@/types";
 
@@ -25,13 +30,13 @@ const matterLabels: Record<string, string> = {
 };
 
 const matterColors: Record<string, string> = {
-  civil: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  penal: "bg-red-500/10 text-red-400 border-red-500/20",
-  laboral: "bg-orange-500/10 text-orange-400 border-orange-500/20",
-  familia: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-  mercantil: "bg-green-500/10 text-green-400 border-green-500/20",
-  contencioso: "bg-teal-500/10 text-teal-400 border-teal-500/20",
-  constitucional: "bg-[#c8a45c]/10 text-[#c8a45c] border-[#c8a45c]/20",
+  civil: "bg-blue-500/10 text-blue-700 border-blue-500/20",
+  penal: "bg-red-500/10 text-red-700 border-red-500/20",
+  laboral: "bg-orange-500/10 text-orange-700 border-orange-500/20",
+  familia: "bg-purple-500/10 text-purple-700 border-purple-500/20",
+  mercantil: "bg-green-500/10 text-green-700 border-green-500/20",
+  contencioso: "bg-teal-500/10 text-teal-700 border-teal-500/20",
+  constitucional: "bg-primary/10 text-primary border-primary/20",
 };
 
 const statusLabels: Record<string, string> = {
@@ -39,13 +44,6 @@ const statusLabels: Record<string, string> = {
   archivado: "Archivado",
   cerrado: "Cerrado",
   suspendido: "Suspendido",
-};
-
-const statusColors: Record<string, string> = {
-  activo: "bg-green-500/10 text-green-400 border-green-500/20",
-  archivado: "bg-gray-500/10 text-gray-400 border-gray-500/20",
-  cerrado: "bg-red-500/10 text-red-400 border-red-500/20",
-  suspendido: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
 };
 
 const priorityLabels: Record<string, string> = {
@@ -56,10 +54,10 @@ const priorityLabels: Record<string, string> = {
 };
 
 const priorityColors: Record<string, string> = {
-  urgente: "bg-red-500/10 text-red-400 border-red-500/20",
-  alta: "bg-orange-500/10 text-orange-400 border-orange-500/20",
-  media: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-  baja: "bg-gray-500/10 text-gray-400 border-gray-500/20",
+  urgente: "bg-red-500/10 text-red-700 border-red-500/20",
+  alta: "bg-orange-500/10 text-orange-700 border-orange-500/20",
+  media: "bg-yellow-500/10 text-yellow-700 border-yellow-500/20",
+  baja: "bg-gray-500/10 text-gray-600 border-gray-500/20",
 };
 
 function formatDate(dateStr: string) {
@@ -70,119 +68,23 @@ function formatDate(dateStr: string) {
   });
 }
 
-function Badge({
-  label,
-  className,
-}: {
-  label: string;
-  className: string;
-}) {
+function formatCurrency(val: string | null) {
+  if (!val) return "—";
+  const num = parseFloat(val);
+  return new Intl.NumberFormat("es-HN", {
+    style: "currency",
+    currency: "HNL",
+    minimumFractionDigits: 0,
+  }).format(num);
+}
+
+function Badge({ label, className }: { label: string; className: string }) {
   return (
-    <span
-      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${className}`}
-    >
+    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${className}`}>
       {label}
     </span>
   );
 }
-
-const mockCases: CaseData[] = [
-  {
-    id: "1",
-    firmId: "",
-    number: "CV-2026-0042",
-    courtNumber: "J-001-2026",
-    title: "Pérez vs. Constructora S.A.",
-    description: "Demanda por incumplimiento de contrato",
-    matter: "civil",
-    status: "activo",
-    priority: "alta",
-    assignedLawyerId: null,
-    assignedLawyer: { id: "1", name: "Dr. Ricardo Mendoza" },
-    startDate: "2026-01-15",
-    endDate: null,
-    estimatedValue: "250000",
-    metadata: null,
-    createdAt: "2026-01-15T00:00:00Z",
-    updatedAt: "2026-01-15T00:00:00Z",
-  },
-  {
-    id: "2",
-    firmId: "",
-    number: "PE-2026-0018",
-    courtNumber: "JP-045-2026",
-    title: "Defensa penal — Caso 0452-B",
-    description: "Defensa en proceso penal por estafa",
-    matter: "penal",
-    status: "activo",
-    priority: "urgente",
-    assignedLawyerId: null,
-    assignedLawyer: { id: "2", name: "Dra. Ana Lucía Torres" },
-    startDate: "2026-02-20",
-    endDate: null,
-    estimatedValue: null,
-    metadata: null,
-    createdAt: "2026-02-20T00:00:00Z",
-    updatedAt: "2026-02-20T00:00:00Z",
-  },
-  {
-    id: "3",
-    firmId: "",
-    number: "FA-2026-0031",
-    courtNumber: "J-FAM-012-2026",
-    title: "Divorcio Martínez-López",
-    description: "Divorcio voluntario con liquidación",
-    matter: "familia",
-    status: "activo",
-    priority: "media",
-    assignedLawyerId: null,
-    assignedLawyer: { id: "1", name: "Dr. Ricardo Mendoza" },
-    startDate: "2026-03-01",
-    endDate: null,
-    estimatedValue: "50000",
-    metadata: null,
-    createdAt: "2026-03-01T00:00:00Z",
-    updatedAt: "2026-03-01T00:00:00Z",
-  },
-  {
-    id: "4",
-    firmId: "",
-    number: "CO-2025-0089",
-    courtNumber: "J-CA-089-2025",
-    title: "Recurso de amparo fiscal",
-    description: "Recurso contra resolución del SAR",
-    matter: "contencioso",
-    status: "activo",
-    priority: "alta",
-    assignedLawyerId: null,
-    assignedLawyer: { id: "3", name: "Dr. Carlos Sandoval" },
-    startDate: "2025-11-10",
-    endDate: null,
-    estimatedValue: "500000",
-    metadata: null,
-    createdAt: "2025-11-10T00:00:00Z",
-    updatedAt: "2025-11-10T00:00:00Z",
-  },
-  {
-    id: "5",
-    firmId: "",
-    number: "LA-2026-0005",
-    courtNumber: "J-T-005-2026",
-    title: "Despido injustificado — García",
-    description: "Reclamo por despido sin causa justa",
-    matter: "laboral",
-    status: "archivado",
-    priority: "baja",
-    assignedLawyerId: null,
-    assignedLawyer: { id: "2", name: "Dra. Ana Lucía Torres" },
-    startDate: "2026-01-05",
-    endDate: "2026-04-20",
-    estimatedValue: "120000",
-    metadata: null,
-    createdAt: "2026-01-05T00:00:00Z",
-    updatedAt: "2026-04-20T00:00:00Z",
-  },
-];
 
 export function CasesClient() {
   const [search, setSearch] = useState("");
@@ -192,27 +94,31 @@ export function CasesClient() {
 
   const { data, isLoading } = useCases({ search, matter, status, page });
 
-  const cases = data?.data ?? mockCases;
+  const cases: CaseData[] = data?.data ?? [];
   const totalPages = data?.totalPages ?? 1;
+  const total = data?.total ?? 0;
 
   return (
     <div className="space-y-6">
-      {/* Actions bar */}
-      <div className="glass-card p-4">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="relative flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8b8d91]" />
-            <Input
-              placeholder="Buscar casos por número o título..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
-              className="pl-9"
-            />
-          </div>
-          <div className="flex flex-wrap gap-2">
+      <PageHeader
+        title="Casos"
+        description="Gestiona los casos y expedientes de tu despacho."
+        actions={
+          <Link href="/casos/nuevo">
+            <Button>
+              <Plus className="h-4 w-4" />
+              Nuevo caso
+            </Button>
+          </Link>
+        }
+      />
+
+      <SearchAndFilters
+        searchPlaceholder="Buscar casos por número o título..."
+        searchValue={search}
+        onSearchChange={(v) => { setSearch(v); setPage(1); }}
+        actions={
+          <>
             <Select value={matter} onValueChange={(v) => { setMatter(v ?? ""); setPage(1); }}>
               <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="Materia" />
@@ -235,137 +141,133 @@ export function CasesClient() {
                 ))}
               </SelectContent>
             </Select>
-            <Link href="/casos/nuevo">
-              <button className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-[#c8a45c] px-3 text-sm font-medium text-[#080b12] hover:bg-[#d4b36a] transition-colors">
-                <Plus className="h-4 w-4" />
-                Nuevo caso
-              </button>
-            </Link>
+          </>
+        }
+      />
+
+      {isLoading ? (
+        <div className="rounded-xl border bg-card shadow-sm">
+          <div className="p-6">
+            <LoadingSkeleton variant="table" />
           </div>
         </div>
-      </div>
-
-      {/* Table */}
-      <div className="glass-card overflow-hidden">
-        {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#c8a45c] border-t-transparent" />
-          </div>
-        ) : cases.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16">
-            <Briefcase className="mb-4 h-12 w-12 text-[#8b8d91]" />
-            <p className="text-sm text-[#8b8d91]">No se encontraron casos</p>
-          </div>
-        ) : (
+      ) : cases.length === 0 ? (
+        <div className="rounded-xl border bg-card shadow-sm">
+          <EmptyState
+            icon={Briefcase}
+            title={search || matter || status ? "Sin resultados" : "No hay casos registrados"}
+            description={
+              search || matter || status
+                ? "No se encontraron casos con los filtros actuales."
+                : "Comienza creando tu primer caso."
+            }
+            action={
+              !search && !matter && !status
+                ? { label: "Crear primer caso", href: "/casos/nuevo" }
+                : undefined
+            }
+          />
+        </div>
+      ) : (
+        <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/[0.04]">
-                  <th className="px-4 py-3 text-left text-xs font-medium text-[#8b8d91] uppercase tracking-wider">
-                    Número
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-[#8b8d91] uppercase tracking-wider">
-                    Título
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-[#8b8d91] uppercase tracking-wider">
-                    Materia
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-[#8b8d91] uppercase tracking-wider">
-                    Estado
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-[#8b8d91] uppercase tracking-wider">
-                    Abogado
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-[#8b8d91] uppercase tracking-wider">
-                    Fecha inicio
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-[#8b8d91] uppercase tracking-wider">
-                    Prioridad
-                  </th>
+                <tr className="border-b">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Número</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Título</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Materia</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Estado</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Abogado</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Inicio</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Prioridad</th>
+                  <th className="w-8" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.03]">
-                {cases.map((caso) => (
+              <tbody className="divide-y">
+                {cases.map((caso, i) => (
                   <tr
                     key={caso.id}
-                    className="transition-colors hover:bg-white/[0.02]"
+                    className="transition-colors hover:bg-muted/50 animate-fade-in-up cursor-pointer"
+                    style={{ animationDelay: `${i * 0.06}s` }}
+                    tabIndex={0}
+                    role="link"
+                    aria-label={`Ver caso ${caso.number}: ${caso.title}`}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        window.location.href = `/casos/${caso.id}`;
+                      }
+                    }}
+                    onClick={() => window.location.href = `/casos/${caso.id}`}
                   >
-                    <td className="px-4 py-3">
-                      <Link
-                        href={`/casos/${caso.id}`}
-                        className="text-sm font-mono text-[#c8a45c] hover:text-[#d4b36a] transition-colors"
-                      >
+                    <td className="px-4 py-3.5">
+                      <span className="text-sm font-mono text-primary font-medium">
                         {caso.number}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3">
-                      <Link
-                        href={`/casos/${caso.id}`}
-                        className="text-sm text-[#e8e4dd] hover:text-[#c8a45c] transition-colors"
-                      >
-                        {caso.title}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge
-                        label={matterLabels[caso.matter] ?? caso.matter}
-                        className={matterColors[caso.matter] ?? ""}
-                      />
-                    </td>
-                    <td className="px-4 py-3">
-                      <Badge
-                        label={statusLabels[caso.status] ?? caso.status}
-                        className={statusColors[caso.status] ?? ""}
-                      />
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="text-sm text-[#8b8d91]">
-                        {caso.assignedLawyer?.name ?? "—"}
                       </span>
                     </td>
-                    <td className="px-4 py-3">
-                      <span className="text-sm text-[#8b8d91]">
-                        {formatDate(caso.startDate)}
-                      </span>
+                    <td className="px-4 py-3.5 max-w-[300px]">
+                      <div>
+                        <p className="text-sm text-foreground truncate">{caso.title}</p>
+                        {caso.estimatedValue && (
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {formatCurrency(caso.estimatedValue)}
+                          </p>
+                        )}
+                      </div>
                     </td>
-                    <td className="px-4 py-3">
-                      <Badge
-                        label={priorityLabels[caso.priority] ?? caso.priority}
-                        className={priorityColors[caso.priority] ?? ""}
+                    <td className="px-4 py-3.5">
+                      <Badge label={matterLabels[caso.matter] ?? caso.matter} className={matterColors[caso.matter] ?? ""} />
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <StatusBadge
+                        status={statusLabels[caso.status] ?? caso.status}
+                        dot
                       />
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <span className="text-sm text-muted-foreground">{caso.assignedLawyer?.name ?? "—"}</span>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <span className="text-sm text-muted-foreground">{formatDate(caso.startDate)}</span>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <Badge label={priorityLabels[caso.priority] ?? caso.priority} className={priorityColors[caso.priority] ?? ""} />
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-        )}
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-white/[0.04] px-4 py-3">
-            <span className="text-xs text-[#8b8d91]">
-              Página {page} de {totalPages}
-            </span>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page <= 1}
-                className="inline-flex h-7 items-center rounded px-2.5 text-xs text-[#8b8d91] hover:text-[#e8e4dd] hover:bg-white/[0.04] disabled:opacity-50 disabled:pointer-events-none transition-colors"
-              >
-                Anterior
-              </button>
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page >= totalPages}
-                className="inline-flex h-7 items-center rounded px-2.5 text-xs text-[#8b8d91] hover:text-[#e8e4dd] hover:bg-white/[0.04] disabled:opacity-50 disabled:pointer-events-none transition-colors"
-              >
-                Siguiente
-              </button>
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between border-t px-4 py-3">
+              <span className="text-xs text-muted-foreground">
+                Mostrando {(page - 1) * 10 + 1}–{Math.min(page * 10, total)} de {total} casos
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                  className="inline-flex h-7 items-center rounded px-2.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-50 disabled:pointer-events-none transition-colors"
+                >
+                  Anterior
+                </button>
+                <button
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                  className="inline-flex h-7 items-center rounded px-2.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-50 disabled:pointer-events-none transition-colors"
+                >
+                  Siguiente
+                </button>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

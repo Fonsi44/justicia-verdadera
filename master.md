@@ -1,341 +1,223 @@
 # Plan de Ejecución — Justicia Verdadera
 
-> **SaaS de gestión integral con automatizaciones e IA para despachos de abogados en Honduras.**
->
-> **Modo de construcción**: proyecto solopreneur construido íntegramente por el fundador (Alfons Roiget) con Kilo Code como pair programmer de IA. Sin equipo externo, sin abogados asesores. La IA actúa como copiloto técnico, analista de producto, code reviewer y acelerador de desarrollo.
->
-> **Objetivo de este documento**: servir como fuente de verdad única y plan de ejecución que Kilo Code lee y sigue para construir el SaaS paso a paso. Kilo Code es el pair programmer de IA que genera, revisa, despliega y documenta todo el código del proyecto.
+**SaaS de gestión integral con automatizaciones e IA para despachos de abogados en Honduras.**
+
+**Documento maestro único:** `master.md` es la única fuente documental operativa del proyecto. Toda decisión, roadmap, checklist, log de implementación, riesgo, criterio de aceptación y próximo paso debe quedar registrado aquí.
 
 ---
 
-## Metodología de Trabajo — Solopreneur + Kilo Code
+## 0. Metadatos
 
-### El modelo
+| Campo | Valor |
+|---|---|
+| Proyecto | Justicia Verdadera |
+| Responsable | Alfons Roiget, fundador |
+| Versión del documento | 5.3 — Rediseño frontend completo (light theme) |
+| Fecha de actualización | 30 mayo 2026 |
+| Estado global | Fase 1 completada. Fase 1.5 en ejecución. Frontend rediseñado a light theme |
+| Fuente de verdad | Solo `master.md` |
+| Última verificación técnica declarada | 30 mayo 2026, 08:00 UTC+2 |
+| Comandos declarados como ejecutados | `npm run lint`, `npm run typecheck`, `npm run build` |
+| Resultado declarado | 0 errores lint, 0 errores typecheck, build exitoso con Turbopack (22 páginas) |
 
+### Etiquetas de trazabilidad
+
+| Etiqueta | Uso |
+|---|---|
+| `[VERIFICADO-REPO]` | Confirmado por repo, archivo real o comando ejecutado |
+| `[PARCIAL]` | Existe base implementada, pero falta parte funcional |
+| `[PENDIENTE]` | Tarea definida pero no iniciada o no confirmada |
+| `[PENDIENTE-VALIDAR]` | Requiere verificación externa, legal, comercial o técnica |
+| `[SUPUESTO]` | Estimación no verificada con fuente externa |
+
+---
+
+## 1. Diagnóstico de auditoría aplicado
+
+Esta versión corrige los problemas detectados en la versión anterior del documento:
+
+- Eliminación total de HTML documental.
+- Conversión de tablas a Markdown.
+- Protección de identificadores técnicos (`document_versions`, `document_version_id`, `version`, `ocr_text`, `processing_status`).
+- Normalización de JSON, SQL, variables de entorno y diagramas en bloques fenced.
+- Eliminación de duplicidad en API REST.
+- Normalización de Fase 1.5 a una estimación única de 2–4 semanas.
+- Actualización de estados OCR definitivos.
+- Refuerzo de privacidad, seguridad, autonomía y control multi-tenant.
+- Paddle queda como pasarela principal pendiente de activación; Stripe queda archivado/no principal.
+- Riesgos ampliados y priorizados.
+- Confirmación de `master.md` como único documento operativo.
+
+---
+
+## 2. Principios operativos de autonomía
+
+Kilo Code debe ejecutar el proyecto con autonomía controlada siguiendo estas reglas:
+
+1. **No preguntar si la tarea está claramente definida en `master.md`.**
+2. **No inventar datos legales, fiscales, técnicos ni comerciales.**
+3. **No marcar tareas como completadas sin evidencia real.**
+4. **No modificar código fuera del alcance de la tarea activa.**
+5. **No traducir identificadores técnicos.**
+6. **No enviar PII ni OCR completo a modelos de IA externos.**
+7. **No implementar checkout hasta tener Paddle o alternativa MoR validada.**
+8. **No activar IA jurídica sin proveedor de embeddings, corpus curado y abogado revisor.**
+9. **No procesar OCR pesado en API routes.**
+10. **Registrar decisiones, bloqueos, cambios y resultados en este documento.**
+
+### Protocolo de ejecución autónoma
+
+Para cada tarea, Kilo Code debe seguir este ciclo:
+
+```text
+1. Leer alcance exacto en master.md
+2. Revisar archivos afectados
+3. Confirmar estado real del repo
+4. Aplicar cambio mínimo y trazable
+5. Ejecutar validaciones necesarias
+6. Actualizar la sección de log operativo de master.md
+7. Indicar resultado: completado, parcial o bloqueado
 ```
-Fundador (Alfons)                  Kilo Code (IA)
-     │                                    │
-     │── decisiones estratégicas ────────→│
-     │── dirección de producto ──────────→│
-     │── revisión y validación ←─────────│
-     │                                    │
-     │                                    │── escribe código
-     │                                    │── diseña arquitectura
-     │                                    │── crea tests
-     │                                    │── documenta decisiones
-     │                                    │── propone alternativas
-     │                                    │── detecta bugs
-     │                                    │── despliega a staging
-     │                                    │
-     ↓                                    ↓
-        Producto construido sin equipo humano adicional
+
+### Definition of Done general
+
+Una tarea solo puede marcarse como completada si cumple:
+
+- Código o documentación aplicada.
+- Sin contradicciones con `master.md`.
+- Lint/typecheck/build ejecutados si se tocó código, schema o dependencias.
+- Tests ejecutados si existe script de test.
+- No se introducen secretos, PII ni logs sensibles.
+- No se rompe aislamiento multi-tenant.
+- Estado final documentado en `master.md`.
+
+---
+
+## 3. Metodología de trabajo — Solopreneur + Kilo Code
+
+```text
+Fundador (Alfons)                         Kilo Code (IA)
+      │                                          │
+      ├── decisiones estratégicas ──────────────▶│
+      ├── dirección de producto ────────────────▶│
+      ├── revisión y validación ◀───────────────┤
+      │                                          │
+      │                                          ├── escribe código
+      │                                          ├── diseña arquitectura
+      │                                          ├── crea tests
+      │                                          ├── documenta decisiones
+      │                                          ├── propone alternativas
+      │                                          ├── detecta bugs
+      │                                          └── despliega a staging
+      ▼                                          ▼
+             Producto construido sin equipo humano adicional fijo
 ```
 
 ### Principios de colaboración
 
-1. **Una decisión, un commit**: cada cambio atómico, trazable y reversible.
-2. **La IA propone, el fundador dispone**: Kilo genera código, el fundador revisa, valida y aprueba.
-3. **Primero funciona, luego escala**: MVP pragmático, sin sobre-ingeniería.
-4. **Sin dependencias externas humanas**: sin necesidad de abogados, diseñadores, ni DevOps externos. Todo lo hace la IA + fundador.
-5. **Velocidad > perfección**: ship features rápido, itera con feedback real.
-6. **El conocimiento legal lo aporta la IA**: modelos LLM entrenados con jurisprudencia, doctrina y legislación hondureña obtenida vía web scraping + RAG.
-
-### Stack de herramientas de desarrollo
-
-| Herramienta | Uso |
-|---|---|
-| **Kilo Code** | Pair programming, arquitectura, code review, despliegue |
-| **GitHub** | Control de versiones, issues, proyectos |
-| **Vercel** | Hosting serverless + preview deployments por rama |
-| **Neon DB** | PostgreSQL serverless, branches para desarrollo |
-| **Stripe** | Gestión de suscripciones y pagos |
-| **Upstash Redis** | Cache, sesiones, rate limiting |
-| **Resend** | Emails transaccionales |
-| **DeepSeek** | IA jurídica (chat, RAG, embeddings) |
+- **Una decisión, un commit:** cambios atómicos, trazables y reversibles.
+- **Primero funciona, luego escala:** MVP pragmático, sin sobreingeniería.
+- **Seguridad antes que velocidad cuando haya PII:** logs, OCR, documentos y multi-tenant son zonas críticas.
+- **IA como asistente, no sustituto:** el abogado siempre valida salidas jurídicas.
+- **Documento vivo:** `master.md` se actualiza con cada decisión o avance relevante.
 
 ---
 
-## 1. Resumen Ejecutivo
+## 4. Estado real del proyecto
 
-**Justicia Verdadera** es una plataforma SaaS cloud-native diseñada para digitalizar, automatizar y potenciar con inteligencia artificial la operativa diaria de los despachos de abogados en Honduras. Cubre la gestión integral del ciclo de vida de un caso legal.
+### Verificación técnica declarada
 
-**Estado actual**: Fase 1 completada. MVP funcional con 6 módulos, API REST 14 endpoints, auth auto-provisioning, dashboard con datos reales. Repo en GitHub — `master` limpio.
+| Prueba | Resultado | Evidencia |
+|---|---|---|
+| `npm run lint` | 0 errores | [VERIFICADO-REPO] |
+| `npm run typecheck` | 0 errores | [VERIFICADO-REPO] |
+| `npm run build` | Exitoso con Turbopack | [VERIFICADO-REPO] |
+| Node.js local | v24.14.1 | [VERIFICADO-REPO] |
+| npm local | 11.11.0 | [VERIFICADO-REPO] |
+| DB schema | 18 tablas definidas | [VERIFICADO-REPO] |
+| shadcn/ui | 25 componentes instalados | [VERIFICADO-REPO] |
+| React Query hooks | 6 archivos | [VERIFICADO-REPO] |
+| API route files | 13 archivos `route.ts` | [VERIFICADO-REPO] |
+| `@sentry/nextjs` | Eliminado (sin uso real) | [VERIFICADO-REPO] |
+| `posthog-js` | Eliminado (sin uso real) | [VERIFICADO-REPO] |
 
-### Datos clave del proyecto
+### Estado de servicios externos
 
-| Aspecto | Detalle |
-|---|---|
-| **Mercado objetivo** | Honduras (expansión futura a Centroamérica) |
-| **Cliente inicial** | Despachos de 1 a 20 abogados |
-| **Modelo de negocio** | SaaS B2B por suscripción mensual/anual |
-| **Stack tecnológico** | Next.js 16 + TypeScript 5 + PostgreSQL + DeepSeek V4 Flash |
-| **UI** | TailwindCSS 4 + shadcn/ui v4 (style: base-nova) |
-| **Auth** | NextAuth.js v5 (beta) — JWT strategy |
-| **DB ORM** | Drizzle ORM v0.45 + Neon DB serverless |
-| **IA** | Vercel AI SDK v6 + @ai-sdk/deepseek |
-| **Modo de construcción** | Solopreneur + Kilo Code (IA pair programmer) |
-| **Repo GitHub** | `https://github.com/Fonsi44/justicia-verdadera` (privado) |
-| **Rama** | `master` — única rama raíz |
-| **Estado actual** | Fase 1 completada — build verde, API funcional, 6 módulos con páginas interactivas |
-| **Última auditoría** | 30 mayo 2026 — estructura limpia, sin duplicados, .git en raíz workspace |
-
----
-
-## 2. Visión y Misión
-
-### Visión
-Ser la plataforma tecnológica de referencia para la transformación digital del sector legal en Centroamérica, haciendo la justicia más accesible, eficiente y transparente.
-
-### Misión
-Proveer a los despachos de abogados hondureños de herramientas tecnológicas de clase mundial que automaticen tareas repetitivas, reduzcan errores, mejoren la colaboración y permitan a los abogados concentrarse en lo que realmente importa: sus clientes y sus casos.
-
----
-
-## 3. Análisis de Mercado — Honduras
-
-### 3.1 Sistema Judicial Hondureño
-
-- **Poder Judicial de Honduras**: Corte Suprema de Justicia, 20+ juzgados de letras, juzgados de paz, tribunales de sentencia.
-- **Materias**: Civil, Penal, Laboral, Familia, Contencioso-Administrativo, Mercantil.
-- **Digitalización**: El Poder Judicial ha avanzado en expediente electrónico pero la adopción en despachos privados es baja.
-- **Oportunidad**: La brecha tecnológica entre el sistema público y los despachos privados es enorme.
-
-### 3.2 Tamaño del Mercado
-
-| Segmento | Estimación |
-|---|---|
-| Abogados colegiados en Honduras | ~25,000+ (aprox.) |
-| Despachos activos | ~3,000 - 5,000 |
-| Despachos con >5 abogados | ~500 - 800 |
-| TAM (mercado total) | ~$6M - $10M ARR potencial |
-| SAM (mercado alcanzable inicial) | ~$500K - $1.5M ARR (Tegucigalpa + San Pedro Sula) |
-| SOM (mercado obtenible año 1) | ~$60K - $120K ARR (50-100 despachos) |
-
-### 3.3 Competencia
-
-| Competidor | Origen | Fortalezas | Debilidades |
+| Servicio | Variable | Estado | Detalle |
 |---|---|---|---|
-| **LegalSoft** (genérico) | Internacional | ERP robusto | No adaptado a Honduras, caro |
-| **Clio** | USA/Canadá | Líder global | No español, no derecho civil |
-| **Lefebvre / Aranzadi** | España | Doctrina y formularios | No gestión de despacho |
-| **Soluciones locales (Excel, papel)** | Honduras | Coste cero | Ineficiencia total |
-| **Software a medida local** | Honduras | Adaptado | Caro, no escalable |
+| Neon DB | `DATABASE_URL` | Verificado | 18 tablas migradas vía `drizzle-kit push` |
+| DeepSeek V4 | `DEEPSEEK_API_KEY` | Verificado | API responde, completions OK |
+| Upstash Redis | `UPSTASH_REDIS_*` | Verificado | Ping REST exitoso |
+| Resend | `RESEND_API_KEY` | Verificado | Email de prueba enviado correctamente |
+| Stripe | `STRIPE_SECRET_KEY` | Archivado | Test/lazy-init. No es pasarela principal |
+| Google OAuth | `AUTH_GOOGLE_*` | Verificado | Configurado y verificado |
+| Microsoft Entra ID | `AUTH_MICROSOFT_ENTRA_ID_*` | Verificado | Configurado y verificado. OAuth funcional con cuentas Microsoft personales y empresariales. |
+| UploadThing | `UPLOADTHING_TOKEN` | Verificado | Token renovado y verificado |
+| Inngest | `INNGEST_EVENT_KEY` | Configurado | Instalado; OCR async pendiente |
+| Paddle | Pendiente | Cuenta, productos, checkout y webhooks pendientes |
 
-**Ventaja competitiva**: No existe un SaaS moderno, asequible y adaptado al sistema judicial hondureño con IA integrada.
+### Fase actual
 
-### 3.4 Entorno Regulatorio
-
-- **Colegio de Abogados de Honduras (CAH)**: Regula el ejercicio profesional.
-- **Ley de Protección de Datos Personales**: Proyecto en desarrollo, anticipar cumplimiento (GDPR-like).
-- **Normativa de firma electrónica**: Vigente, oportunidad para integración.
-
----
-
-## 4. Propuesta de Valor
-
-> "El despacho de abogados del futuro, hoy. Automatiza lo administrativo, potencia lo jurídico."
-
-### Diferenciadores clave
-
-1. **Hecho para Honduras**: Adaptado al sistema judicial, terminología y práctica legal hondureña.
-2. **IA jurídica integrada**: Redacción de escritos, análisis de jurisprudencia, predicción de resultados, chat con expedientes.
-3. **Todo en uno**: Un solo sistema para gestión de casos, documentos, facturación, agenda y clientes.
-4. **Precio accesible**: Modelo SaaS escalonado desde $29/mes.
-5. **Cloud + On-premise híbrido**: Opcional para despachos con conectividad limitada.
+| Fase | Estado | Resumen |
+|---|---|---|
+| Fase 0 | Completada | Setup, Next.js 16, Drizzle, NextAuth, shadcn/ui |
+| Fase 1 | Completada | MVP funcional con 6 módulos, API REST, auth y dashboard |
+| Fase 1.5 | Lista para implementación | Subida documental, OCR async, búsqueda full-text y hardening mínimo |
+| Fase 2 | Planificada | IA jurídica, RAG, automatizaciones y pipeline documental avanzado |
 
 ---
 
-## 5. Funcionalidades del Producto (MVP → Full)
+## 5. Resumen ejecutivo
 
-### 5.1 Módulos Core (Fase 1 — MVP)
+**Justicia Verdadera** es una plataforma SaaS cloud-native para digitalizar, automatizar y potenciar con IA la operativa diaria de despachos de abogados en Honduras. Cubre expedientes, clientes, documentos, agenda, facturación, automatizaciones y asistencia jurídica controlada.
 
-#### a) Gestión de Expedientes
-- Creación y seguimiento de casos por materia (civil, penal, laboral, etc.)
-- Línea de tiempo cronológica del expediente
-- Vinculación de documentos, partes, abogados asignados
-- Estados configurables del caso
-- Número de expediente judicial + referencias internas
-- Alertas de plazos y prescripciones
-
-#### b) Gestión de Clientes y Contactos
-- CRM de clientes con historial completo
-- Gestión de partes contrarias, testigos, peritos
-- Portal del cliente (fase 3): consulta de estado del caso, documentos, comunicación
-- Consentimientos informados digitales
-
-#### c) Gestión Documental
-- Repositorio centralizado de documentos
-- Plantillas de documentos legales (demandas, contestaciones, recursos, etc.)
-- Rellenado automático de plantillas con datos del caso
-- Control de versiones
-- Firma electrónica integrada (fase 2)
-- OCR para documentos escaneados (fase 2)
-
-#### d) Agenda y Calendario
-- Calendario de vistas, audiencias, plazos
-- Sincronización con Google Calendar / Outlook
-- Recordatorios automáticos (email, WhatsApp, push)
-- Gestión de disponibilidad de abogados y salas
-
-#### e) Facturación y Cobros
-- Honorarios por caso (fijo, por hora, cuota litis)
-- Generación de facturas (SAR compliant para Honduras)
-- Control de pagos y cuentas por cobrar
-- Recordatorios de pago automatizados
-- Gastos del caso (tasas judiciales, peritos, desplazamientos)
-
-### 5.2 Funcionalidades con IA (Fase 2)
-
-#### a) Asistente Jurídico IA
-- Chat con el expediente: preguntar en lenguaje natural sobre cualquier caso
-- Redacción automática de borradores de escritos judiciales
-- Análisis de jurisprudencia relevante para el caso
-- Resumen automático de documentos y expedientes
-- Traducción jurídica EN↔ES
-
-#### b) Predicción y Análisis
-- Análisis de probabilidad de éxito según histórico y jurisprudencia
-- Estimación de plazos y duración de fases judiciales
-- Detección de patrones de riesgo en casos
-- Dashboard de KPIs del despacho
-
-#### c) Automatizaciones Inteligentes
-- Clasificación automática de documentos entrantes
-- Extracción de datos de sentencias y resoluciones
-- Detección de plazos y generación de alertas
-- Workflows automatizados (ej: al recibir una demanda → crear caso, notificar, asignar tareas)
-
-### 5.3 Funcionalidades Avanzadas (Fase 3)
-
-- Portal del cliente con acceso a expedientes y comunicación cifrada
-- Integración con el Poder Judicial de Honduras (Sistema de Expediente Electrónico cuando esté disponible API)
-- App móvil PWA con acceso offline
-- Marketplace de integraciones (contabilidad, RRHH, compliance)
-- Módulo de cumplimiento normativo y prevención de blanqueo
-- Multi-idioma (ES/EN)
-- White-label para colegios de abogados
+| Aspecto | Detalle | Estado |
+|---|---|---|
+| Mercado objetivo | Honduras, con expansión futura a Centroamérica | [SUPUESTO] |
+| Cliente inicial | Despachos de 1 a 20 abogados | [SUPUESTO] |
+| Modelo de negocio | SaaS B2B mensual/anual | [SUPUESTO] |
+| Stack | Next.js 16.2.6, TypeScript 5, PostgreSQL, DeepSeek | [VERIFICADO-REPO] |
+| UI | TailwindCSS 4 + shadcn/ui v4 | [VERIFICADO-REPO] |
+| Auth | NextAuth.js v5 beta, JWT, Google + Microsoft Entra ID | [VERIFICADO-REPO] Google y Microsoft Entra ID verificados |
+| ORM | Drizzle ORM v0.45.2 + Neon DB | [VERIFICADO-REPO] |
+| IA | Vercel AI SDK v6 + `@ai-sdk/deepseek` | [VERIFICADO-REPO] |
+| Pagos | Paddle MoR como opción principal | [PENDIENTE-ACTIVACIÓN] |
+| Fuente documental | `master.md` únicamente | [VERIFICADO] |
 
 ---
 
-## 6. Plan de Automatizaciones
+## 6. Alcance MVP
 
-### Workflows automatizados prioritarios
+### Módulos implementados en Fase 1
 
-| Automatización | Descripción | Trigger | Valor |
-|---|---|---|---|
-| **Onboarding de cliente** | Formulario digital → creación de ficha → contrato de honorarios → carpeta documental | Nuevo cliente registrado | Reduce 80% del tiempo administrativo inicial |
-| **Notificaciones de plazos** | El sistema lee el expediente, detecta fechas clave y genera alertas multi-canal | Cron diario / event-driven | Evita pérdida de plazos procesales |
-| **Generación de escritos** | Con los datos del caso + plantilla + IA, genera borrador del escrito en segundos | Solicitud del abogado | Reduce horas de redacción a minutos |
-| **Conciliación de pagos** | Cruce automático de pagos con facturas pendientes | Webhook de Stripe | Elimina gestión manual de cobros |
-| **Reportes al cierre** | Informes mensuales automáticos de actividad, horas facturables, casos activos, ingresos | Cron mensual | Visibilidad total del negocio |
-| **Onboarding de nuevo abogado** | Asignación de roles, acceso a casos activos, training automatizado en la plataforma | Nuevo usuario creado | Integración inmediata al equipo |
+| Módulo | Alcance | Estado |
+|---|---|---|
+| Auth + multi-tenant | Auto-provisioning, JWT con `firmId` y `role`, Google OAuth | [VERIFICADO-REPO] |
+| Expedientes | CRUD, filtros, formulario, detalle con tabs | [VERIFICADO-REPO] |
+| Clientes/contactos | CRUD, búsqueda, filtros por tipo | [VERIFICADO-REPO] |
+| Documentos | CRUD de metadatos y vinculación a casos | [PARCIAL] subida real pendiente |
+| Agenda | CRUD de eventos, filtros, toggle completado | [VERIFICADO-REPO] |
+| Facturación | Facturas, items, cálculo ISV 15%, horas facturables | [VERIFICADO-REPO] |
+| Dashboard | Estadísticas reales desde BD | [VERIFICADO-REPO] |
 
-### Motores de automatización
+### Fuera del alcance de Fase 1.5
 
-- **Inngest**: workflows event-driven, durable functions, retries, scheduling.
-- **React Email + Resend**: plantillas de email transaccionales y de marketing.
-- **Twilio**: notificaciones WhatsApp/SMS.
-- **Webhooks de Stripe**: cambios en suscripciones y pagos.
-
----
-
-## 7. Modelo de Negocio
-
-### 7.1 Plan de Precios (SaaS)
-
-| Plan | Precio Mensual | Usuarios | Casos activos | IA incluida |
-|---|---|---|---|---|
-| **Starter** | $29/mes | 1 | 20 | Básica (10 prompts/mes) |
-| **Profesional** | $79/mes | 3 | 100 | Estándar (50 prompts/mes) |
-| **Despacho** | $199/mes | 10 | Ilimitados | Avanzada (200 prompts/mes) |
-| **Enterprise** | $499/mes | Ilimitados | Ilimitados | Premium + personalización |
-
-- **Descuento**: 20% por pago anual.
-- **Freemium**: Prueba gratuita 14 días (plan Starter).
-- **Add-ons**: Usuarios extra ($9/u/mes), IA extra ($19/100 prompts), almacenamiento adicional.
-
-### 7.2 Ingresos adicionales
-
-- Servicios de migración de datos ($500 - $2,000 por despacho)
-- Formación online certificada ($99/curso)
-- Marketplace de plantillas legales premium (comisión 30%)
-
-### 7.3 Proyección Financiera (Escenario Conservador)
-
-| Año | Clientes | ARR | Costes infraestructura | Resultado |
-|---|---|---|---|---|
-| Año 1 | 40 | $48,000 | ~$3,600/año (Vercel Pro + Neon + APIs) | -$3,600 |
-| Año 2 | 150 | $190,000 | ~$12,000/año | +$178,000 |
-| Año 3 | 400 | $550,000 | ~$30,000/año | +$520,000 |
-| Año 5 | 1,200+ | $1.8M+ | ~$80,000/año | +$1.7M+ |
+- IA jurídica productiva.
+- RAG jurídico.
+- Embeddings.
+- Clasificación IA documental.
+- Extracción IA estructurada.
+- OCR multimodal.
+- PDF escaneado pesado.
+- Checkout automático.
+- Portal de cliente.
+- Firma electrónica.
 
 ---
 
-## 8. Stack Tecnológico
+## 7. Stack tecnológico
 
-### 8.1 Estructura del Proyecto
-
-```
-justicia-verdadera/              ← workspace (Kilo Code + git root)
-├── .gitignore                   ← ignora node_modules, .env*, .next, *.png
-├── master.md                    ← plan de ejecución (este documento)
-├── AGENTS.md                    ← instrucciones para Kilo Code
-├── apis.md                      ← guía de obtención de API keys
-├── .kilo/                       ← configuración de Kilo Code
-└── app/                         ← proyecto Next.js 16
-    ├── app/                     ← App Router
-    │   ├── (dashboard)/         ← rutas autenticadas
-    │   │   ├── layout.tsx       ← sidebar + header
-    │   │   ├── dashboard/
-    │   │   ├── casos/           ← CRUD expedientes (page, [id], nuevo)
-    │   │   ├── clientes/        ← CRUD contactos (page, [id], nuevo)
-    │   │   ├── documentos/      ← gestión documental
-    │   │   ├── agenda/          ← calendario eventos
-    │   │   └── facturacion/     ← facturación
-    │   ├── auth/signin/         ← página de login
-    │   ├── auth/error/          ← página de error auth
-    │   ├── api/                 ← 14 endpoints REST
-    │   │   ├── auth/[...nextauth]/
-    │   │   ├── cases/ + [id]/
-    │   │   ├── contacts/ + [id]/
-    │   │   ├── documents/ + [id]/
-    │   │   ├── events/ + [id]/
-    │   │   ├── invoices/ + [id]/
-    │   │   ├── time-entries/
-    │   │   └── dashboard/
-    │   ├── layout.tsx           ← root layout (fuentes, providers)
-    │   ├── page.tsx             ← landing page
-    │   ├── globals.css          ← Tailwind v4 + tema + animaciones
-    │   ├── not-found.tsx        ← 404
-    │   ├── error.tsx            ← 500
-    │   └── loading.tsx          ← loading state
-    ├── components/
-    │   ├── ui/                  ← 25 componentes shadcn/ui v4
-    │   ├── illustrations/       ← SVGs vectoriales
-    │   ├── forms/               ← formularios (sign-in-form)
-    │   ├── layout/              ← layouts reutilizables
-    │   └── providers/           ← QueryProvider (React Query)
-    ├── lib/
-    │   ├── auth/                ← NextAuth config + require-auth
-    │   ├── billing/             ← Stripe (lazy init)
-    │   ├── db/                  ← Drizzle client (Neon)
-    │   ├── inngest/             ← Inngest client
-    │   └── utils.ts             ← cn(), formatCurrency(), formatDate()
-    ├── hooks/                   ← 6 hooks React Query
-    ├── stores/                  ← Zustand stores (pendiente)
-    ├── types/                   ← TypeScript types compartidos
-    ├── database/
-    │   ├── schema.ts            ← 18 tablas Drizzle ORM
-    │   └── seed.ts              ← datos demo
-    ├── drizzle.config.ts        ← Drizzle Kit config
-    ├── proxy.ts                 ← auth middleware (Next.js 16)
-    ├── vercel.json              ← Vercel deploy config
-    ├── .env.local               ← variables de entorno (no commitear)
-    ├── .env.example             ← plantilla de variables
-    └── package.json             ← 40+ dependencias
-```
-
-### 8.2 Versiones y Paquetes Clave
+### Paquetes principales declarados
 
 ```json
 {
@@ -369,813 +251,994 @@ justicia-verdadera/              ← workspace (Kilo Code + git root)
     "@upstash/redis": "^1.38.0",
     "@upstash/ratelimit": "^2.0.8",
     "inngest": "^4.5.0",
-    "zustand": "^5.0.14",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "cmdk": "^1.1.1",
-    "next-themes": "^0.4.6",
-    "react-day-picker": "^10.0.1",
-    "sonner": "^2.0.7",
-    "tailwind-merge": "^3.6.0",
-    "tw-animate-css": "^1.4.0",
-    "vaul": "^1.1.2",
-    "@base-ui/react": "^1.5.0"
+    "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4",
     "@types/node": "^20.19.41",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "prettier": "^3.8.3",
-    "prettier-plugin-tailwindcss": "^0.8.0",
-    "@tailwindcss/postcss": "^4"
+    "prettier-plugin-tailwindcss": "^0.8.0"
   }
 }
 ```
 
-> **Nota**: `@sentry/nextjs` y `posthog-js` permanecen en `package.json` como dependencias muertas (sin configuración ni imports activos). Se eliminarán en próxima limpieza. `vitest`, `@playwright/test` y `turbo` no están instalados (testing aún no configurado).
+> **Nota:** no aplicar correcciones automáticas sobre nombres de paquetes sin verificar `package.json`.
 
-### 8.3 Arquitectura de Despliegue
+### Dependencias de Fase 1.5
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│  Usuario final (Navegador / PWA)                             │
-├─────────────────────────────────────────────────────────────┤
-│  Vercel (Edge Network + Serverless Functions + ISR)          │
-│  ├── next.config.ts (headers, redirects, image optimization) │
-│  ├── proxy.ts (auth, protección de rutas)                    │
-│  └── Serverless Functions (API routes, Inngest)              │
-├─────────────────────────────────────────────────────────────┤
-│  Neon DB (PostgreSQL serverless, branching, pooled)          │
-│  Upstash Redis (cache, sessions, rate limits, queues)        │
-├─────────────────────────────────────────────────────────────┤
-│  Resend (emails transaccionales)                             │
-│  Stripe (pagos y suscripciones)                              │
-│  DeepSeek V4 Flash (IA jurídica, embeddings, RAG)            │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### 8.4 Principios Técnicos
-
-- **TypeScript end-to-end**: type safety total, desde DB hasta frontend.
-- **API REST**: endpoints tipados en `app/api/`, firm-isolation via `getFirmId()` en cada handler. Preparado para app móvil.
-- **Multi-tenant por columna `firm_id`**: filtrado a nivel de aplicación con WHERE clauses. Datos aislados entre despachos.
-- **Optimistic UI**: mutaciones instantáneas con React Query, invalidación de caché automática.
-- **Edge-ready**: proxy, ISR, streaming SSR, parcialmente edge si es necesario.
-- **Seguridad desde el día 1**: encriptación AES-256 en reposo, TLS 1.3 en tránsito, audit logs, RBAC granular.
-- **Testing**: Vitest (unitarios + integración) + Playwright (E2E). 80% coverage en lógica crítica.
+| Paquete | Acción | Motivo | Estado |
+|---|---|---|---|
+| `@sentry/nextjs` | Eliminado | Dependencia muerta — 0 usos, 0 configs | [COMPLETADO] |
+| `posthog-js` | Eliminado | Dependencia muerta — 0 usos, 0 configs | [COMPLETADO] |
+| `tesseract.js` | Instalar | OCR básico de imágenes | [PENDIENTE] |
+| `vitest` | Instalar/configurar | Tests unitarios | [PENDIENTE] |
+| `@playwright/test` | Instalar/configurar solo si se usará | E2E mínimo | [PENDIENTE] |
+| SDK/API Paddle | Definir después de activar cuenta | Pasarela comercial | [PENDIENTE-ACTIVACIÓN] |
 
 ---
 
-## 9. Base de Datos — Schema MVP
+## 8. Entorno y configuración
 
-> Este es el schema relacional del MVP, implementado con PostgreSQL + Drizzle ORM. Solo las tablas esenciales para la Fase 1. Se expandirá en fases posteriores.
+| Requisito | Valor mínimo | Recomendado | Estado |
+|---|---|---|---|
+| Node.js | `>=20.9` | Node 22 LTS para CI/Vercel/producción | Local verificado: v24.14.1 |
+| npm | `>=10` | npm 10+ | Local verificado: 11.11.0 |
+| PostgreSQL | 15+ | Neon DB serverless | [VERIFICADO-REPO] |
+| Variables de entorno | `.env.example` | Sin secretos reales | [VERIFICADO-REPO] |
+
+### `engines` recomendado
+
+```json
+{
+  "engines": {
+    "node": ">=20.9 <25",
+    "npm": ">=10"
+  }
+}
+```
+
+### `.nvmrc` recomendado
+
+```text
+22
+```
+
+### Variables de entorno
+
+```env
+NEXT_PUBLIC_APP_URL=
+NEXT_PUBLIC_APP_NAME=
+DATABASE_URL=
+AUTH_SECRET=
+AUTH_GOOGLE_ID=
+AUTH_GOOGLE_SECRET=
+AUTH_MICROSOFT_ENTRA_ID_ID=
+AUTH_MICROSOFT_ENTRA_ID_SECRET=
+DEEPSEEK_API_KEY=
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
+UPLOADTHING_TOKEN=
+RESEND_API_KEY=
+RESEND_FROM_EMAIL=
+INNGEST_EVENT_KEY=
+
+# Stripe heredado/archivado mientras exista lazy-init:
+STRIPE_SECRET_KEY=
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=
+
+# Paddle pendiente de activación comercial:
+PADDLE_API_KEY=
+PADDLE_WEBHOOK_SECRET=
+PADDLE_ENVIRONMENT=
+```
+
+---
+
+## 9. Arquitectura del proyecto
+
+### Estructura declarada del repo
+
+```text
+justicia-verdadera/
+├── .gitignore
+├── .kilo/
+├── master.md
+├── AGENTS.md
+├── apis.md
+└── app/
+    ├── app/
+    │   ├── (dashboard)/
+    │   │   ├── layout.tsx
+    │   │   ├── dashboard/page.tsx
+    │   │   ├── casos/
+    │   │   ├── clientes/
+    │   │   ├── documentos/page.tsx
+    │   │   ├── agenda/page.tsx
+    │   │   └── facturacion/page.tsx
+    │   ├── auth/
+    │   ├── api/
+    │   ├── layout.tsx
+    │   ├── page.tsx
+    │   └── globals.css
+    ├── components/
+    ├── hooks/
+    ├── lib/
+    ├── stores/
+    ├── types/
+    ├── database/
+    │   ├── schema.ts
+    │   └── seed.ts
+    ├── drizzle.config.ts
+    ├── proxy.ts
+    ├── vercel.json
+    ├── .env.example
+    └── package.json
+```
+
+### Arquitectura de despliegue
+
+```text
+Usuario final
+   │
+   ▼
+Vercel
+   ├── App Router / Server Components
+   ├── API routes
+   ├── proxy.ts para protección de rutas
+   └── Serverless Functions
+        │
+        ├── Neon DB / PostgreSQL
+        ├── Upstash Redis
+        ├── Resend
+        ├── UploadThing
+        ├── Inngest
+        ├── DeepSeek V4 Flash/Pro
+        └── Paddle MoR pendiente de activación
+```
+
+### Principios técnicos
+
+- **TypeScript end-to-end.**
+- **API REST con validación Zod.**
+- **Aislamiento multi-tenant por `firm_id`.**
+- **React Query para cache e invalidación.**
+- **Serverless-first.**
+- **Jobs async con Inngest para tareas lentas.**
+- **Testing mínimo antes de crecer funcionalidad crítica.**
+
+---
+
+## 10. Base de datos
 
 ### Diagrama conceptual
 
-```
-firms (despacho)
-  │
-  ├── users (abogados, staff)
-  │     ├── sessions (NextAuth)
-  │     └── accounts (NextAuth providers)
-  │
-  ├── cases (expedientes)
-  │     ├── case_parties (partes del caso)
-  │     ├── case_events (eventos: vistas, audiencias, plazos)
-  │     ├── documents (documentos vinculados vía caseId FK)
-  │     └── time_entries (horas facturables vía caseId FK)
-  │
-  ├── contacts (clientes, contrarias, testigos, peritos, jueces)
-  │
-  ├── documents (documentos con versiones)
-  │     └── document_versions
-  │
-  ├── templates (plantillas de documentos legales)
-  │
-  ├── invoices (facturas)
-  │     └── invoice_items (líneas de factura)
-  │
-  ├── payments (pagos registrados)
-  │
-  ├── notifications (registro de notificaciones enviadas)
-  │
-  └── audit_logs (registro de acciones para compliance)
+```text
+firms
+├── users
+│   ├── sessions
+│   └── accounts
+├── cases
+│   ├── case_parties
+│   ├── case_events
+│   ├── documents
+│   └── time_entries
+├── contacts
+├── documents
+│   └── document_versions
+├── templates
+├── invoices
+│   └── invoice_items
+├── payments
+├── notifications
+└── audit_logs
 ```
 
-### Definición de tablas (Drizzle ORM — TypeScript)
+### Tablas implementadas declaradas
 
-```typescript
-// ─── FIRMS ─────────────────────────────────────
-export const firms = pgTable("firms", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  name: text("name").notNull(),
-  slug: text("slug").unique().notNull(),
-  logo: text("logo"),
-  contactEmail: text("contact_email"),
-  contactPhone: text("contact_phone"),
-  address: text("address"),
-  taxId: text("tax_id"), // RTN en Honduras
-  settings: jsonb("settings"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .notNull()
-    .$onUpdate(() => new Date()),
-});
+| # | Tabla | Descripción | Estado |
+|---:|---|---|---|
+| 1 | `firms` | Despachos / tenant | [VERIFICADO-REPO] |
+| 2 | `users` | Usuarios y roles | [VERIFICADO-REPO] |
+| 3 | `cases` | Expedientes | [VERIFICADO-REPO] |
+| 4 | `contacts` | Clientes/contactos | [VERIFICADO-REPO] |
+| 5 | `case_parties` | Relación casos-contactos | [VERIFICADO-REPO] |
+| 6 | `case_events` | Hitos, vistas, plazos | [VERIFICADO-REPO] |
+| 7 | `documents` | Metadatos documentales | [VERIFICADO-REPO] |
+| 8 | `document_versions` | Versiones de archivo | [VERIFICADO-REPO] |
+| 9 | `templates` | Plantillas legales | [VERIFICADO-REPO] |
+| 10 | `time_entries` | Horas facturables | [VERIFICADO-REPO] |
+| 11 | `invoices` | Facturas | [VERIFICADO-REPO] |
+| 12 | `invoice_items` | Líneas de factura | [VERIFICADO-REPO] |
+| 13 | `payments` | Pagos | [VERIFICADO-REPO] |
+| 14 | `notifications` | Notificaciones | [VERIFICADO-REPO] |
+| 15 | `audit_logs` | Auditoría | [VERIFICADO-REPO] |
+| 16 | `accounts` | NextAuth OAuth | [VERIFICADO-REPO] |
+| 17 | `sessions` | Sesiones NextAuth | [VERIFICADO-REPO] |
+| 18 | `verification_tokens` | Tokens NextAuth | [VERIFICADO-REPO] |
 
-// ─── USERS ─────────────────────────────────────
-export const users = pgTable("users", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  firmId: uuid("firm_id").references(() => firms.id).notNull(),
-  name: text("name").notNull(),
-  email: text("email").unique().notNull(),
-  emailVerified: timestamp("email_verified"),
-  image: text("image"),
-  role: text("role", { enum: ["owner", "admin", "lawyer", "assistant", "staff"] })
-    .default("lawyer").notNull(),
-  barNumber: text("bar_number"), // número de colegiación
-  specialty: text("specialty"),
-  phone: text("phone"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .notNull()
-    .$onUpdate(() => new Date()),
-},
-(table) => [
-  index("user_email_idx").on(table.email),
-  index("user_firm_idx").on(table.firmId),
-]);
+### Índices declarados como implementados
 
-// ─── CASES ─────────────────────────────────────
-export const cases = pgTable("cases", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  firmId: uuid("firm_id").references(() => firms.id).notNull(),
-  number: text("number").notNull(), // número interno: "CV-2026-0042"
-  courtNumber: text("court_number"), // número del juzgado
-  title: text("title").notNull(),
-  description: text("description"),
-  matter: text("matter", {
-    enum: ["civil", "penal", "laboral", "familia", "mercantil", "contencioso", "constitucional"]
-  }).notNull(),
-  status: text("status", {
-    enum: ["activo", "archivado", "cerrado", "suspendido"]
-  }).default("activo").notNull(),
-  priority: text("priority", {
-    enum: ["baja", "media", "alta", "urgente"]
-  }).default("media").notNull(),
-  assignedLawyerId: uuid("assigned_lawyer_id").references(() => users.id),
-  startDate: date("start_date").notNull(),
-  endDate: date("end_date"),
-  estimatedValue: numeric("estimated_value"), // cuantía
-  metadata: jsonb("metadata"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .notNull()
-    .$onUpdate(() => new Date()),
-},
-(table) => [
-  index("case_firm_status_matter_idx").on(table.firmId, table.status, table.matter),
-  index("case_firm_lawyer_idx").on(table.firmId, table.assignedLawyerId),
-  index("case_firm_number_idx").on(table.firmId, table.number),
-]);
-
-// ─── CASE PARTIES ──────────────────────────────
-export const caseParties = pgTable("case_parties", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  caseId: uuid("case_id").references(() => cases.id, { onDelete: "cascade" }).notNull(),
-  contactId: uuid("contact_id").references(() => contacts.id).notNull(),
-  role: text("role", {
-    enum: ["cliente", "contraria", "testigo", "perito", "juez", "fiscal", "otro"]
-  }).notNull(),
-  isMain: boolean("is_main").default(false),
-  notes: text("notes"),
-});
-
-// ─── CONTACTS ──────────────────────────────────
-export const contacts = pgTable("contacts", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  firmId: uuid("firm_id").references(() => firms.id).notNull(),
-  type: text("type", {
-    enum: ["persona_natural", "persona_juridica", "institucion"]
-  }).default("persona_natural").notNull(),
-  firstName: text("first_name"),
-  lastName: text("last_name"),
-  companyName: text("company_name"),
-  identityNumber: text("identity_number"), // DNI / RTN
-  email: text("email"),
-  phone: text("phone"),
-  address: text("address"),
-  notes: text("notes"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .notNull()
-    .$onUpdate(() => new Date()),
-},
-(table) => [
-  index("contact_firm_idx").on(table.firmId),
-  index("contact_firm_email_idx").on(table.firmId, table.email),
-]);
-
-// ─── CASE EVENTS (hitos del expediente) ────────
-export const caseEvents = pgTable("case_events", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  caseId: uuid("case_id").references(() => cases.id, { onDelete: "cascade" }).notNull(),
-  type: text("type", {
-    enum: ["vista", "audiencia", "plazo", "sentencia", "resolucion", "notificacion", "otro"]
-  }).notNull(),
-  title: text("title").notNull(),
-  description: text("description"),
-  date: timestamp("date").notNull(),
-  endDate: timestamp("end_date"),
-  location: text("location"), // sala, juzgado
-  isCompleted: boolean("is_completed").default(false),
-  notifiedAt: timestamp("notified_at"),
-  createdBy: uuid("created_by").references(() => users.id),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-// ─── DOCUMENTS ─────────────────────────────────
-export const documents = pgTable("documents", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  firmId: uuid("firm_id").references(() => firms.id).notNull(),
-  caseId: uuid("case_id").references(() => cases.id),
-  name: text("name").notNull(),
-  type: text("type", {
-    enum: ["demanda", "contestacion", "recurso", "sentencia", "contrato", "poder", "prueba", "informe", "otro"]
-  }).default("otro").notNull(),
-  currentVersion: integer("current_version").default(1).notNull(),
-  status: text("status", {
-    enum: ["borrador", "final", "firmado", "archivado"]
-  }).default("borrador").notNull(),
-  createdBy: uuid("created_by").references(() => users.id),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .notNull()
-    .$onUpdate(() => new Date()),
-},
-(table) => [
-  index("document_firm_case_type_idx").on(table.firmId, table.caseId, table.type),
-]);
-
-// ─── DOCUMENT VERSIONS ─────────────────────────
-export const documentVersions = pgTable("document_versions", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  documentId: uuid("document_id").references(() => documents.id, { onDelete: "cascade" }).notNull(),
-  version: integer("version").notNull(),
-  fileUrl: text("file_url").notNull(),
-  fileKey: text("file_key").notNull(), // clave en S3/UploadThing
-  fileSize: integer("file_size"),
-  mimeType: text("mime_type"),
-  changes: text("changes"), // descripción de cambios
-  createdBy: uuid("created_by").references(() => users.id),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-// ─── DOCUMENT TEMPLATES ────────────────────────
-export const templates = pgTable("templates", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  firmId: uuid("firm_id").references(() => firms.id),
-  name: text("name").notNull(),
-  type: text("type", {
-    enum: ["demanda", "contestacion", "recurso", "contrato", "poder", "carta", "otro"]
-  }).notNull(),
-  matter: text("matter"),
-  content: text("content").notNull(), // contenido con placeholders {{ }}
-  isPublic: boolean("is_public").default(false), // template global o del despacho
-  createdBy: uuid("created_by").references(() => users.id),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .notNull()
-    .$onUpdate(() => new Date()),
-});
-
-// ─── INVOICES ──────────────────────────────────
-export const invoices = pgTable("invoices", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  firmId: uuid("firm_id").references(() => firms.id).notNull(),
-  caseId: uuid("case_id").references(() => cases.id),
-  clientId: uuid("client_id").references(() => contacts.id).notNull(),
-  number: text("number").notNull(), // factura #F2026-0042
-  status: text("status", {
-    enum: ["borrador", "emitida", "pagada", "anulada", "vencida"]
-  }).default("borrador").notNull(),
-  subtotal: numeric("subtotal").notNull(),
-  tax: numeric("tax").notNull(), // ISV 15% en Honduras
-  total: numeric("total").notNull(),
-  currency: text("currency").default("HNL").notNull(),
-  issueDate: date("issue_date").notNull(),
-  dueDate: date("due_date").notNull(),
-  paidAt: timestamp("paid_at"),
-  notes: text("notes"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-// ─── INVOICE ITEMS ─────────────────────────────
-export const invoiceItems = pgTable("invoice_items", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  invoiceId: uuid("invoice_id").references(() => invoices.id, { onDelete: "cascade" }).notNull(),
-  description: text("description").notNull(),
-  quantity: numeric("quantity").default("1").notNull(),
-  unitPrice: numeric("unit_price").notNull(),
-  total: numeric("total").notNull(),
-  timeEntryId: uuid("time_entry_id").references(() => timeEntries.id),
-});
-
-// ─── TIME ENTRIES ──────────────────────────────
-export const timeEntries = pgTable("time_entries", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  caseId: uuid("case_id").references(() => cases.id, { onDelete: "cascade" }).notNull(),
-  userId: uuid("user_id").references(() => users.id).notNull(),
-  description: text("description").notNull(),
-  startTime: timestamp("start_time").notNull(),
-  endTime: timestamp("end_time"),
-  durationMinutes: integer("duration_minutes"),
-  hourlyRate: numeric("hourly_rate"),
-  isBillable: boolean("is_billable").default(true),
-  isInvoiced: boolean("is_invoiced").default(false),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-// ─── PAYMENTS ──────────────────────────────────
-export const payments = pgTable("payments", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  firmId: uuid("firm_id").references(() => firms.id).notNull(),
-  invoiceId: uuid("invoice_id").references(() => invoices.id),
-  amount: numeric("amount").notNull(),
-  method: text("method", {
-    enum: ["transferencia", "efectivo", "cheque", "tarjeta", "stripe", "otro"]
-  }).notNull(),
-  reference: text("reference"),
-  notes: text("notes"),
-  paidAt: timestamp("paid_at").defaultNow().notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-// ─── NOTIFICATIONS ─────────────────────────────
-export const notifications = pgTable("notifications", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  firmId: uuid("firm_id").references(() => firms.id).notNull(),
-  userId: uuid("user_id").references(() => users.id),
-  caseId: uuid("case_id").references(() => cases.id),
-  type: text("type", {
-    enum: ["plazo", "vista", "audiencia", "factura", "documento", "sistema", "mensaje"]
-  }).notNull(),
-  title: text("title").notNull(),
-  body: text("body"),
-  channel: text("channel", {
-    enum: ["email", "whatsapp", "sms", "push", "in_app"]
-  }).notNull(),
-  isRead: boolean("is_read").default(false),
-  sentAt: timestamp("sent_at"),
-  readAt: timestamp("read_at"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-// ─── AUDIT LOGS ────────────────────────────────
-export const auditLogs = pgTable("audit_logs", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  firmId: uuid("firm_id").references(() => firms.id).notNull(),
-  userId: uuid("user_id").references(() => users.id),
-  action: text("action").notNull(), // "case.created", "document.deleted"
-  entityType: text("entity_type").notNull(), // "case", "document", "invoice"
-  entityId: uuid("entity_id"),
-  changes: jsonb("changes"), // diff JSON: { antes, después }
-  ipAddress: text("ip_address"),
-  userAgent: text("user_agent"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-// ─── NEXT AUTH TABLES ──────────────────────────
-// accounts, sessions, verification_tokens (Drizzle adapter auto-genera)
+```text
+firms                  -> index(slug)
+users                  -> index(email), index(firm_id)
+cases                  -> index(firm_id, status, matter)
+cases                  -> index(firm_id, assigned_lawyer_id)
+cases                  -> index(firm_id, number)
+case_parties           -> index(case_id)
+case_events            -> index(case_id, date)
+contacts               -> index(firm_id), index(firm_id, email)
+documents              -> index(firm_id, case_id, type)
+document_versions      -> uniqueIndex(document_id, version)
+time_entries           -> index(case_id, user_id)
+invoices               -> index(firm_id, status, due_date)
+payments               -> index(firm_id, invoice_id)
+notifications          -> index(user_id, is_read, created_at)
+accounts               -> uniqueIndex(provider, provider_account_id)
+sessions               -> index(session_token)
+verification_tokens    -> uniqueIndex(identifier, token)
 ```
 
-### Índices críticos (definidos en el schema)
+### SQL recomendado para Fase 1.5
 
-```typescript
-// Búsquedas frecuentes:
-firms           => index on (slug)
-users           => index on (email), index on (firm_id)
-cases           => index on (firm_id, status, matter)
-cases           => index on (firm_id, assigned_lawyer_id)
-cases           => index on (firm_id, number)
-case_parties    => index on (case_id)
-case_events     => index on (case_id, date)
-contacts        => index on (firm_id), index on (firm_id, email)
-documents       => index on (firm_id, case_id, type)
-document_versions => uniqueIndex on (document_id, version)
-time_entries    => index on (case_id, user_id)
-invoices        => index on (firm_id, status, due_date)
-payments        => index on (firm_id, invoice_id)
-notifications   => index on (user_id, is_read, created_at)
-accounts        => uniqueIndex on (provider, provider_account_id)
-sessions        => index on (session_token)
-verification_tokens => uniqueIndex on (identifier, token)
+```sql
+CREATE UNIQUE INDEX IF NOT EXISTS case_firm_number_unique
+  ON cases(firm_id, number);
+
+CREATE UNIQUE INDEX IF NOT EXISTS invoice_firm_number_unique
+  ON invoices(firm_id, number);
+
+CREATE INDEX IF NOT EXISTS idx_documents_ocr_text
+  ON documents USING gin(to_tsvector('spanish', COALESCE(ocr_text, '')));
 ```
 
-> **Nota**: Búsqueda full-text para casos y documentos e índices pgvector para embeddings semánticos IA se implementarán en Fase 2.
+### Columnas pendientes para Fase 1.5
+
+```sql
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS ocr_text TEXT;
+
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS processing_status TEXT
+  DEFAULT 'pending'
+  CHECK (
+    processing_status IN (
+      'pending',
+      'uploaded',
+      'ocr_processing',
+      'ocr_complete',
+      'ocr_skipped',
+      'manual_review',
+      'error',
+      'retry_pending'
+    )
+  );
+```
+
+### Tabla pendiente para Fase 2
+
+```sql
+CREATE TABLE IF NOT EXISTS document_extractions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  document_version_id UUID REFERENCES document_versions(id) ON DELETE CASCADE,
+  document_id UUID REFERENCES documents(id) ON DELETE CASCADE,
+  extracted_data JSONB NOT NULL DEFAULT '{}',
+  extraction_method TEXT NOT NULL DEFAULT 'ai',
+  confidence_score DECIMAL(3,2),
+  fields_confidence JSONB,
+  reviewed_by UUID REFERENCES users(id),
+  reviewed_at TIMESTAMP,
+  corrections JSONB,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+### Reglas de seguridad de datos
+
+- Toda query debe filtrar por `firmId`.
+- Validar que `caseId`, `contactId`, `documentId` e `invoiceId` pertenecen al mismo `firmId` antes de vincular.
+- No confiar solo en FK para aislamiento multi-tenant.
+- Usar constraints únicas con `firmId` cuando el dato pertenezca a un despacho.
+- `drizzle-kit push` solo para desarrollo controlado; producción requiere migraciones revisadas.
 
 ---
 
-## 10. Estructura de API (REST)
+## 11. API REST
 
-### Endpoints implementados (Fase 1)
+### Tabla canónica de endpoints
 
-```
-app/api/
-├── cases/
-│   ├── route.ts              GET (listar + filtros) | POST (crear)
-│   └── [id]/route.ts         GET | PATCH | DELETE
-├── contacts/
-│   ├── route.ts              GET (listar + filtros) | POST (crear)
-│   └── [id]/route.ts         GET | PATCH | DELETE
-├── documents/
-│   ├── route.ts              GET (listar + filtros) | POST (crear)
-│   └── [id]/route.ts         GET | PATCH | DELETE
-├── events/
-│   ├── route.ts              GET (listar + filtros + paginación) | POST (crear)
-│   └── [id]/route.ts         GET | PATCH (toggle completado) | DELETE
-├── invoices/
-│   ├── route.ts              GET (listar + filtros + paginación) | POST (crear con items)
-│   └── [id]/route.ts         GET (con items) | PATCH (con máquina de estados) | DELETE
-├── time-entries/
-│   └── route.ts              GET (listar + filtros + paginación) | POST (crear)
-├── dashboard/
-│   └── route.ts              GET (stats agregados: casos activos, eventos próximos, facturación, horas)
-└── auth/
-    └── [...nextauth]/route.ts  NextAuth handlers (GET, POST)
-```
+| Método | Ruta | Descripción | Auth | Multi-tenant | Validación | Estado |
+|---|---|---|---|---|---|---|
+| GET/POST | `/api/auth/[...nextauth]` | Handlers NextAuth | No | N/A | NextAuth | [VERIFICADO-REPO] |
+| GET | `/api/cases` | Listar casos | Sí | Sí | Query params | [VERIFICADO-REPO] |
+| POST | `/api/cases` | Crear caso | Sí | Sí | Zod | [VERIFICADO-REPO] |
+| GET | `/api/cases/[id]` | Obtener caso | Sí | Sí | Param id | [VERIFICADO-REPO] |
+| PATCH | `/api/cases/[id]` | Actualizar caso | Sí | Sí | Zod | [VERIFICADO-REPO] |
+| DELETE | `/api/cases/[id]` | Eliminar caso | Sí | Sí | Param id | [VERIFICADO-REPO] |
+| GET | `/api/contacts` | Listar contactos | Sí | Sí | Query params | [VERIFICADO-REPO] |
+| POST | `/api/contacts` | Crear contacto | Sí | Sí | Zod | [VERIFICADO-REPO] |
+| GET | `/api/contacts/[id]` | Obtener contacto | Sí | Sí | Param id | [VERIFICADO-REPO] |
+| PATCH | `/api/contacts/[id]` | Actualizar contacto | Sí | Sí | Zod | [VERIFICADO-REPO] |
+| DELETE | `/api/contacts/[id]` | Eliminar contacto | Sí | Sí | Param id | [VERIFICADO-REPO] |
+| GET | `/api/documents` | Listar documentos por metadatos | Sí | Sí | Query params | [PARCIAL] OCR search pendiente |
+| POST | `/api/documents` | Crear metadatos de documento | Sí | Sí | Zod | [PARCIAL] subida real pendiente |
+| GET | `/api/documents/[id]` | Obtener documento con versiones | Sí | Sí | Param id | [PARCIAL] detalle OCR pendiente |
+| PATCH | `/api/documents/[id]` | Actualizar metadatos | Sí | Sí | Zod | [VERIFICADO-REPO] |
+| DELETE | `/api/documents/[id]` | Eliminar documento | Sí | Sí | Param id | [VERIFICADO-REPO] |
+| GET | `/api/events` | Listar eventos | Sí | Sí | Query params | [VERIFICADO-REPO] |
+| POST | `/api/events` | Crear evento | Sí | Sí | Zod | [VERIFICADO-REPO] |
+| GET | `/api/events/[id]` | Obtener evento | Sí | Sí | Param id | [VERIFICADO-REPO] |
+| PATCH | `/api/events/[id]` | Actualizar evento | Sí | Sí | Zod | [VERIFICADO-REPO] |
+| DELETE | `/api/events/[id]` | Eliminar evento | Sí | Sí | Param id | [VERIFICADO-REPO] |
+| GET | `/api/invoices` | Listar facturas | Sí | Sí | Query params | [VERIFICADO-REPO] |
+| POST | `/api/invoices` | Crear factura con items | Sí | Sí | Zod | [VERIFICADO-REPO] |
+| GET | `/api/invoices/[id]` | Obtener factura | Sí | Sí | Param id | [VERIFICADO-REPO] |
+| PATCH | `/api/invoices/[id]` | Actualizar factura | Sí | Sí | Zod | [VERIFICADO-REPO] |
+| DELETE | `/api/invoices/[id]` | Eliminar factura | Sí | Sí | Param id | [VERIFICADO-REPO] |
+| GET | `/api/time-entries` | Listar horas | Sí | Sí | Query params | [VERIFICADO-REPO] |
+| POST | `/api/time-entries` | Crear registro de tiempo | Sí | Sí | Zod | [VERIFICADO-REPO] |
+| GET | `/api/dashboard` | Stats agregados | Sí | Sí | Sesión | [VERIFICADO-REPO] |
 
-### Convenciones de API
+### Funciones previstas para Fase 1.5
 
-- **Autenticación**: JWT via NextAuth v5. Cada handler obtiene `firmId` mediante `getFirmId()` de `@/lib/auth/require-auth`.
-- **Aislamiento multi-tenant**: todas las queries incluyen `eq(table.firmId, firmId)` en el WHERE.
-- **Paginación**: parámetros `page` y `limit` con clamp (`Math.min(100, ...)`). Respuesta incluye `total`, `page`, `limit`, `totalPages`.
-- **Filtros**: query params (`?search=`, `?status=`, `?matter=`, `?type=`, etc.) según el recurso.
-- **Errores**: `NextResponse.json({ error: "mensaje" }, { status: 4xx/5xx })`.
-- **Formato**: `Response.json({ data, total, page, limit, totalPages })` para listas, `{ data: entity }` para singles.
-
----
-
-## 11. Estrategia de IA Jurídica
-
-### Arquitectura RAG (Retrieval-Augmented Generation)
-
-```
-Consulta del abogado
-        │
-        ▼
-┌──────────────────────┐
-│   Embedding query    │ ← DeepSeek V4 Flash embeddings
-└──────┬───────────────┘
-        │
-        ▼
-┌──────────────────────┐
-│  Búsqueda semántica  │ ← pgvector cosine similarity
-│  en corpus legal HN  │    + filtros por materia, fecha
-└──────┬───────────────┘
-        │
-        ▼
-┌──────────────────────┐
-│  Recuperación top-K  │ ← 5-10 fragmentos más relevantes
-│  (leyes, sentencias, │    con score de relevancia
-│   doctrina, propios  │
-│   documentos firma)  │
-└──────┬───────────────┘
-        │
-        ▼
-┌──────────────────────┐
-│  Prompt aumentado    │ ← system prompt jurídico
-│  + contexto + query  │    + instrucciones específicas
-└──────┬───────────────┘
-        │
-        ▼
-┌──────────────────────┐
-│  LLM (DeepSeek V4 Flash)│ ← streaming de respuesta
-│  → Respuesta fundada │    con citas y referencias
-└──────────────────────┘
-```
-
-### Construcción del corpus legal hondureño (sin abogados)
-
-La IA (Kilo) construirá el corpus mediante web scraping automatizado:
-
-1. **Legislación**: scraping de leyes, códigos y decretos de `tsc.gob.hn`, `poderjudicial.gob.hn`, `gaceta.hn`.
-2. **Jurisprudencia**: scraping de sentencias públicas de la Corte Suprema de Justicia.
-3. **Doctrina**: artículos y publicaciones de universidades y revistas jurídicas hondureñas.
-4. **Procesamiento**: limpieza, chunking, embedding con DeepSeek V4 Flash, almacenamiento en `pgvector`.
-5. **Actualización periódica**: cron mensual de re-indexación.
-
-### Funcionalidades IA concretas a construir
-
-| Funcionalidad | Prompt engineering | RAG | Tool calling |
-|---|---|---|---|
-| **Chat con expediente** | Sistema: "Eres un asistente jurídico hondureño..." | Documentos del caso + legislación relevante | Buscar docs, crear notas |
-| **Redacción de escritos** | Sistema: "Eres un abogado redactor..." | Plantilla + datos del caso + jurisprudencia | Insertar datos del caso |
-| **Resumen de documentos** | Sistema: "Resume este documento jurídico..." | Documento completo + mapa conceptual | Guardar resumen |
-| **Predicción de plazos** | Sistema: "Analiza plazos procesales..." | Código Procesal Civil/Penal HN | Crear eventos |
-| **Clasificación de docs** | Sistema: "Clasifica este documento..." | Catálogo de tipos documentales | Etiquetar documento |
-| **Extracción de datos** | Sistema: "Extrae datos estructurados..." | Sentencias y resoluciones | Poblar campos del caso |
-
----
-
-## 12. Roadmap de Ejecución (Solopreneur + IA)
-
-### Fase 0 — Setup y Planificación ✅ COMPLETADA (29 mayo 2026)
-
-**Resultado**: Proyecto Next.js 16 funcional, build verde, sin dependencias de APIs externas para arrancar.
-
-- [x] Definir plan de empresa y ejecución (`master.md`)
-- [x] Inicializar proyecto Next.js 16 + TypeScript + TailwindCSS 4
-- [x] Drizzle ORM + schema base (18 tablas listas para migrar)
-- [x] NextAuth.js v5 con JWT strategy (GitHub + Google)
-- [x] shadcn/ui v4 (25 componentes instalados)
-- [x] CI/CD (GitHub Actions → lint + typecheck + Vercel preview)
-- [x] Landing page profesional (Playfair Display + DM Sans, glassmorphism, SVG illustrations, scroll reveals)
-- [x] Dashboard layout + página principal con stats mock
-- [x] Auth page (sign-in con GitHub + Google)
-- [x] Error pages (404, 500, loading)
-- [x] Stripe billing module (lazy init, no requiere key)
-- [x] Inngest client (configurado, requiere key para usarse)
-- [x] Proxy middleware (protege rutas del dashboard)
-- [x] Vercel config (`vercel.json`)
-- [x] `.env.local` con todas las variables configuradas
-- [x] `apis.md` — guía detallada paso a paso para obtener cada API key (9 servicios)
-- [x] **Verificación de servicios** — todos los APIs comprobados (ver tabla abajo)
-- [x] Neon DB — proyecto creado, 18 tablas migradas vía `drizzle-kit push`
-
-### Estado de servicios — verificación 2026-05-30
-
-| Servicio | Estado | Detalle |
+| Pieza | Descripción | Estado |
 |---|---|---|
-| **Neon DB** | ✅ | 18 tablas creadas vía `drizzle-kit push` |
-| **DeepSeek V4 Flash** | ✅ | API responde, completions OK |
-| **Upstash Redis** | ✅ | Ping REST exitoso |
-| **Resend** | ✅ | Email de prueba enviado correctamente |
-| **Stripe** | ✅ | Modo test activo, balance OK |
-| **GitHub OAuth** | ⚠️ | Keys configuradas — requiere navegador para verificar |
-| **Google OAuth** | ⚠️ | Keys configuradas — requiere navegador para verificar |
-| **UploadThing** | ❌ | 401 Invalid API key — token inválido o expirado |
-
-- [ ] Configurar dominio y DNS (requiere dominio)
-
-**Comandos de setup (ejecutados por Kilo Code):**
-
-```bash
-# 1. Crear proyecto Next.js
-npx create-next-app@latest justicia-verdadera --typescript --tailwind --eslint --app --src-dir=false --import-alias="@/*"
-
-# 2. Instalar dependencias core
-npm install drizzle-orm @neondatabase/serverless drizzle-kit
-npm install next-auth@beta @auth/drizzle-adapter
-npm install @tanstack/react-query @tanstack/react-table
-npm install react-hook-form @hookform/resolvers zod
-npm install date-fns lucide-react recharts zustand
-
-# 3. Instalar AI
-npm install ai @ai-sdk/deepseek
-
-# 4. Instalar infraestructura
-npm install stripe @stripe/stripe-js
-npm install resend @react-email/components
-npm install uploadthing @upstash/redis @upstash/ratelimit
-npm install inngest
-npm install @sentry/nextjs posthog-js
-
-# 5. shadcn/ui
-npx shadcn@latest init
-npx shadcn@latest add button card input label separator dropdown-menu avatar badge
-
-# 6. Configurar variables de entorno
-# Crear .env.local con todas las keys necesarias
-```
-
-### Fase 1 — MVP Core ✅ COMPLETADA (30 mayo 2026)
-
-**Resultado**: MVP funcional con 6 módulos, API REST completa, 14 endpoints, autenticación con auto-provisioning, dashboard con datos reales.
-
-- [x] **Auth + Multi-tenant**: Auto-provisioning de firma/usuario en primer sign-in OAuth (GitHub/Google). JWT con firmId y role. NextAuth v5 con callbacks de sincronización BD.
-- [x] **Casos**: CRUD completo (API + páginas). Lista con filtros (materia, estado, búsqueda), formulario de creación con react-hook-form + zod, vista detalle con tabs (cronograma, partes, documentos, finanzas).
-- [x] **Clientes/Contactos**: CRUD completo. Lista con búsqueda y filtro por tipo, formulario de creación con campos condicionales según tipo.
-- [x] **Documentos**: CRUD de metadata. Lista con filtros y vinculación a casos.
-- [x] **Agenda/Calendario**: CRUD de eventos. Lista con filtros por tipo y rango, toggle completado.
-- [x] **Facturación**: CRUD de facturas con cálculo automático (subtotal + ISV 15%). Registro de tiempo facturable.
-- [x] **Dashboard**: Panel con stats reales desde BD (casos activos, vistas próximas, facturación pendiente, horas facturables, casos recientes, plazos próximos).
-- [x] **API REST**: 14 endpoints tipados (cases, contacts, documents, events, invoices, time-entries, dashboard).
-- [x] **React Query**: Hooks para todos los módulos con invalidación de caché automática.
-- [x] **TypeScript estricto**: 0 errores de typecheck.
-- [x] **ESLint**: 0 errores de lint.
-
-**Arquitectura de archivos (Phase 1)**:
-```
-app/
-├── app/
-│   ├── (dashboard)/
-│   │   ├── dashboard/page.tsx    ← Stats reales desde BD
-│   │   ├── casos/
-│   │   │   ├── page.tsx          ← Lista con filtros
-│   │   │   ├── _client.tsx       ← Cliente interactivo
-│   │   │   ├── nuevo/page.tsx    ← Formulario creación
-│   │   │   └── [id]/page.tsx     ← Vista detalle
-│   │   ├── clientes/
-│   │   │   ├── page.tsx          ← Lista contactos
-│   │   │   ├── nuevo/page.tsx    ← Formulario creación
-│   │   │   └── [id]/page.tsx     ← Vista detalle
-│   │   ├── documentos/page.tsx   ← Lista documentos
-│   │   ├── agenda/page.tsx       ← Calendario eventos
-│   │   └── facturacion/page.tsx  ← Lista facturas
-│   └── api/
-│       ├── cases/route.ts + [id]/route.ts
-│       ├── contacts/route.ts + [id]/route.ts
-│       ├── documents/route.ts + [id]/route.ts
-│       ├── events/route.ts + [id]/route.ts
-│       ├── invoices/route.ts + [id]/route.ts
-│       ├── time-entries/route.ts
-│       └── dashboard/route.ts
-├── hooks/
-│   ├── use-cases.ts          ← React Query hooks
-│   ├── use-contacts.ts
-│   ├── use-documents.ts
-│   ├── use-events.ts
-│   ├── use-invoices.ts
-│   └── use-dashboard.ts
-├── types/index.ts            ← Tipos compartidos
-└── lib/auth/
-    ├── index.ts              ← NextAuth v5 + auto-provisioning
-    └── require-auth.ts       ← Helpers getSession/getFirmId
-```
-
-### Fase 2 — IA y Automatizaciones (Sprints 9-14, ~2 meses)
-
-**Sprint 9-10: Asistente IA — Chat con expedientes**
-- UI de chat (inspirado en DeepSeek/Claude)
-- RAG pipeline: embeddings, búsqueda pgvector
-- Chat contextualizado con el expediente abierto
-- Historial de conversaciones por caso
-- Streaming de respuestas
-
-**Sprint 11: Redacción IA de escritos**
-- Selector de tipo de escrito (demanda, contestación, recurso...)
-- Generación automática con datos del caso
-- Editor de texto enriquecido (TipTap / BlockNote)
-- Control de versiones del escrito generado
-- Exportación a DOCX y PDF
-
-**Sprint 12: Automatizaciones y Workflows**
-- Workflows con Inngest (onboarding cliente, notificaciones plazos)
-- Notificaciones por email y WhatsApp (Twilio)
-- Recordatorios automáticos de plazos y vistas
-- Webhooks de Stripe (cambio de plan, pago fallido, factura pagada)
-- OCR básico de documentos subidos
-
-**Sprint 13: Dashboard y Reportes**
-- Dashboard principal (KPIs: casos activos, facturación, horas, plazos próximos)
-- Gráficos (Recharts): casos por materia, estado, evolución mensual
-- Exportación de reportes a PDF y Excel
-- Widgets configurables por usuario
-
-**Sprint 14: Polishing y lanzamiento beta**
-- Onboarding in-app (tutorial guiado)
-- Emails transaccionales (bienvenida, recordatorio, factura, etc.)
-- Página de precios y checkout completo
-- Prueba gratuita 14 días
-- Documentación de usuario
-- Landing de lanzamiento en Honduras
-
-### Fase 3 — Escalado y Avanzado (Sprints 15-22, ~3 meses)
-
-- Portal del cliente
-- App PWA con offline support
-- Firma electrónica
-- OCR avanzado con IA
-- Predicción de resultados
-- Multi-idioma ES/EN
-- Marketplace de plantillas
-- Expansión Guatemala / El Salvador
-
-### Fase 4 — Crecimiento (Sprints 23+)
-
-- IA avanzada (predicción de riesgos, análisis de sentencias)
-- API pública para integraciones
-- Segmentación por especialidad
-- Certificaciones de compliance
-- Más países CA
+| UploadThing router | Subida real de archivos | [PENDIENTE] |
+| Inngest OCR job | Procesamiento async de OCR | [PENDIENTE] |
+| Búsqueda OCR | `GET /api/documents?search=` incluye `ocr_text` | [PENDIENTE] |
+| Reintento OCR | Manual o job con `retry_pending` | [PENDIENTE] |
 
 ---
 
-## 13. Análisis DAFO
+## 12. Seguridad, privacidad y compliance
 
-### Fortalezas
-- Primer SaaS específico para el mercado legal hondureño
-- IA integrada como diferenciador clave
-- Stack tecnológico moderno, escalable y low-ops
-- Velocidad de ejecución (solopreneur + IA, sin burocracia)
-- Costes operativos mínimos (sin salarios, sin oficina)
+### Estado actual
 
-### Debilidades
-- Dependencia de APIs de IA de terceros (DeepSeek)
-- Marca nueva, sin reputación en el sector
-- Fundador sin background jurídico (compensado por IA + RAG)
-- Mercado hondureño pequeño, necesidad de expansión regional
-- Sin validación previa con abogados reales (se validará post-MVP)
+| Aspecto | Estado | Detalle |
+|---|---|---|
+| Autenticación | Implementado | NextAuth v5 JWT con Google (verificado); Microsoft Entra ID configurado y verificado |
+| Autorización RBAC | Parcial | Roles definidos; reglas de negocio pendientes |
+| Multi-tenant | Implementado en aplicación | Filtrado por `firm_id` |
+| Cifrado en reposo | Pendiente de validar | Gestionado por proveedor |
+| Cifrado en tránsito | Pendiente de validar | Gestionado por Vercel/Neon |
+| Secretos | Correcto | `.env.local`, no commitear |
+| Validación | Implementada | Zod en escrituras |
+| CSRF | Parcial | NextAuth cubre auth; resto pendiente de revisar |
+| Rate limiting | Pendiente | Upstash instalado, no activado |
+| Audit logs | Parcial | Tabla existe, escritura pendiente |
+| Backups | Pendiente de validar | Verificar plan Neon, RPO/RTO |
+| Logging sin PII | Pendiente | Política mínima definida, implementación pendiente |
 
-### Oportunidades
-- Digitalización incipiente del sector legal hondureño
-- Sin competidor directo con IA integrada
-- Expansión natural a Guatemala, El Salvador, Nicaragua
-- Posible integración futura con expediente judicial electrónico
-- Demanda creciente de eficiencia en despachos
+### Política mínima de privacidad
 
-### Amenazas
-- Resistencia al cambio en abogados tradicionales
-- Limitaciones de conectividad en zonas rurales
-- Entrada de competidores internacionales (Clio, PracticePanther)
-- Cambios regulatorios en IA y protección de datos
-- Inestabilidad política/económica en Honduras
-- Dependencia excesiva de un único proveedor de IA (DeepSeek — mitigar con modelo de respaldo si es necesario)
+- No registrar PII ni texto OCR completo en logs.
+- No enviar OCR ni documentos a IA externa en Fase 1.5.
+- No enviar PII a modelos de IA sin base legal, consentimiento o anonimización.
+- Permitir exportación y corrección de datos por despacho.
+- Definir retención configurable antes de producción.
+- Verificar backups, RPO/RTO y ubicación de datos.
+- Documentar responsabilidades del despacho sobre consentimiento de sus clientes.
+
+### Controles mínimos obligatorios Fase 1.5
+
+| Control | Implementación esperada | Estado |
+|---|---|---|
+| Rate limiting | Auth 5/min, API 60/min, upload 10/min | [PENDIENTE] |
+| Audit logs | create/update/delete de casos y documentos | [PENDIENTE] |
+| Logs seguros | Sin PII, sin OCR completo, sin secretos | [PENDIENTE] |
+| Multi-tenant tests | Validar que no cruza documentos/casos entre firmas | [PENDIENTE] |
+| Upload limits | 10 MB, MIME permitidos | [PENDIENTE] |
+| OCR async | Inngest, no API route | [PENDIENTE] |
 
 ---
 
-## 14. Go-to-Market (Post-MVP)
+## 13. IA jurídica y RAG
 
-### Canales de adquisición
+**Principio fundamental:** la IA asiste, no sustituye al abogado. Toda salida jurídica debe ser revisada por un profesional colegiado antes de usarse.
 
-1. **SEO local**: "software para abogados Honduras", "gestión de despachos legales", "programa jurídico Honduras"
-2. **LinkedIn Ads**: segmentado a abogados en Honduras
-3. **Google Ads**: keywords locales de intención de compra
-4. **Contenido**: blog jurídico-tecnológico, guías prácticas, webinars
-5. **Directo**: cold email/DM a despachos en Tegucigalpa y San Pedro Sula
-6. **Alianzas**: Colegio de Abogados de Honduras (post-validación)
+### Modelos DeepSeek
 
-### Métricas North Star
+| Modelo | Uso correcto | Configuración |
+|---|---|---|
+| `deepseek-v4-flash` | Generación usando contexto recuperado por RAG, borradores y resúmenes | `@ai-sdk/deepseek` |
+| `deepseek-v4-pro` | Verificación, auto-crítica y razonamiento más exigente | `@ai-sdk/deepseek` |
 
-| Métrica | Objetivo |
+> DeepSeek V4 Flash y V4 Pro son modelos de chat/generación/verificación. No son modelos de embeddings.
+
+> RAG no es una función del modelo. Es una arquitectura con chunking, embeddings, búsqueda vectorial/keyword, recuperación de contexto y generación condicionada.
+
+### Arquitectura anti-alucinaciones
+
+```text
+Pregunta del abogado
+   │
+   ▼
+Capa 1 — Validación de entrada
+   │
+   ▼
+Capa 2 — Recuperación de contexto RAG
+   │
+   ▼
+Capa 3 — Generación restringida
+   │
+   ▼
+Capa 4 — Verificación automática
+   │
+   ▼
+Capa 5 — Puntuación de confianza
+   │
+   ▼
+Capa 6 — Presentación con fuentes y disclaimer
+```
+
+### System prompt jurídico base
+
+```text
+Eres un asistente jurídico especializado en derecho hondureño.
+Tu única fuente de conocimiento son los fragmentos legales proporcionados.
+No uses conocimiento general.
+
+REGLAS ABSOLUTAS:
+1. Nunca inventes números de artículo, leyes, decretos o sentencias.
+2. Nunca afirmes algo que no esté respaldado por los fragmentos.
+3. Si no hay suficiente información, responde que no tienes información suficiente.
+4. Cada afirmación debe incluir su fuente.
+5. Distingue hechos, análisis y recomendación.
+6. No uses lenguaje absoluto salvo que esté textualmente en la fuente.
+7. Si dos fuentes se contradicen, señala ambas y explica la jerarquía normativa.
+```
+
+### Formato JSON esperado
+
+```json
+{
+  "hechos": [
+    {
+      "afirmacion": "...",
+      "fuente": "Código Procesal Penal",
+      "articulo": "Art. 123",
+      "texto_original": "..."
+    }
+  ],
+  "analisis": "...",
+  "recomendaciones": [
+    {
+      "recomendacion": "...",
+      "fundamento": "..."
+    }
+  ],
+  "advertencias": [
+    "Esta respuesta se basa únicamente en los fragmentos proporcionados.",
+    "Verifique con un abogado colegiado antes de tomar decisiones."
+  ],
+  "confianza": 8.5,
+  "fragmentos_usados": 5,
+  "fragmentos_disponibles": 12
+}
+```
+
+### Plazos procesales
+
+- Los plazos no se calculan con IA generativa.
+- La IA solo puede ayudar a identificar el tipo de plazo.
+- El cálculo debe realizarse mediante lógica determinística en TypeScript.
+- Cada regla debe estar documentada y validada por abogado revisor.
+
+### Embeddings y pgvector — bloqueante de Fase 2
+
+| Decisión | Estado | Notas |
+|---|---|---|
+| Proveedor embeddings | [PENDIENTE-VALIDAR] | Evaluar coste, español jurídico y privacidad |
+| Dimensión vectorial | [PENDIENTE-VALIDAR] | Depende del modelo |
+| Tabla `legal_chunks` | [PENDIENTE] | Necesaria para RAG legal |
+| Estrategia pgvector | [PENDIENTE-VALIDAR] | HNSW vs IVFFlat |
+| Actualización corpus | [PENDIENTE] | Reindexación selectiva |
+| Coste mensual | [PENDIENTE-VALIDAR] | Depende del volumen |
+
+---
+
+## 14. Corpus legal hondureño
+
+### Fuentes prioritarias
+
+| Fuente | Uso | Estado |
+|---|---|---|
+| Poder Judicial de Honduras | Sentencias y jurisprudencia | [PENDIENTE-VALIDAR] |
+| La Gaceta | Leyes, decretos y reformas | [PENDIENTE-VALIDAR] |
+| Tribunal Superior de Cuentas | Legislación y reglamentos | [PENDIENTE-VALIDAR] |
+| SAR | Materia fiscal/facturación | [PENDIENTE-VALIDAR] |
+| CAH | Referencia institucional | [PENDIENTE-VALIDAR] |
+
+### Reglas de scraping y curación
+
+- Respetar `robots.txt`.
+- Evitar scraping agresivo.
+- Guardar URL, fecha de consulta, hash SHA-256, materia, fuente, jerarquía y estado de vigencia.
+- No marcar contenido como vigente sin abogado revisor.
+- Hacer chunking por artículo/sección antes de embeddings.
+- Mantener trazabilidad completa del fragmento legal usado por la IA.
+
+---
+
+## 15. Pipeline documental
+
+### Objetivo
+
+Permitir que un abogado suba documentos reales, que el sistema guarde versiones, procese OCR básico en background, permita búsqueda por texto extraído y mantenga control de privacidad.
+
+### Flujo Fase 1.5
+
+```text
+Subida del archivo
+   │
+   ▼
+UploadThing
+   │
+   ▼
+Guardar metadata + document_version
+   │
+   ▼
+processing_status = uploaded / pending
+   │
+   ▼
+Job Inngest OCR async
+   │
+   ├── PDF nativo → extracción directa si librería viable
+   ├── Imagen JPG/PNG/TIFF → Tesseract.js
+   └── PDF escaneado pesado → ocr_skipped / manual_review
+   │
+   ▼
+Guardar ocr_text
+   │
+   ▼
+Búsqueda full-text + UI de revisión
+```
+
+### Estados `processing_status`
+
+| Estado | Significado | Transición típica |
+|---|---|---|
+| `pending` | Pendiente de crear/procesar job | Documento recién registrado |
+| `uploaded` | Archivo subido y metadata guardada | UploadThing OK |
+| `ocr_processing` | OCR en ejecución | Inngest job iniciado |
+| `ocr_complete` | OCR finalizado con texto | Texto guardado |
+| `ocr_skipped` | OCR omitido por tipo/límite | PDF escaneado pesado o no soportado |
+| `manual_review` | Requiere revisión humana | Baja calidad o resultado dudoso |
+| `error` | Error no recuperado | Fallo técnico |
+| `retry_pending` | Reintento programado | Retry manual/automático |
+
+### Alcance Fase 1.5
+
+| Incluido | Excluido |
 |---|---|
-| MRR | $4K+ al mes 6 |
-| Churn Rate | <3% mensual |
-| Tiempo hasta valor | <5 min del registro al primer caso |
-| NPS | >50 |
-| LTV/CAC | >3:1 |
+| Subida real de archivos | IA multimodal |
+| Versionado documental | Clasificación IA |
+| OCR async con Inngest | Extracción IA estructurada |
+| OCR para imágenes | RAG jurídico |
+| Extracción PDF nativo si viable | Embeddings |
+| Búsqueda full-text | Checkout/pagos automáticos |
+| Rate limiting básico | PDF escaneado pesado |
+| Audit logs mínimos | Automatizaciones avanzadas |
+
+### Límites técnicos Fase 1.5
+
+- Tamaño máximo inicial: 10 MB por archivo.
+- MIME permitidos: `application/pdf`, `image/jpeg`, `image/png`, `image/tiff`.
+- No procesar OCR pesado en API route.
+- No loggear OCR completo.
+- No enviar documentos ni OCR a IA externa.
+- Timeout máximo por job OCR: 120 segundos.
+- PDF escaneado de más de 3 páginas: `ocr_skipped` o `manual_review` hasta Fase 2.
 
 ---
 
-## 15. Próximos Pasos Inmediatos (Fase 2)
+## 16. Modelo de negocio
 
-1. **Limpieza de dependencias**
-   - Eliminar `@sentry/nextjs` y `posthog-js` del `package.json` (dependencias muertas)
-   - Instalar `vitest`, `@playwright/test` para testing
-   - Crear `.env.example` actualizado
+### Planes SaaS propuestos
 
-2. **Subida de archivos (UploadThing)**
-   - Renovar token de UploadThing (actualmente inválido)
-   - Implementar upload UI con drag & drop para documentos
-   - Vincular archivos subidos a `document_versions`
+| Plan | Precio mensual | Usuarios | Casos activos | IA incluida | Estado |
+|---|---:|---:|---:|---|---|
+| Starter | $29 | 1 | 20 | 10 prompts/mes | [SUPUESTO] |
+| Profesional | $79 | 3 | 100 | 50 prompts/mes | [SUPUESTO] |
+| Despacho | $199 | 10 | Ilimitados | 200 prompts/mes | [SUPUESTO] |
+| Enterprise | $499 | Ilimitados | Ilimitados | Personalización | [SUPUESTO] |
 
-3. **Asistente IA — Chat con expedientes** (Sprint 9-10)
-   - UI de chat contextualizado por caso
-   - RAG pipeline: embeddings con DeepSeek V4 Flash
-   - Búsqueda semántica con pgvector
-   - Streaming de respuestas
+### Proyección financiera — escenario conservador
 
-4. **Redacción IA de escritos** (Sprint 11)
-   - Generación automática de borradores con datos del caso
-   - Editor de texto enriquecido (TipTap/BlockNote)
-   - Exportación a DOCX y PDF
+| Año | Clientes | ARR | Infraestructura | IA/APIs | Herramientas | Legal/Contable | Marketing | Soporte | Costes no estimados | Margen antes de impuestos |
+|---|---:|---:|---:|---:|---:|---|---|---:|---|---:|
+| Año 1 | 40 | $48,000 | ~$3,600 | ~$1,200 | ~$600 | [PENDIENTE-VALIDAR] | [PENDIENTE-VALIDAR] | N/A | [PENDIENTE-VALIDAR] | ~$42,600 |
+| Año 2 | 150 | $190,000 | ~$12,000 | ~$6,000 | ~$1,200 | [PENDIENTE-VALIDAR] | [PENDIENTE-VALIDAR] | N/A | [PENDIENTE-VALIDAR] | ~$170,800 |
+| Año 3 | 400 | $550,000 | ~$30,000 | ~$20,000 | ~$2,400 | [PENDIENTE-VALIDAR] | [PENDIENTE-VALIDAR] | ~$24,000 | [PENDIENTE-VALIDAR] | ~$473,600 |
+| Año 5 | 1,200+ | $1.8M+ | ~$80,000 | ~$50,000 | ~$4,800 | [PENDIENTE-VALIDAR] | [PENDIENTE-VALIDAR] | ~$60,000 | [PENDIENTE-VALIDAR] | ~$1.6M |
 
-5. **Automatizaciones y Workflows** (Sprint 12)
-   - Workflows con Inngest (onboarding, notificaciones de plazos)
-   - Notificaciones email con Resend + React Email
-   - Webhooks de Stripe (cambio de plan, pago fallido)
+> Este margen no incluye impuestos, marketing completo, legales, contabilidad, comisiones de pasarela, soporte real, churn ni otros costes no estimados.
 
-6. **Dashboard avanzado y Reportes** (Sprint 13)
-   - Gráficos con Recharts (casos por materia, estado, evolución)
-   - Exportación de reportes a PDF y Excel
+### Pagos / pasarela comercial
 
-7. **Stripe Checkout y Pricing**
-   - Integración completa de Stripe Checkout
-   - Página de precios con planes Starter/Profesional/Despacho
-   - Gestión de suscripciones (cambio de plan, cancelación)
+| Fase | Estrategia | Estado |
+|---|---|---|
+| Beta | Transferencia bancaria local / pagos manuales | Decisión operativa inicial |
+| Lanzamiento comercial | Paddle como Merchant of Record principal | [PENDIENTE-ACTIVACIÓN] |
+| Alternativa | Lemon Squeezy si Paddle no aprueba o no encaja | [PENDIENTE-VALIDAR] |
+| Stripe | Archivado/no principal; solo entidad soportada o soporte oficial futuro | [PARCIAL] |
+
+**Regla:** no implementar checkout ni suscripciones automáticas en Fase 1.5.
 
 ---
 
-## 16. Apéndice — Recursos y Referencias
+## 17. Riesgos y bloqueantes
 
-- [Poder Judicial de Honduras](https://www.poderjudicial.gob.hn/)
-- [Colegio de Abogados de Honduras](https://www.cah.hn/)
-- [Tribunal Superior de Cuentas (legislación)](https://www.tsc.gob.hn/)
-- [Gaceta Oficial de Honduras](https://www.gaceta.hn/)
-- Competidores de referencia: Clio, PracticePanther, MyCase, LegalSoft, Lefebvre
-- Inspiración de UI/UX: Linear, Notion, Attio, Clio
-- Inspiración de IA: Harvey AI, CoCounsel, Leya AI, Alexi
+| ID | Riesgo | Impacto | Probabilidad | Mitigación | Owner | Estado |
+|---|---|---|---|---|---|---|
+| R1 | Pasarela comercial pendiente de activación | Crítico | Alta | Paddle MoR principal; Lemon Squeezy alternativa; pagos manuales beta | Fundador | [PENDIENTE-ACTIVACIÓN] |
+| R2 | Paddle no aprueba la cuenta | Alto | Media | Preparar documentación de identidad, empresa y producto | Fundador | [PENDIENTE-VALIDAR] |
+| R3 | Stripe no acepta cuentas Honduras | Bajo | Alta | Stripe no es opción principal; usar Paddle MoR | Fundador | Descartado como principal |
+| R4 | Coste/disponibilidad de IA | Alto | Media | Capa de abstracción de proveedor | Fundador | Monitoreo |
+| R5 | Corpus legal deficiente | Alto | Alta | Fuentes oficiales + abogado revisor | Abogado revisor | Planificado |
+| R6 | Protección de datos | Alto | Media | Política privacidad, minimización, no PII en IA | Fundador + abogado | [PENDIENTE-VALIDAR] |
+| R7 | Multi-tenant leakage | Crítico | Baja | Tests y validaciones firmId | Fundador | Parcialmente mitigado |
+| R8 | Error en plazos procesales | Crítico | Baja | Lógica determinística + tests + abogado | Fundador + abogado | Fase 2 |
+| R9 | OCR defectuoso | Medio | Alta | Manual review, límites, no automatizar decisiones críticas | Fundador | Planificado |
+| R10 | Dependencia de proveedor IA | Medio | Media | Abstracción y proveedores alternativos | Fundador | Planificado |
+| R11 | Falta de validación real | Alto | Alta | 5–10 despachos piloto | Fundador | [PENDIENTE-VALIDAR] |
+| R12 | Conectividad limitada | Medio | Media | PWA/offline Fase 3 | Fundador | Planificado |
+| R13 | UploadThing lock-in / fallo proveedor | Medio | Media | Documentar migración a Vercel Blob/S3 | Fundador | [PENDIENTE] |
+| R14 | OCR captura PII sensible | Alto | Alta | No logs OCR, no IA externa, controles acceso | Fundador | [PENDIENTE] |
+| R15 | Costes ocultos Vercel/Inngest/OCR | Medio | Media | Métricas de uso y límites | Fundador | [PENDIENTE] |
+| R16 | Migraciones Drizzle no controladas | Alto | Media | Migraciones revisadas en producción | Fundador | [PENDIENTE] |
+| R17 | NextAuth v5 beta | Medio | Media | Monitorizar cambios y aislar auth | Fundador | [PARCIAL] |
+| R18 | Backups no verificados | Alto | Media | Confirmar plan Neon RPO/RTO | Fundador | [PENDIENTE-VALIDAR] |
+| R19 | Exceso de autonomía de IA | Medio | Media | Scope estricto, DoD, validaciones y rollback | Fundador | [PENDIENTE] |
+| R20 | Documentación desactualizada | Alto | Media | `master.md` como fuente única, actualización obligatoria | Fundador | [PENDIENTE] |
+
+### Bloqueantes antes de Fase 2
+
+- Proveedor de embeddings.
+- Abogado revisor.
+- Corpus legal curado.
+- Política legal/privacidad antes de producción.
+
+### Bloqueantes antes de lanzamiento comercial
+
+- Paddle activo o alternativa MoR validada.
+- Términos de uso y privacidad revisados.
+- Piloto real con 5–10 despachos.
 
 ---
 
-> **Documento vivo y ejecutable**: este documento es la fuente de verdad que Kilo Code lee para entender el proyecto y ejecutar las tareas. Cada cambio relevante (decisión de producto, cambio de arquitectura, nuevo módulo) se actualiza aquí. La IA consulta este documento al inicio de cada sesión de desarrollo.
->
-> **Última actualización**: 30 mayo 2026 — Fase 1 completada, repositorio limpio en GitHub. Build verde (0 errores typecheck + 0 errores lint).
+## 18. Roadmap por fases
+
+### Fase 0 — Setup y planificación
+
+| Tarea | Estado |
+|---|---|
+| Next.js 16 + TypeScript + TailwindCSS 4 | Completado |
+| Drizzle ORM + schema base | Completado |
+| NextAuth.js v5 | Completado |
+| shadcn/ui | Completado |
+| Proxy middleware | Completado |
+| Landing page | Completado |
+| Variables locales | Completado |
+| 18 tablas migradas | Completado |
+| CI/CD | Declarado completado |
+
+### Fase 1 — MVP Core
+
+| Tarea | Estado |
+|---|---|
+| Auth + multi-tenant | Completado |
+| Casos CRUD | Completado |
+| Contactos CRUD | Completado |
+| Documentos metadata CRUD | Completado parcial |
+| Agenda CRUD | Completado |
+| Facturación CRUD | Completado |
+| Dashboard | Completado |
+| API REST | Completado |
+| React Query hooks | Completado |
+| Lint/typecheck/build | Completado |
+
+### Fase 1.5 — Subida documental, OCR y hardening
+
+#### 1.5A — Limpieza y base técnica (0.5–1 día)
+
+| ID | Tarea | Dependencia | Archivos probables | Criterio de aceptación | Estado |
+|---|---|---|---|---|---|
+| F1.5A-01 | Eliminar `@sentry/nextjs` y `posthog-js` si no se usan | Ninguna | `package.json`, lockfile | `npm ls` no devuelve dependencias | [COMPLETADO] |
+| F1.5A-02 | Verificar `engines` | Ninguna | `package.json` | npm sin warnings engine | [VERIFICADO-REPO] |
+| F1.5A-03 | Verificar `.nvmrc` con `22` | Ninguna | `app/.nvmrc` | `nvm use` carga Node 22 | [VERIFICADO-REPO] |
+| F1.5A-04 | Instalar/configurar tests y OCR | F1.5A-01 | `package.json` | `npm run test` funciona si existe | [PENDIENTE] (vitest no instalado) |
+
+#### 1.5B — Schema documental (1–2 días)
+
+| ID | Tarea | Dependencia | Archivos probables | Criterio de aceptación | Estado |
+|---|---|---|---|---|---|
+| F1.5B-01 | Añadir `ocr_text` | Ninguna | `database/schema.ts`, migración | Columna visible | [PENDIENTE] |
+| F1.5B-02 | Añadir `processing_status` | Ninguna | `database/schema.ts`, migración | Estados válidos aplicados | [PENDIENTE] |
+| F1.5B-03 | Unique `firmId + number` en casos/facturas | Ninguna | `database/schema.ts`, migración | Duplicado devuelve 409 | [PENDIENTE] |
+| F1.5B-04 | Índice GIN `ocr_text` | F1.5B-01 | `database/schema.ts`, migración | Búsqueda por texto OCR | [PENDIENTE] |
+
+#### 1.5C — UploadThing (2–4 días)
+
+| ID | Tarea | Dependencia | Archivos probables | Criterio de aceptación | Estado |
+|---|---|---|---|---|---|
+| F1.5C-01 | Drag & drop en `/documentos` | Ninguna | `components/upload`, página documentos | Archivo sube y crea versión | [PENDIENTE] |
+| F1.5C-02 | Validar MIME/tamaño | F1.5C-01 | upload components/router | Error claro si inválido | [PENDIENTE] |
+| F1.5C-03 | UI progreso/estado | F1.5C-01 | upload components | Progreso y resultado visible | [PENDIENTE] |
+| F1.5C-04 | Plan contingencia Vercel Blob | Ninguna | `master.md` | Migración documentada | [PENDIENTE] |
+
+#### 1.5D — OCR y búsqueda (3–7 días)
+
+| ID | Tarea | Dependencia | Archivos probables | Criterio de aceptación | Estado |
+|---|---|---|---|---|---|
+| F1.5D-01 | Job OCR async con Inngest | F1.5B | `lib/ocr`, `app/inngest` | `ocr_text` se puebla | [PENDIENTE] |
+| F1.5D-02 | OCR imágenes con Tesseract | F1.5D-01 | `lib/ocr/tesseract.ts` | Imagen → texto | [PENDIENTE] |
+| F1.5D-03 | PDF nativo si viable | F1.5D-01 | `lib/ocr/pdf.ts` | PDF texto → texto extraído | [PENDIENTE] |
+| F1.5D-04 | PDF escaneado pesado fuera de alcance | Ninguna | `master.md` | Límite documentado | [PENDIENTE] |
+| F1.5D-05 | UI OCR | F1.5D-01 | detalle documento | Texto/estado visible | [PENDIENTE] |
+| F1.5D-06 | Búsqueda OCR | F1.5B-04 | `/api/documents` | Busca por `ocr_text` | [PENDIENTE] |
+
+#### 1.5E — Hardening mínimo (2–4 días)
+
+| ID | Tarea | Dependencia | Archivos probables | Criterio de aceptación | Estado |
+|---|---|---|---|---|---|
+| F1.5E-01 | Rate limiting | Ninguna | `lib/rate-limit.ts`, API routes | 429 al exceder límite | [PENDIENTE] |
+| F1.5E-02 | Audit logs básicos | Ninguna | `lib/audit.ts`, API routes | Mutaciones registradas | [PENDIENTE] |
+| F1.5E-03 | Tests mínimos | F1.5A-04 | `__tests__` | 5 tests pasan | [PENDIENTE] |
+| F1.5E-04 | Revisar logs sin PII/OCR | Ninguna | `lib`, API routes | No hay logs sensibles | [PENDIENTE] |
+
+---
+
+## 19. Criterios de aceptación
+
+### Fase 1.5
+
+- El usuario puede subir un PDF nativo o imagen permitida.
+- Se crea `document` y `document_version`.
+- `processing_status` refleja el estado real.
+- OCR se ejecuta en background, no en API route de subida.
+- OCR de imagen funciona con Tesseract.js.
+- PDF nativo extrae texto si la librería elegida lo permite.
+- PDF escaneado pesado queda como `ocr_skipped` o `manual_review`.
+- Búsqueda encuentra documentos por `ocr_text`.
+- No hay filtración multi-tenant.
+- No se loggea PII ni OCR completo.
+- Rate limiting activo en endpoints críticos.
+- Audit logs mínimos activos.
+- `npm run lint`, `npm run typecheck`, `npm run build` pasan.
+- `npm run test` pasa si el script existe.
+- Toda decisión, avance, checklist, log operativo y cambio relevante queda documentado exclusivamente en `master.md`.
+
+### MVP antes de lanzamiento comercial
+
+- 5–10 despachos piloto durante mínimo 30 días.
+- 0 incidencias de multi-tenant leakage.
+- Términos y privacidad revisados por abogado.
+- Paddle activo o alternativa MoR validada.
+- IA jurídica solo activada con corpus validado y abogado revisor.
+
+---
+
+## 20. Backlog autónomo priorizado
+
+| Prioridad | ID | Acción | Motivo | Estado |
+|---:|---|---|---|---|
+| 1 | BA-01 | Limpiar dependencias muertas | Reduce superficie y peso | [COMPLETADO] |
+| 2 | BA-02 | Implementar schema documental | Desbloquea OCR/subida | [PENDIENTE] |
+| 3 | BA-03 | Implementar UploadThing real | Valor directo para usuario | [PENDIENTE] |
+| 4 | BA-04 | Implementar OCR async | Búsqueda documental | [PENDIENTE] |
+| 5 | BA-05 | Implementar rate limiting | Seguridad mínima | [PENDIENTE] |
+| 6 | BA-06 | Implementar audit logs | Compliance mínimo | [PENDIENTE] |
+| 7 | BA-07 | Tests multi-tenant | Evitar fuga crítica | [PENDIENTE] |
+| 8 | BA-08 | Activar piloto con abogados | Validación real | [PENDIENTE-VALIDAR] |
+| 9 | BA-09 | Decidir embeddings | Desbloquea RAG | [PENDIENTE-VALIDAR] |
+| 10 | BA-10 | Activar Paddle | Desbloquea comercial | [PENDIENTE-ACTIVACIÓN] |
+
+---
+
+## 21. Fuente única de verdad
+
+`master.md` es el único documento operativo del proyecto.
+
+Toda decisión de producto, arquitectura, roadmap, checklist, log de implementación, riesgos, criterios de aceptación y próximos pasos debe quedar registrada aquí. No se deben mantener referencias heredadas a documentación auxiliar de proyectos anteriores.
+
+---
+
+## 22. Log operativo
+
+### 2026-05-30 — Rediseño frontend completo (dark → light theme)
+
+| Campo | Resultado |
+|---|---|
+| Tipo | Rediseño integral del frontend |
+| Orquestador | DeepSeek V4 Pro |
+| Subagentes Flash usados | 7 subagentes: auditoría, sistema visual, landing, auth, dashboard, módulos, ilustraciones + QA |
+| Duración | ~1.5 horas (9 sesiones de subagente en paralelo) |
+| Objetivo | Migrar de dark theme (#080b12) a light theme profesional con diseño SaaS legal premium |
+| Estrategia | División por áreas: CSS base → componentes → páginas públicas → dashboard → módulos → ilustraciones → QA |
+
+#### Sistema visual (Phase 1a)
+- `app/app/globals.css` reescrito (308 → 335 líneas)
+- `:root` ahora define light theme: fondo `oklch(0.985 0 0)`, primario `#1e3a5f` (navy), acento `#0d9488` (teal)
+- `.dark` conservado como variante opcional con los tokens oscuros originales
+- Animaciones adaptadas a light mode (pulse-glow, border-glow usan `color-mix` para adaptarse)
+- `.glass-card` ahora es tarjeta sólida blanca con sombra sutil (no glass)
+- Nuevas utilidades: `.surface-card`, `.divider`, `.text-balance`, `.skeleton-shimmer`, `.gradient-primary`
+- `.gradient-gold` mantenido como alias de `.gradient-primary` para retrocompatibilidad
+
+#### Root layout (fix rápido)
+- `app/app/layout.tsx`: eliminada clase `dark` hardcodeada del `<html>`
+- `Toaster` cambiado de `theme="dark"` a por defecto (system)
+
+#### Componentes nuevos (Phase 1b) — 8 archivos creados
+| Componente | Archivo | Líneas |
+|---|---|---|
+| StatCard | `components/stat-card.tsx` | 92 |
+| EmptyState | `components/empty-state.tsx` | 80 |
+| PageHeader | `components/page-header.tsx` | 63 |
+| SectionCard | `components/section-card.tsx` | 76 |
+| StatusBadge | `components/status-badge.tsx` | 80 |
+| LoadingSkeleton | `components/loading-skeleton.tsx` | 116 |
+| SearchAndFilters | `components/search-and-filters.tsx` | 102 |
+| ActivityFeed | `components/activity-feed.tsx` | 131 |
+
+Todos usan CSS variables, `cn()`, shadcn/ui, lucide-react, TypeScript estricto, aria-labels.
+
+#### Landing page (Phase 2a)
+- `app/app/page.tsx` reescrito (459 → ~580 líneas)
+- Nueva paleta: `bg-background`, `text-foreground`, `text-muted-foreground`, `bg-card`, `border`
+- Secciones: nav, hero, stats, features (6), how-it-works (3 pasos), testimonial, **pricing** (3 planes), **FAQ** (6 preguntas con `<details>`), CTA, footer
+- Pricing: Starter $29, Profesional $79, Despacho $199 — display visual sin checkout
+- FAQ: 6 preguntas frecuentes con acordeón nativo `<details>`
+- Sin colores dark, sin glass-card, sin orbs
+
+#### Auth pages (Phase 2b)
+- `app/auth/signin/page.tsx` reescrito (113 → 115 líneas): light theme, JV logo navy, card blanco
+- `app/auth/error/page.tsx` reescrito (59 → 85 líneas): light theme, usa `bg-destructive/10`
+
+#### Dashboard layout + página (Phase 2c)
+- `app/(dashboard)/layout.tsx` reescrito (98 → 100 líneas): sidebar light `bg-sidebar`, navy JV badge, header con backdrop-blur
+- `app/(dashboard)/dashboard/page.tsx` reescrito (444 → 328 líneas): usa StatCard, SectionCard, EmptyState, PageHeader. KPIs con variantes de color, casos recientes, plazos próximos, quick actions
+
+#### Módulos internos (Phase 3a + 3b) — 12 archivos
+| Archivo | Cambio |
+|---|---|
+| `casos/_client.tsx` | 264 líneas — PageHeader, SearchAndFilters, StatusBadge, EmptyState, light table |
+| `casos/nuevo/page.tsx` | 262 líneas — form card light, breadcrumbs |
+| `casos/[id]/_client.tsx` | 581 líneas — tabs light, stat cards, badges, timeline |
+| `casos/page.tsx` | ~20 líneas — spinner actualizado |
+| `casos/[id]/page.tsx` | ~16 líneas — spinner actualizado |
+| `clientes/page.tsx` | ~180 líneas — PageHeader, SearchAndFilters, contact cards grid |
+| `clientes/[id]/page.tsx` | ~210 líneas — server component, detail card light |
+| `clientes/nuevo/page.tsx` | ~170 líneas — form card light |
+| `documentos/page.tsx` | 212 líneas — PageHeader, StatusBadge, EmptyState |
+| `agenda/page.tsx` | 249 líneas — countdown badges adaptados, toggle ARIA |
+| `facturacion/page.tsx` | 215 líneas — StatCard summaries, StatusBadge dots |
+| `error.tsx`, `not-found.tsx`, `loading.tsx` | Adaptados a light theme |
+
+#### Ilustraciones y mocks (Phase 4)
+- `components/illustrations/index.tsx` ampliado (160 → 410 líneas): 6 iconos existentes recoloreados + 5 nuevos (HeroIllustration, DashboardIllustration, EmptyCasesIllustration, EmptyDocsIllustration, LegalPatternSVG)
+- `components/mockups.tsx` creado (139 líneas): MockupFrame (browser/mobile) + DashboardMockup
+
+#### QA y correcciones (Phase 5)
+- Revisión exhaustiva de 25 archivos por el subagente QA
+- Encontrados y corregidos:
+  - **C1**: `casos/_client.tsx` — fila de tabla con `onClick` ahora tiene `tabIndex`, `role="link"`, `aria-label`, `onKeyDown` para accesibilidad keyboard
+  - **C4**: `agenda/page.tsx` — bug crítico: `useUpdateEvent("")` con ID vacío reemplazado por fetch directo con ID del evento
+  - **H1-H2**: colores hardcodeados `bg-[#1e3a5f]` en signin y layout reemplazados por `bg-primary`/`bg-sidebar-primary`
+  - **U1**: import `ArrowLeft` no usado eliminado de `casos/[id]/_client.tsx`
+  - **statusColors**: variable no usada eliminada
+
+#### Validaciones finales (Phase 6)
+| Comando | Resultado |
+|---|---|
+| `npm run lint` | 0 errores, 0 warnings |
+| `npm run typecheck` | 0 errores |
+| `npm run build` | Exitoso con Turbopack, 22 páginas generadas en 1.3s |
+| `npm run test` | No existe script test (vitest pendiente instalar F1.5A-04) |
+
+#### Archivos modificados/creados
+- **Creados**: 10 archivos (8 componentes + 2 mockups/ilustraciones)
+- **Modificados**: 21 archivos (globals.css, layout.tsx, page.tsx, auth×2, dashboard×2, casos×5, clientes×3, documentos, agenda, facturacion, error, not-found, loading, ilustraciones)
+- **Total**: 31 archivos tocados
+
+#### Pendientes reales
+- **P1**: `casos/nuevo/page.tsx` — Labels sin `htmlFor` en Select (F1-F3 del QA) — accesibilidad menor
+- **P2**: `documentos/page.tsx` y `facturacion/page.tsx` — `cursor-pointer` en filas no interactivas — UX menor
+- **P3**: `agenda/page.tsx` — `toggleComplete` usa `as Record<string, unknown>` — tipado mejorable
+- **P4**: `clientes/nuevo/page.tsx` — usa `useState` en vez de `react-hook-form` — inconsistencia menor con `casos/nuevo`
+- **P5**: Ilustraciones SVG usan colores hardcodeados en vez de `currentColor` — adaptación temática pendiente
+
+#### Riesgos detectados
+- **R19** (exceso autonomía IA): Mitigado — V4 Pro orquestó, subagentes Flash ejecutaron, V4 Pro revisó y corrigió.
+- Sin roturas de funcionalidad existente confirmadas.
+- Sin cambios en backend/schema/API routes.
+- Sin secretos expuestos.
+
+#### Decisión de diseño
+- El dark mode se conserva como opción futura (clase `.dark` en globals.css) pero no está activo por defecto.
+- Se mantuvo la paleta navy `#1e3a5f` como primario (profesional legal) y teal `#0d9488` como acento.
+- Las ilustraciones SVG usan 6 colores semánticos distintos para dar identidad a cada módulo.
+
+### 2026-05-30 — Microsoft Entra ID verificado + sistema mock data
+
+| Campo | Resultado |
+|---|---|
+| Tipo | Verificación OAuth + implementación de datos demo |
+| Login Microsoft Entra ID | Funcional. Probado con cuenta Microsoft personal/empresarial. Login, callback y sesión correctos. |
+| Archivos creados | `app/lib/mock-data.ts`, `app/app/api/seed-mock/route.ts` |
+| Archivos modificados | `master.md`, `app/app/(dashboard)/dashboard/page.tsx`, `app/app/(dashboard)/casos/_client.tsx`, `app/app/(dashboard)/clientes/page.tsx`, `app/app/(dashboard)/documentos/page.tsx`, `app/app/(dashboard)/agenda/page.tsx`, `app/app/(dashboard)/facturacion/page.tsx` |
+| Mock data | 12 casos, 12 contactos, 14 documentos, 14 eventos, 8 facturas con pagos, 20 time entries, 8 notificaciones. Temática legal hondureña realista. |
+| Dashboard nuevos usuarios | Detecta firm vacío, muestra onboarding con botón "Generar datos de demostración" vía POST `/api/seed-mock` |
+| Mejoras UI | Animaciones fade-in-up, stagger, skeleton loaders mejorados, hover states, countdown badges en agenda, tarjetas de stats con iconos decorativos, empty states accionables con CTAs |
+| Estados cubiertos | Empty state → seed trigger → loading → populated data → filtros sin resultados → error handling |
+| `npm run lint` | 0 errores |
+| `npm run typecheck` | 0 errores |
+| `npm run build` | Exitoso con Turbopack |
+
+### 2026-05-30 — Verificación Microsoft Entra ID OAuth
+
+| Campo | Resultado |
+|---|---|
+| Tipo | Verificación documental y técnica de configuración OAuth |
+| Archivos revisados | `app/.env.local`, `app/.env.example`, `app/lib/auth/index.ts`, `app/app/api/auth/[...nextauth]/route.ts`, `app/app/auth/signin/page.tsx` |
+| Archivos modificados | `master.md` (3 secciones actualizadas) |
+| Variables en `.env.local` | `AUTH_MICROSOFT_ENTRA_ID_ID` y `AUTH_MICROSOFT_ENTRA_ID_SECRET` presentes (sin exponer valores) |
+| Variables en `.env.example` | Ambas presentes con placeholder `your_value_here` — sin cambios necesarios |
+| Provider NextAuth | Configurado en `lib/auth/index.ts:89-92`: `MicrosoftEntraID({ clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_ID, clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET })` — import correcto desde `next-auth/providers/microsoft-entra-id` |
+| UI signin | Botón "Continuar con Microsoft" implementado en `app/auth/signin/page.tsx:79-92` con `signIn("microsoft-entra-id")` |
+| Login OAuth real | No probado (no se puede simular desde el entorno) |
+| Callback URL Azure Portal | Pendiente de confirmación manual |
+| `npm run lint` | 0 errores |
+| `npm run typecheck` | 0 errores |
+| `npm run build` | Exitoso con Turbopack |
+| `npm run test` | Fallo esperado: `vitest` no instalado (F1.5A-04) |
+| Estado | [PARCIAL] — configurado, pendiente prueba funcional OAuth real |
+| Pendientes | Prueba manual de login con cuenta Microsoft; verificación de callback URL `http://localhost:3000/api/auth/callback/microsoft-entra-id` en Azure Portal |
+
+### 2026-05-30 — F1.5A-01: Eliminación de dependencias muertas
+
+| Campo | Resultado |
+|---|---|
+| Tipo | Limpieza de dependencias sin uso real |
+| Archivos modificados | `app/package.json`, `app/package-lock.json`, `master.md` |
+| Dependencias eliminadas | `@sentry/nextjs` (`^10.55.0`), `posthog-js` (`^1.376.4`): 0 imports, 0 configs, 0 usos en el repo |
+| Efecto colateral detectado | `dotenv` era dependencia transitiva de `@sentry/nextjs`. `drizzle.config.ts` lo importa directamente sin declararlo en `package.json`. Instalado como dependencia directa (`npm install dotenv`). |
+| `npm ls @sentry/nextjs posthog-js` | `-- (empty)` — no instaladas |
+| `npm run lint` | 0 errores |
+| `npm run typecheck` | 0 errores |
+| `npm run build` | Exitoso con Turbopack |
+| `npm run test` | Fallo esperado: `vitest` no instalado (pendiente F1.5A-04) |
+| `engines` en `package.json` | `node >=20.9 <25`, `npm >=10` — verificado |
+| `.nvmrc` | Contiene `22` — verificado |
+| Paquetes removidos de node_modules | 104 paquetes (árbol de Sentry) |
+| Estado | [COMPLETADO] |
+| Pendientes | F1.5A-04: instalar `vitest` |
+
+### 2026-05-30 — Auditoría integral aplicada
+
+| Campo | Resultado |
+|---|---|
+| Tipo | Auditoría línea por línea + normalización integral |
+| Resultado | Documento reescrito en Markdown limpio |
+| Mejoras clave | Seguridad, autonomía, eficiencia, trazabilidad, OCR, multi-tenant |
+| Documentación externa | Eliminada como dependencia operativa |
+| Fuente única | `master.md` |
+| Estado | Listo para Fase 1.5 |
+
+---
+
+## 23. Estado final
+
+- Markdown limpio, sin HTML.
+- Sin referencias heredadas a documentación auxiliar.
+- Sin identificadores técnicos traducidos.
+- API REST unificada.
+- Tabla financiera corregida.
+- Riesgos ampliados hasta R20.
+- Fase 1.5 delimitada y estimada en 2–4 semanas.
+- OCR async definido con estados finales.
+- Seguridad mínima definida para PII, OCR, rate limiting y audit logs.
+- Autonomía de Kilo Code reforzada mediante protocolo de ejecución y DoD.
+- `master.md` queda como única fuente documental operativa.

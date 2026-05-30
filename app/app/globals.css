@@ -51,38 +51,38 @@
 }
 
 :root {
-  --background: #080b12;
-  --foreground: #e8e4dd;
-  --card: #0d1119;
-  --card-foreground: #e8e4dd;
-  --popover: #0d1119;
-  --popover-foreground: #e8e4dd;
-  --primary: #c8a45c;
-  --primary-foreground: #080b12;
-  --secondary: #1a2030;
-  --secondary-foreground: #e8e4dd;
-  --muted: #151c28;
-  --muted-foreground: #8b8d91;
-  --accent: #1e2a3a;
-  --accent-foreground: #e8e4dd;
-  --destructive: #e05a4f;
-  --border: rgba(255, 255, 255, 0.06);
-  --input: rgba(255, 255, 255, 0.08);
-  --ring: #c8a45c;
-  --chart-1: #c8a45c;
-  --chart-2: #7ea8c4;
-  --chart-3: #8b9d83;
-  --chart-4: #b8956e;
-  --chart-5: #c08060;
+  --background: oklch(0.985 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: #ffffff;
+  --card-foreground: oklch(0.145 0 0);
+  --popover: #ffffff;
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: #1e3a5f;
+  --primary-foreground: #ffffff;
+  --secondary: oklch(0.95 0.01 85);
+  --secondary-foreground: oklch(0.145 0 0);
+  --muted: oklch(0.965 0 0);
+  --muted-foreground: oklch(0.55 0 0);
+  --accent: #0d9488;
+  --accent-foreground: #ffffff;
+  --destructive: #dc2626;
+  --border: oklch(0.92 0 0);
+  --input: oklch(0.92 0 0);
+  --ring: #1e3a5f;
+  --chart-1: #1e3a5f;
+  --chart-2: #0d9488;
+  --chart-3: #d97706;
+  --chart-4: #7c3aed;
+  --chart-5: #059669;
   --radius: 0.75rem;
-  --sidebar: #0a0e17;
-  --sidebar-foreground: #e8e4dd;
-  --sidebar-primary: #c8a45c;
-  --sidebar-primary-foreground: #080b12;
-  --sidebar-accent: #1a2030;
-  --sidebar-accent-foreground: #e8e4dd;
-  --sidebar-border: rgba(255, 255, 255, 0.06);
-  --sidebar-ring: #c8a45c;
+  --sidebar: oklch(0.98 0 0);
+  --sidebar-foreground: oklch(0.25 0 0);
+  --sidebar-primary: #1e3a5f;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: oklch(0.95 0.01 85);
+  --sidebar-accent-foreground: oklch(0.145 0 0);
+  --sidebar-border: oklch(0.92 0 0);
+  --sidebar-ring: #1e3a5f;
 }
 
 .dark {
@@ -109,6 +109,7 @@
   --chart-3: #8b9d83;
   --chart-4: #b8956e;
   --chart-5: #c08060;
+  --radius: 0.75rem;
   --sidebar: #0a0e17;
   --sidebar-foreground: #e8e4dd;
   --sidebar-primary: #c8a45c;
@@ -177,8 +178,8 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(200, 164, 92, 0.1); }
-  50% { box-shadow: 0 0 40px rgba(200, 164, 92, 0.25); }
+  0%, 100% { box-shadow: 0 0 20px color-mix(in srgb, var(--ring) 10%, transparent); }
+  50% { box-shadow: 0 0 40px color-mix(in srgb, var(--ring) 25%, transparent); }
 }
 
 @keyframes gradient-shift {
@@ -188,8 +189,8 @@
 }
 
 @keyframes border-glow {
-  0%, 100% { border-color: rgba(200, 164, 92, 0.15); }
-  50% { border-color: rgba(200, 164, 92, 0.35); }
+  0%, 100% { border-color: color-mix(in srgb, var(--ring) 15%, transparent); }
+  50% { border-color: color-mix(in srgb, var(--ring) 35%, transparent); }
 }
 
 /* ─── Utility Classes ────────────────────────── */
@@ -226,7 +227,6 @@
   animation: border-glow 3s ease-in-out infinite;
 }
 
-/* Staggered children delays */
 .stagger-1 { animation-delay: 0.1s; }
 .stagger-2 { animation-delay: 0.2s; }
 .stagger-3 { animation-delay: 0.3s; }
@@ -236,26 +236,25 @@
 .stagger-7 { animation-delay: 0.7s; }
 .stagger-8 { animation-delay: 0.8s; }
 
-/* Glass card effect */
 .glass-card {
-  background: rgba(255, 255, 255, 0.02);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: #ffffff;
+  border: 1px solid var(--border);
   border-radius: var(--radius-2xl);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
 .glass-card-hover {
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .glass-card-hover:hover {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(200, 164, 92, 0.2);
+  background: oklch(from var(--card) l c h / 0.98);
+  border-color: color-mix(in srgb, var(--ring) 20%, var(--border));
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
-/* Gradient text */
-.gradient-gold {
-  background: linear-gradient(135deg, #c8a45c 0%, #e2c88a 50%, #c8a45c 100%);
+.gradient-primary {
+  background: linear-gradient(135deg, #1e3a5f 0%, #3b5e8a 50%, #1e3a5f 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -263,15 +262,22 @@
   animation: gradient-shift 4s ease infinite;
 }
 
-/* Grid background pattern */
+.gradient-gold {
+  background: linear-gradient(135deg, #1e3a5f 0%, #3b5e8a 50%, #1e3a5f 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 4s ease infinite;
+}
+
 .bg-grid {
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
   background-size: 64px 64px;
 }
 
-/* Noise texture overlay */
 .bg-noise::before {
   content: '';
   position: absolute;
@@ -282,16 +288,14 @@
   z-index: 0;
 }
 
-/* Subtle orb background */
 .orb {
   position: absolute;
   border-radius: 50%;
   filter: blur(120px);
-  opacity: 0.15;
+  opacity: 0.08;
   pointer-events: none;
 }
 
-/* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -300,9 +304,32 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.1);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.surface-card {
+  background: var(--card);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+}
+
+.divider {
+  height: 1px;
+  background: var(--border);
+  border: none;
+  margin: 0;
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, var(--muted) 25%, var(--border) 50%, var(--muted) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
 }

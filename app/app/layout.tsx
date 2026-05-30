@@ -43,14 +43,14 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${playfair.variable} ${dmSans.variable} dark h-full antialiased`}
+      className={`${playfair.variable} ${dmSans.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full bg-background text-foreground font-body">
         <QueryProvider>
           <TooltipProvider>{children}</TooltipProvider>
         </QueryProvider>
-        <Toaster theme="dark" />
+        <Toaster />
       </body>
     </html>
   );

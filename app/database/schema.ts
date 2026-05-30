@@ -105,7 +105,7 @@ export const cases = pgTable(
   (table) => [
     index("case_firm_status_matter_idx").on(table.firmId, table.status, table.matter),
     index("case_firm_lawyer_idx").on(table.firmId, table.assignedLawyerId),
-    index("case_firm_number_idx").on(table.firmId, table.number),
+    uniqueIndex("case_firm_number_unique").on(table.firmId, table.number),
   ]
 );
 
@@ -217,6 +217,10 @@ export const documents = pgTable(
     })
       .default("borrador")
       .notNull(),
+    ocrText: text("ocr_text"),
+    processingStatus: text("processing_status")
+      .default("pending")
+      .notNull(),
     createdBy: uuid("created_by").references(() => users.id),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
@@ -323,6 +327,7 @@ export const invoices = pgTable(
   },
   (table) => [
     index("invoice_firm_status_date_idx").on(table.firmId, table.status, table.dueDate),
+    uniqueIndex("invoice_firm_number_unique").on(table.firmId, table.number),
   ]
 );
 

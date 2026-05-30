@@ -7,14 +7,14 @@
 | Servicio | Estado |
 |---|---|
 | Neon DB | ✅ Funcionando |
-| GitHub OAuth | ⚠️ Configurado (pendiente verificar con navegador) |
-| Google OAuth | ⚠️ Configurado (pendiente verificar con navegador) |
+| Google OAuth | ✅ Funcionando |
+| Microsoft Entra ID OAuth | ⚠️ Pendiente configurar en Azure Portal |
 | DeepSeek | ✅ Funcionando |
 | Upstash Redis | ✅ Funcionando |
-| UploadThing | ❌ Token inválido — regenerar en dashboard |
+| UploadThing | ✅ Token renovado |
 | Resend | ✅ Funcionando |
-| Stripe | ✅ Funcionando (modo test) |
-| Inngest | ⚠️ Pendiente configurar |
+| Stripe | ✅ Funcionando (modo test) — ⚠️ Verificar si acepta cuentas de Honduras |
+| Inngest | ✅ Verificado (pospuesto a Fase 2) |
 | Vercel | ⚠️ Pendiente de despliegue |
 
 ---
@@ -107,40 +107,9 @@ Copia el resultado en:
 AUTH_SECRET=el_valor_generado
 ```
 
-### 2.2 GitHub OAuth App
+### 2.2 Google OAuth
 
-Permite a los usuarios iniciar sesión con su cuenta de GitHub.
-
-1. Ve a **https://github.com/settings/developers**
-2. Haz clic en **"New OAuth App"** (NO en "New GitHub App")
-3. Rellena el formulario:
-   - **Application name**: `Justicia Verdadera (dev)`
-   - **Homepage URL**: `http://localhost:3000`
-   - **Application description**: `Plataforma de gestión legal con IA para despachos de abogados en Honduras`
-   - **Authorization callback URL**: `http://localhost:3000/api/auth/callback/github`
-4. Haz clic en **"Register application"**
-5. En la siguiente pantalla verás:
-   - **Client ID** → copia este valor
-   - **Client Secrets** → haz clic en **"Generate a new client secret"** y copia el valor
-6. Pega en `.env.local`:
-   ```
-   AUTH_GITHUB_ID=tu_client_id
-   AUTH_GITHUB_SECRET=tu_client_secret
-   ```
-
-**Nota para producción**: Cuando tengas dominio real, crea OTRA OAuth App con la URL de producción y el callback correspondiente. No reutilices la de desarrollo.
-
-### Crear app de producción (cuando tengas dominio)
-
-1. Repite los pasos anteriores
-2. Cambia:
-   - **Homepage URL**: `https://tudominio.com`
-   - **Callback URL**: `https://tudominio.com/api/auth/callback/github`
-3. Usa estas credenciales en el deploy de Vercel (no en `.env.local`)
-
-### 2.3 Google OAuth
-
-Permite iniciar sesión con cuenta de Google.
+Permite iniciar sesión con cuenta de Google. Es el método de login principal para los abogados (practicamente todos tienen Gmail).
 
 1. Ve a **https://console.cloud.google.com**
 2. Si no tienes proyecto, crea uno:
@@ -182,6 +151,42 @@ Permite iniciar sesión con cuenta de Google.
    - **Authorized JavaScript origins**: `https://tudominio.com`
    - **Authorized redirect URIs**: `https://tudominio.com/api/auth/callback/google`
 3. Publica la app: **"OAuth consent screen"** → **"Publish App"**
+
+### 2.3 Microsoft Entra ID OAuth (Azure AD)
+
+Permite iniciar sesión con cuenta de Microsoft (Outlook, Office 365, Hotmail). Muchos despachos de abogados usan Office 365/Outlook como correo corporativo, por lo que este método es muy relevante para el público objetivo.
+
+1. Ve a **https://portal.azure.com**
+2. Busca **"Microsoft Entra ID"** en la barra de búsqueda superior (antes llamado Azure Active Directory)
+3. En el menú lateral, ve a **"App registrations"** → **"New registration"**
+4. Configura:
+   - **Name**: `Justicia Verdadera (dev)`
+   - **Supported account types**: `Accounts in any organizational directory and personal Microsoft accounts`
+   - **Redirect URI**: `Web` → `http://localhost:3000/api/auth/callback/microsoft-entra-id`
+5. Haz clic en **"Register"**
+6. Una vez creada, anota:
+   - **Application (client) ID** → `AUTH_MICROSOFT_ENTRA_ID_ID`
+7. Ve a **"Certificates & secrets"** → **"New client secret"**
+   - **Description**: `dev`
+   - **Expires**: `24 months`
+8. Haz clic en **"Add"** y copia el **Value** (solo se muestra una vez)
+   - **Client secret value** → `AUTH_MICROSOFT_ENTRA_ID_SECRET`
+9. Pega en `.env.local`:
+   ```
+   AUTH_MICROSOFT_ENTRA_ID_ID=tu_application_client_id
+   AUTH_MICROSOFT_ENTRA_ID_SECRET=tu_client_secret
+   ```
+
+**Nota**: Por defecto, el issuer usa `https://login.microsoftonline.com/common/v2.0` que permite cualquier cuenta Microsoft (personal, trabajo, educativa). Si quieres restringir el acceso solo a una organizacion, añade:
+```
+AUTH_MICROSOFT_ENTRA_ID_ISSUER=https://login.microsoftonline.com/<ID_del_inquilino>/v2.0
+```
+
+### Microsoft Entra ID para producción
+
+1. Ve al mismo "App registration" en Azure Portal
+2. Añade otro Redirect URI: `https://tudominio.com/api/auth/callback/microsoft-entra-id`
+3. Crea un nuevo client secret para produccion
 
 ---
 
@@ -254,7 +259,7 @@ Permite iniciar sesión con cuenta de Google.
 
 ## 5. UploadThing — Subida de Archivos
 
-> Servicio de subida de archivos optimizado para Next.js. Lo usamos para documentos legales (PDFs, DOCX, imágenes).
+> Servicio de subida de archivos optimizado para Next.js. Lo usamos para documentos legales (PDFs, DOCX, imágenes). El token ha sido renovado y verificado.
 
 1. Ve a **https://uploadthing.com**
 2. Haz clic en **"Get Started"** o **"Sign In"**
@@ -379,6 +384,16 @@ Resend solo enviará emails a direcciones verificadas en modo testing. Para veri
 
 ### Documentación relevante
 
+### Verificación de cuenta para Honduras
+
+**IMPORTANTE**: Stripe no permite crear cuentas a empresas registradas en Honduras. Antes de lanzar a producción, verificar la elegibilidad en **https://stripe.com/global**. Si Honduras no aparece en la lista de países soportados, las alternativas son:
+
+- **MercadoPago** (https://www.mercadopago.com): Acepta cuentas de Honduras, muy usado en Latinoamérica. API sólida, soporta suscripciones. Comisiones ~3.99% + $0.50.
+- **Lemon Squeezy** (https://www.lemonsqueezy.com): Actúa como "Merchant of Record" (revendedor oficial). Gestiona impuestos globales automáticamente. Comisiones ~5% + $0.50.
+- **Stripe Atlas**: Permite crear una LLC en EEUU (~$500 una sola vez) y usar Stripe a través de ella.
+
+### Documentación relevante
+
 - Dashboard test: **https://dashboard.stripe.com/test**
 - API keys: **https://dashboard.stripe.com/test/apikeys**
 - Productos: **https://dashboard.stripe.com/test/products**
@@ -416,7 +431,7 @@ Resend solo enviará emails a direcciones verificadas en modo testing. Para veri
 
 ## 9. Inngest — Workflows Asíncronos
 
-> Orquestador de funciones durables con reintentos y scheduling.
+> Orquestador de funciones durables con reintentos y scheduling. El servicio ya está configurado y verificado. Se pospone su uso activo a Fase 2 (automatizaciones), usando Cron Jobs de Vercel para tareas programadas simples durante el MVP.
 
 1. Ve a **https://app.inngest.com/sign-up**
 2. Regístrate con GitHub o email
@@ -448,9 +463,9 @@ Marca cada servicio conforme lo configures:
 
 ```
 [ ] 1. Neon DB          → https://neon.tech               → DATABASE_URL
-[ ] 2. GitHub OAuth     → https://github.com/settings/developers → AUTH_GITHUB_ID + SECRET
+[ ] 2. AUTH_SECRET      → Local (npx auth secret o crypto) → AUTH_SECRET
 [ ] 3. Google OAuth     → https://console.cloud.google.com → AUTH_GOOGLE_ID + SECRET
-[ ] 4. AUTH_SECRET      → Local (npx auth secret o crypto) → AUTH_SECRET
+[ ] 4. Microsoft Entra ID → https://portal.azure.com       → AUTH_MICROSOFT_ENTRA_ID_ID + SECRET
 [ ] 5. DeepSeek         → https://platform.deepseek.com    → DEEPSEEK_API_KEY
 [ ] 6. Upstash Redis    → https://console.upstash.com      → UPSTASH_REDIS_REST_URL + TOKEN
 [ ] 7. UploadThing      → https://uploadthing.com          → UPLOADTHING_TOKEN
@@ -460,20 +475,18 @@ Marca cada servicio conforme lo configures:
 [ ] 11. Vercel (prod)   → https://vercel.com               → Reemplazar variables con valores de producción
 ```
 
----
-
 ## Orden recomendado de configuración
 
 Configura los servicios en este orden para ir desbloqueando funcionalidad progresivamente:
 
 1. **Neon DB** — necesario para que la app funcione (persistencia)
 2. **AUTH_SECRET** — se genera local, 1 minuto
-3. **GitHub OAuth** — permite hacer login en desarrollo (más fácil que Google)
-4. **DeepSeek** — desbloquea todas las features de IA
-5. **Google OAuth** — segunda opción de login para usuarios
+3. **Google OAuth** — principal método de login para abogados
+4. **Microsoft Entra ID** — segunda opción de login (muchos despachos usan Office 365)
+5. **DeepSeek** — desbloquea todas las features de IA
 6. **Upstash Redis** — rate limiting y cache
 7. **UploadThing** — subida de archivos y documentos
 8. **Resend** — envío de emails (bienvenida, notificaciones, facturas)
-9. **Stripe** — pagos y suscripciones
-10. **Inngest** — workflows automatizados (onboarding, recordatorios)
+9. **Stripe** — pagos y suscripciones (verificar antes si acepta Honduras)
+10. **Inngest** — workflows automatizados (pospuesto a Fase 2)
 11. **Vercel** — deploy a producción

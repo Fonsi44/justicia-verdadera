@@ -3,7 +3,6 @@
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
-  ArrowLeft,
   Edit3,
   Calendar,
   FileText,
@@ -13,12 +12,15 @@ import {
   Scale,
   Gavel,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Tabs,
   TabsList,
   TabsTrigger,
   TabsContent,
 } from "@/components/ui/tabs";
+import PageHeader from "@/components/page-header";
+import StatusBadge from "@/components/status-badge";
 import { useCase } from "@/hooks/use-cases";
 import type { CaseData } from "@/types";
 
@@ -33,13 +35,13 @@ const matterLabels: Record<string, string> = {
 };
 
 const matterColors: Record<string, string> = {
-  civil: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  penal: "bg-red-500/10 text-red-400 border-red-500/20",
-  laboral: "bg-orange-500/10 text-orange-400 border-orange-500/20",
-  familia: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-  mercantil: "bg-green-500/10 text-green-400 border-green-500/20",
-  contencioso: "bg-teal-500/10 text-teal-400 border-teal-500/20",
-  constitucional: "bg-[#c8a45c]/10 text-[#c8a45c] border-[#c8a45c]/20",
+  civil: "bg-blue-500/10 text-blue-700 border-blue-500/20",
+  penal: "bg-red-500/10 text-red-700 border-red-500/20",
+  laboral: "bg-orange-500/10 text-orange-700 border-orange-500/20",
+  familia: "bg-purple-500/10 text-purple-700 border-purple-500/20",
+  mercantil: "bg-green-500/10 text-green-700 border-green-500/20",
+  contencioso: "bg-teal-500/10 text-teal-700 border-teal-500/20",
+  constitucional: "bg-primary/10 text-primary border-primary/20",
 };
 
 const statusLabels: Record<string, string> = {
@@ -47,13 +49,6 @@ const statusLabels: Record<string, string> = {
   archivado: "Archivado",
   cerrado: "Cerrado",
   suspendido: "Suspendido",
-};
-
-const statusColors: Record<string, string> = {
-  activo: "bg-green-500/10 text-green-400 border-green-500/20",
-  archivado: "bg-gray-500/10 text-gray-400 border-gray-500/20",
-  cerrado: "bg-red-500/10 text-red-400 border-red-500/20",
-  suspendido: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
 };
 
 const priorityLabels: Record<string, string> = {
@@ -64,10 +59,10 @@ const priorityLabels: Record<string, string> = {
 };
 
 const priorityColors: Record<string, string> = {
-  urgente: "bg-red-500/10 text-red-400 border-red-500/20",
-  alta: "bg-orange-500/10 text-orange-400 border-orange-500/20",
-  media: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
-  baja: "bg-gray-500/10 text-gray-400 border-gray-500/20",
+  urgente: "bg-red-500/10 text-red-700 border-red-500/20",
+  alta: "bg-orange-500/10 text-orange-700 border-orange-500/20",
+  media: "bg-yellow-500/10 text-yellow-700 border-yellow-500/20",
+  baja: "bg-gray-500/10 text-gray-600 border-gray-500/20",
 };
 
 const partyRoleLabels: Record<string, string> = {
@@ -273,9 +268,9 @@ function DetailRow({
   value: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between py-2 border-b border-white/[0.03] last:border-0">
-      <span className="text-sm text-[#8b8d91]">{label}</span>
-      <span className="text-sm text-[#e8e4dd]">{value}</span>
+    <div className="flex items-center justify-between py-2 border-b last:border-0">
+      <span className="text-sm text-muted-foreground">{label}</span>
+      <span className="text-sm text-foreground">{value}</span>
     </div>
   );
 }
@@ -292,10 +287,10 @@ function SectionCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className={`glass-card p-6 ${className ?? ""}`}>
+    <div className={`rounded-xl border bg-card shadow-sm p-6 ${className ?? ""}`}>
       <div className="flex items-center gap-2 mb-4">
-        {Icon && <Icon className="h-4 w-4 text-[#c8a45c]" />}
-        <h2 className="font-display text-base font-semibold text-[#e8e4dd]">
+        {Icon && <Icon className="h-4 w-4 text-primary" />}
+        <h2 className="font-display text-base font-semibold text-foreground">
           {title}
         </h2>
       </div>
@@ -307,7 +302,7 @@ function SectionCard({
 function CaseDetailSkeleton() {
   return (
     <div className="flex items-center justify-center py-24">
-      <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#c8a45c] border-t-transparent" />
+      <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
     </div>
   );
 }
@@ -326,39 +321,35 @@ export function CaseDetailClient() {
 
   return (
     <>
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link
-            href="/casos"
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.06] text-[#8b8d91] hover:text-[#e8e4dd] hover:bg-white/[0.04] transition-all"
-          >
-            <ArrowLeft className="h-4 w-4" />
+      <PageHeader
+        title={displayCase.title}
+        breadcrumbs={[
+          { label: "Casos", href: "/casos" },
+          { label: displayCase.number },
+        ]}
+        actions={
+          <Link href={`/casos/${id}/editar`}>
+            <Button variant="outline" size="sm">
+              <Edit3 className="h-4 w-4" />
+              Editar
+            </Button>
           </Link>
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="font-display text-2xl font-bold text-[#e8e4dd]">
-                {displayCase.title}
-              </h1>
-              <Badge
-                label={statusLabels[displayCase.status] ?? displayCase.status}
-                className={statusColors[displayCase.status] ?? ""}
-              />
-            </div>
-            <p className="mt-1 text-sm text-[#8b8d91]">
-              {displayCase.number}
-              {displayCase.courtNumber && (
-                <> &middot; {displayCase.courtNumber}</>
-              )}
-            </p>
-          </div>
+        }
+      />
+
+      <div className="space-y-1 -mt-4 mb-6">
+        <div className="flex items-center gap-2">
+          <StatusBadge
+            status={statusLabels[displayCase.status] ?? displayCase.status}
+            dot
+          />
+          <span className="text-sm text-muted-foreground">
+            {displayCase.number}
+            {displayCase.courtNumber && (
+              <> &middot; {displayCase.courtNumber}</>
+            )}
+          </span>
         </div>
-        <Link href={`/casos/${id}/editar`}>
-          <button className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 text-sm text-[#e8e4dd] hover:bg-white/[0.06] transition-colors">
-            <Edit3 className="h-4 w-4" />
-            Editar
-          </button>
-        </Link>
       </div>
 
       {/* Info Cards Grid */}
@@ -378,12 +369,12 @@ export function CaseDetailClient() {
           />
         </SectionCard>
         <SectionCard title="Abogado asignado" icon={Users}>
-          <p className="text-sm text-[#e8e4dd]">
+          <p className="text-sm text-foreground">
             {displayCase.assignedLawyer?.name ?? "No asignado"}
           </p>
         </SectionCard>
         <SectionCard title="Valor estimado" icon={DollarSign}>
-          <p className="text-sm text-[#e8e4dd]">
+          <p className="text-sm text-foreground">
             {displayCase.estimatedValue
               ? `HNL ${Number(displayCase.estimatedValue).toLocaleString("es-HN")}`
               : "No especificado"}
@@ -394,7 +385,7 @@ export function CaseDetailClient() {
       {/* Description */}
       {displayCase.description && (
         <SectionCard title="Descripción">
-          <p className="text-sm text-[#8b8d91] leading-relaxed">
+          <p className="text-sm text-muted-foreground leading-relaxed">
             {displayCase.description}
           </p>
         </SectionCard>
@@ -426,7 +417,7 @@ export function CaseDetailClient() {
           <div className="space-y-4">
             {mockEvents.length === 0 ? (
               <SectionCard title="Cronograma">
-                <p className="text-sm text-[#8b8d91]">
+                <p className="text-sm text-muted-foreground">
                   No hay eventos registrados
                 </p>
               </SectionCard>
@@ -436,38 +427,38 @@ export function CaseDetailClient() {
                   eventTypeIcons[event.type as keyof typeof eventTypeIcons] ??
                   Calendar;
                 return (
-                  <div key={event.id} className="glass-card p-6">
+                  <div key={event.id} className="rounded-xl border bg-card shadow-sm p-6">
                     <div className="flex items-start gap-4">
                       <div
                         className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border ${
                           event.isCompleted
-                            ? "border-green-500/20 bg-green-500/10 text-green-400"
-                            : "border-[#c8a45c]/10 bg-[#c8a45c]/5 text-[#c8a45c]"
+                            ? "border-green-500/20 bg-green-500/10 text-green-600"
+                            : "border-primary/10 bg-primary/5 text-primary"
                         }`}
                       >
                         <Icon className="h-4 w-4" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <h3 className="text-sm font-medium text-[#e8e4dd]">
+                          <h3 className="text-sm font-medium text-foreground">
                             {event.title}
                           </h3>
                           {event.isCompleted ? (
-                            <span className="text-xs text-green-400">
+                            <span className="text-xs text-green-600 font-medium">
                               Completado
                             </span>
                           ) : (
-                            <span className="text-xs text-[#c8a45c]">
+                            <span className="text-xs text-primary font-medium">
                               Pendiente
                             </span>
                           )}
                         </div>
                         {event.description && (
-                          <p className="mt-1 text-xs text-[#8b8d91]">
+                          <p className="mt-1 text-xs text-muted-foreground">
                             {event.description}
                           </p>
                         )}
-                        <p className="mt-1.5 text-xs text-[#8b8d91]">
+                        <p className="mt-1.5 text-xs text-muted-foreground">
                           {formatDateTime(event.date)}
                           {event.location && <> &middot; {event.location}</>}
                         </p>
@@ -484,34 +475,34 @@ export function CaseDetailClient() {
         <TabsContent value="parties">
           <SectionCard title="Partes del caso">
             {parties.length === 0 ? (
-              <p className="text-sm text-[#8b8d91]">
+              <p className="text-sm text-muted-foreground">
                 No hay partes registradas
               </p>
             ) : (
-              <div className="divide-y divide-white/[0.03]">
+              <div className="divide-y">
                 {parties.map((party: (typeof mockParties)[number]) => (
                   <div
                     key={party.id}
                     className="flex items-center justify-between py-3 first:pt-0 last:pb-0"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#c8a45c]/5 border border-[#c8a45c]/10">
-                        <Users className="h-4 w-4 text-[#c8a45c]" />
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/5 border border-primary/10">
+                        <Users className="h-4 w-4 text-primary" />
                       </div>
                       <div>
-                        <p className="text-sm text-[#e8e4dd]">
+                        <p className="text-sm text-foreground">
                           {party.contact?.firstName && party.contact?.lastName
                             ? `${party.contact.firstName} ${party.contact.lastName}`
                             : party.contact?.companyName ?? "Sin nombre"}
                         </p>
-                        <p className="text-xs text-[#8b8d91]">
+                        <p className="text-xs text-muted-foreground">
                           {partyRoleLabels[party.role as keyof typeof partyRoleLabels] ?? party.role}
                           {party.isMain && " (Principal)"}
                         </p>
                       </div>
                     </div>
                     {party.contact?.email && (
-                      <span className="text-xs text-[#8b8d91]">
+                      <span className="text-xs text-muted-foreground">
                         {party.contact.email}
                       </span>
                     )}
@@ -526,30 +517,30 @@ export function CaseDetailClient() {
         <TabsContent value="documents">
           <SectionCard title="Documentos">
             {mockDocuments.length === 0 ? (
-              <p className="text-sm text-[#8b8d91]">
+              <p className="text-sm text-muted-foreground">
                 No hay documentos vinculados
               </p>
             ) : (
-              <div className="divide-y divide-white/[0.03]">
+              <div className="divide-y">
                 {mockDocuments.map((doc) => (
                   <div
                     key={doc.id}
                     className="flex items-center justify-between py-3 first:pt-0 last:pb-0"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/[0.06] bg-white/[0.02]">
-                        <FileText className="h-4 w-4 text-[#7ea8c4]" />
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg border bg-muted/30">
+                        <FileText className="h-4 w-4 text-primary" />
                       </div>
                       <div>
-                        <p className="text-sm text-[#e8e4dd]">{doc.name}</p>
-                        <p className="text-xs text-[#8b8d91]">
+                        <p className="text-sm text-foreground">{doc.name}</p>
+                        <p className="text-xs text-muted-foreground">
                           {documentTypeLabels[doc.type as keyof typeof documentTypeLabels] ?? doc.type}
                           {" · "}
                           {documentStatusLabels[doc.status as keyof typeof documentStatusLabels] ?? doc.status}
                         </p>
                       </div>
                     </div>
-                    <span className="text-xs text-[#8b8d91]">
+                    <span className="text-xs text-muted-foreground">
                       {formatDate(doc.createdAt)}
                     </span>
                   </div>

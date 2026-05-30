@@ -2,13 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateContact } from "@/hooks/use-contacts";
 import { toast } from "sonner";
+import PageHeader from "@/components/page-header";
 
 export default function NewContactPage() {
   const router = useRouter();
@@ -47,29 +47,24 @@ export default function NewContactPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => router.back()}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div>
-          <h1 className="font-display text-2xl font-bold text-[#e8e4dd]">
-            Nuevo contacto
-          </h1>
-          <p className="mt-1 text-sm text-[#8b8d91]">
-            Agrega un cliente, contacto o instituci&oacute;n
-          </p>
-        </div>
-      </div>
+    <div className="max-w-2xl mx-auto space-y-8">
+      <PageHeader
+        title="Nuevo contacto"
+        description="Agrega un cliente, contacto o institución"
+        breadcrumbs={[
+          { label: "Clientes", href: "/clientes" },
+          { label: "Nuevo contacto" },
+        ]}
+      />
 
-      <form onSubmit={handleSubmit} className="glass-card p-6 space-y-5">
+      <form onSubmit={handleSubmit} className="rounded-xl border bg-card shadow-sm p-6 space-y-5">
         <div className="space-y-2">
           <Label htmlFor="type">Tipo de contacto</Label>
           <select
             id="type"
             value={type}
             onChange={(e) => setType(e.target.value)}
-            className="flex w-fit items-center justify-between gap-1.5 rounded-lg border border-input bg-transparent py-2 pr-2 pl-2.5 text-sm whitespace-nowrap transition-colors outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30 h-8"
+            className="flex h-8 w-fit items-center justify-between gap-1.5 rounded-lg border border-input bg-background px-2.5 py-1 text-sm transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             <option value="persona_natural">Persona Natural</option>
             <option value="persona_juridica">Persona Jur&iacute;dica</option>

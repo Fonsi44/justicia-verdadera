@@ -2,7 +2,7 @@
 
 > Proyecto: SaaS de gestión legal con IA para despachos de abogados en Honduras.
 > Stack: Next.js 16 + TypeScript + PostgreSQL + DeepSeek V4 Flash.
-> Fase actual: Fase 1 — MVP Core.
+> Fase actual: Fase 1 completada. Fase 1.5 en curso — Subida de Documentos + OCR.
 
 ---
 
@@ -48,8 +48,11 @@ workspace/
 | DeepSeek V4 | `DEEPSEEK_API_KEY` | ✅ |
 | Upstash Redis | `UPSTASH_REDIS_*` | ✅ |
 | Resend | `RESEND_API_KEY` | ✅ |
-| Stripe | `STRIPE_SECRET_KEY` | ✅ |
-| UploadThing | `UPLOADTHING_TOKEN` | ❌ Token inválido |
+| Stripe | `STRIPE_SECRET_KEY` | ⚠️ Verificar cuentas Honduras |
+| Google OAuth | `AUTH_GOOGLE_*` | ✅ |
+| Microsoft Entra ID | `AUTH_MICROSOFT_ENTRA_ID_*` | ⚠️ Pendiente configurar |
+| UploadThing | `UPLOADTHING_TOKEN` | ✅ |
+| Inngest | `INNGEST_EVENT_KEY` | ✅ Pospuesto a Fase 2 |
 
 ## Convenciones de código
 

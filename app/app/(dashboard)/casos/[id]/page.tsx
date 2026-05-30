@@ -7,7 +7,7 @@ export default function CasoDetailPage() {
       <Suspense
         fallback={
           <div className="flex items-center justify-center py-24">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#c8a45c] border-t-transparent" />
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
           </div>
         }
       >

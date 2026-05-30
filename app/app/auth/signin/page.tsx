@@ -15,36 +15,38 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-[#080b12]">
-      <div className="fixed inset-0 bg-grid pointer-events-none z-0" />
-      <div className="fixed inset-0 bg-noise pointer-events-none z-0" />
-      <div className="fixed top-[-15%] right-[-10%] w-[500px] h-[500px] rounded-full bg-[#c8a45c] opacity-[0.03] blur-[150px] pointer-events-none z-0" />
-      <div className="fixed bottom-[-15%] left-[-10%] w-[400px] h-[400px] rounded-full bg-[#7ea8c4] opacity-[0.04] blur-[150px] pointer-events-none z-0" />
+    <div className="relative flex min-h-screen items-center justify-center bg-background">
+      <div
+        className="pointer-events-none fixed inset-0 z-0"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px)",
+          backgroundSize: "64px 64px",
+        }}
+      />
 
       <div className="relative z-10 w-full max-w-md px-6">
-        <Link href="/" className="flex items-center justify-center gap-3 mb-10 group">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-[#c8a45c]/20 bg-[#c8a45c]/10 transition-colors group-hover:border-[#c8a45c]/40">
-            <span className="font-display text-sm font-bold text-[#c8a45c]">
-              JV
-            </span>
+        <Link href="/" className="mb-10 flex items-center justify-center gap-3 group">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary transition-colors group-hover:bg-primary/90">
+            <span className="font-display text-sm font-bold text-primary-foreground">JV</span>
           </div>
-          <span className="font-display text-lg font-semibold text-[#e8e4dd] tracking-wide">
+          <span className="font-display text-lg font-semibold tracking-wide text-foreground">
             Justicia Verdadera
           </span>
         </Link>
 
-        <div className="glass-card p-8">
-          <h1 className="font-display text-2xl font-bold text-[#e8e4dd] text-center">
+        <div className="rounded-2xl border border-border bg-card p-8 shadow-sm">
+          <h1 className="font-display text-xl font-bold text-foreground text-center">
             Acceder a la plataforma
           </h1>
-          <p className="mt-2 text-sm text-[#8b8d91] text-center">
+          <p className="mt-2 text-center text-sm text-muted-foreground">
             Elige tu método de acceso
           </p>
 
           <div className="mt-8 space-y-3">
             <Button
               variant="outline"
-              className="w-full h-12 border-white/[0.08] bg-white/[0.02] text-[#e8e4dd] hover:bg-white/[0.05] hover:border-white/[0.12] transition-all duration-200"
+              className="h-12 w-full rounded-xl border-border bg-white text-sm hover:bg-muted"
               onClick={() => handleSignIn("google")}
               disabled={!!loading}
             >
@@ -75,22 +77,25 @@ export default function SignInPage() {
 
             <Button
               variant="outline"
-              className="w-full h-12 border-white/[0.08] bg-[#1b1f24] text-[#e8e4dd] hover:bg-[#24292e] hover:border-white/[0.12] transition-all duration-200"
-              onClick={() => handleSignIn("github")}
+              className="h-12 w-full rounded-xl border-border bg-white text-sm hover:bg-muted"
+              onClick={() => handleSignIn("microsoft-entra-id")}
               disabled={!!loading}
             >
-              {loading === "github" ? (
+              {loading === "microsoft-entra-id" ? (
                 <Loader2 className="mr-3 h-4 w-4 animate-spin" />
               ) : (
                 <svg className="mr-3 h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                  <path d="M11.55 1H1v10.55h10.55V1z" fill="#F25022" />
+                  <path d="M23 1H12.45v10.55H23V1z" fill="#7FBA00" />
+                  <path d="M11.55 12.45H1V23h10.55V12.45z" fill="#00A4EF" />
+                  <path d="M23 12.45H12.45V23H23V12.45z" fill="#FFB900" />
                 </svg>
               )}
-              Continuar con GitHub
+              Continuar con Microsoft
             </Button>
           </div>
 
-          <p className="mt-6 text-xs text-center text-[#8b8d91]/60">
+          <p className="mt-6 text-center text-xs text-muted-foreground/60">
             Al acceder, aceptas nuestros términos de servicio y política de
             privacidad.
           </p>
@@ -99,7 +104,7 @@ export default function SignInPage() {
         <div className="mt-8 text-center">
           <Link
             href="/"
-            className="text-xs text-[#8b8d91] hover:text-[#e8e4dd] transition-colors duration-200"
+            className="text-xs text-muted-foreground transition-colors hover:text-foreground"
           >
             ← Volver al inicio
           </Link>

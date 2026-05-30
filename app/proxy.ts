@@ -1,4 +1,4 @@
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 
 const publicPaths = [
@@ -12,22 +12,21 @@ const publicPaths = [
   "/docs",
 ];
 
-export default async function proxy(req: NextRequest) {
+export default auth((req) => {
   const { pathname } = req.nextUrl;
 
   if (publicPaths.some((p) => pathname.startsWith(p))) {
     return NextResponse.next();
   }
 
-  const session = await auth();
-  if (!session?.user) {
+  if (!req.auth) {
     const signInUrl = new URL("/auth/signin", req.url);
     signInUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(signInUrl);
   }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.svg|.*\\.png).*)"],

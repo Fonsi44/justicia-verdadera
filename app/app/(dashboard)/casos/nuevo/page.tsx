@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useCreateCase } from "@/hooks/use-cases";
+import PageHeader from "@/components/page-header";
 
 const caseSchema = z.object({
   number: z.string().min(1, "El número de caso es requerido"),
@@ -93,27 +94,17 @@ export default function NuevoCasoPage() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <Link
-          href="/casos"
-          className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/[0.06] text-[#8b8d91] hover:text-[#e8e4dd] hover:bg-white/[0.04] transition-all"
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Link>
-        <div>
-          <h1 className="font-display text-2xl font-bold text-[#e8e4dd]">
-            Nuevo caso
-          </h1>
-          <p className="mt-1 text-sm text-[#8b8d91]">
-            Crea un nuevo expediente en tu despacho.
-          </p>
-        </div>
-      </div>
+      <PageHeader
+        title="Nuevo caso"
+        description="Crea un nuevo expediente en tu despacho."
+        breadcrumbs={[
+          { label: "Casos", href: "/casos" },
+          { label: "Nuevo caso" },
+        ]}
+      />
 
-      {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl">
-        <div className="glass-card p-6 space-y-6">
+        <div className="rounded-xl border bg-card shadow-sm p-6 space-y-6">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="number">Número de caso *</Label>
@@ -123,7 +114,7 @@ export default function NuevoCasoPage() {
                 {...register("number")}
               />
               {errors.number && (
-                <p className="text-xs text-red-400">{errors.number.message}</p>
+                <p className="text-xs text-red-600">{errors.number.message}</p>
               )}
             </div>
             <div className="space-y-2">
@@ -144,7 +135,7 @@ export default function NuevoCasoPage() {
               {...register("title")}
             />
             {errors.title && (
-              <p className="text-xs text-red-400">{errors.title.message}</p>
+              <p className="text-xs text-red-600">{errors.title.message}</p>
             )}
           </div>
 
@@ -177,7 +168,7 @@ export default function NuevoCasoPage() {
                 </SelectContent>
               </Select>
               {errors.matter && (
-                <p className="text-xs text-red-400">{errors.matter.message}</p>
+                <p className="text-xs text-red-600">{errors.matter.message}</p>
               )}
             </div>
             <div className="space-y-2">
@@ -209,7 +200,7 @@ export default function NuevoCasoPage() {
                 {...register("startDate")}
               />
               {errors.startDate && (
-                <p className="text-xs text-red-400">
+                <p className="text-xs text-red-600">
                   {errors.startDate.message}
                 </p>
               )}
@@ -248,7 +239,6 @@ export default function NuevoCasoPage() {
             <Button
               type="submit"
               disabled={createCase.isPending}
-              className="bg-[#c8a45c] text-[#080b12] hover:bg-[#d4b36a]"
             >
               {createCase.isPending ? (
                 <>
@@ -259,11 +249,9 @@ export default function NuevoCasoPage() {
                 "Crear caso"
               )}
             </Button>
-            <Link href="/casos">
-              <Button type="button" variant="ghost">
-                Cancelar
-              </Button>
-            </Link>
+            <Button render={<Link href="/casos" />} variant="outline" nativeButton={false}>
+              Cancelar
+            </Button>
           </div>
         </div>
       </form>

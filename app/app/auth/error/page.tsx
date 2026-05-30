@@ -25,30 +25,43 @@ export default function AuthErrorPage() {
   const error = searchParams.get("error") ?? "Default";
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#080b12]">
-      <div className="glass-card mx-4 max-w-md p-8 text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border border-red-500/20 bg-red-500/10">
-          <AlertTriangle className="h-6 w-6 text-red-400" />
+    <div className="flex min-h-screen items-center justify-center bg-background">
+      <div
+        className="pointer-events-none fixed inset-0 z-0"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px)",
+          backgroundSize: "64px 64px",
+        }}
+      />
+
+      <div className="relative z-10 mx-4 max-w-md animate-fade-in-up rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10">
+          <AlertTriangle className="h-6 w-6 text-destructive" />
         </div>
-        <h1 className="font-display text-xl font-bold text-[#e8e4dd]">
+
+        <h1 className="font-display text-xl font-bold text-foreground">
           Error de autenticación
         </h1>
-        <div className="mt-2 rounded-lg border border-white/[0.06] bg-white/[0.02] px-4 py-2">
-          <code className="text-sm text-[#c8a45c]">{error}</code>
+
+        <div className="mt-2 inline-block rounded-lg border border-border px-4 py-2">
+          <code className="text-sm text-muted-foreground">{error}</code>
         </div>
-        <p className="mt-4 text-sm leading-relaxed text-[#8b8d91]">
+
+        <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
           {errorMessages[error] ?? errorMessages.Default}
         </p>
+
         <div className="mt-6 flex flex-col gap-3">
           <Link
             href="/auth/signin"
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#c8a45c] px-6 py-2.5 text-sm font-medium text-[#080b12] hover:bg-[#d4b36a] transition-colors"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80"
           >
             Volver al inicio de sesión
           </Link>
           <Link
             href="/"
-            className="text-xs text-[#8b8d91] hover:text-[#e8e4dd] transition-colors"
+            className="text-xs text-muted-foreground transition-colors hover:text-foreground"
           >
             ← Volver al inicio
           </Link>
