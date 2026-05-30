@@ -12,9 +12,9 @@
 |---|---|
 | Proyecto | Justicia Verdadera |
 | Responsable | Alfons Roiget, fundador |
-| Versión del documento | 5.7 — Auditoría 100%, service layer 7 módulos, OCR mejorado, RBAC, soft-delete, CI/CD (30 mayo 2026) |
+| Versión del documento | 5.8 — Planificación Fase 2: IA jurídica, RAG, facturación SAR (30 mayo 2026) |
 | Fecha de actualización | 30 mayo 2026 |
-| Estado global | Fase 1 completada. Fase 1.5 completada. Auditoría 78 hallazgos resueltos. Service layer implementado. CI/CD + Vercel funcional. |
+| Estado global | Fase 1 completada. Fase 1.5 completada. Auditoría 78 hallazgos resueltos. Service layer implementado. CI/CD + Vercel funcional. Fase 2 planificada. |
 | Fuente de verdad | Solo `master.md` |
 | Última verificación técnica declarada | 30 mayo 2026 |
 | Comandos declarados como ejecutados | `npm run lint`, `npm run typecheck`, `npm run build`, `npm run test` |
@@ -505,6 +505,119 @@ firms
 
 ## 13. IA jurídica y RAG — Fase 2
 
+### 13.1 Estrategia de datos legales
+
+El éxito del módulo de IA jurídica depende de un corpus legal hondureño curado y actualizado. La estrategia de recolección se divide en tres fases:
+
+**Fase 2A — Fuentes oficiales estáticas (prioridad alta):**
+- **Códigos y leyes:** Código Civil, Código Penal, Código Procesal Civil, Código Procesal Penal, Código de Trabajo, Código de Comercio, Código de Familia, Ley de Contratación del Estado, Ley del Notariado. Fuente: `www.tsc.gob.hn` (Tribunal Superior de Cuentas) y `www.poderjudicial.gob.hn`.
+- **Reglamentos:** Reglamento de ISR, Reglamento de ISV, Reglamento de Facturación (SAR). Fuente: `www.sefin.gob.hn`.
+- **Tratados internacionales:** CAFTA-DR, Convención de Viena, tratados OIT ratificados. Fuente: `www.sre.gob.hn`.
+
+**Fase 2B — Jurisprudencia y resoluciones (prioridad media):**
+- **Sentencias CSJ:** scraping/API de la Sala Constitucional, Sala Civil y Sala Penal del portal `www.poderjudicial.gob.hn`.
+- **Resoluciones administrativas:** SAR, IP, CNBS — scraping de gacetas oficiales.
+- **La Gaceta:** diario oficial `www.lagaceta.hn` para decretos, reformas y avisos.
+
+**Fase 2C — Corpus vivo y actualizaciones (prioridad baja):**
+- **Actualización periódica:** cron job semanal (Vercel Cron) que descarga nuevas publicaciones de La Gaceta y sentencias CSJ.
+- **Validación por abogado revisor:** todo texto incorporado al corpus debe ser validado por un abogado colegiado hondureño antes de usarse en producción.
+
+### 13.2 Estrategia de plantillas y borradores
+
+**Catálogo de plantillas base (25-30 documentos):**
+| Tipo | Plantillas |
+|---|---|
+| Demandas | Civil, penal, laboral, mercantil, familia, contencioso |
+| Contestaciones | Demanda civil, demanda penal, demanda laboral |
+| Recursos | Apelación, casación, amparo, revisión, queja |
+| Contratos | Servicios profesionales, honorarios, arrendamiento, compraventa |
+| Poderes | General, especial, notarial |
+| Escritos | Ofrecimiento de pruebas, desistimiento, conciliación |
+
+**Sistema de generación de borradores:**
+```text
+Selección de plantilla → Relleno automático con datos del caso (partes, fechas, hechos)
+→ IA contextualiza con jurisprudencia relevante
+→ Abogado revisa y firma → PDF final
+```
+
+### 13.3 Arquitectura RAG
+
+```text
+Documentos legales (PDF, HTML, texto)
+→ Chunking (512 tokens con overlap 50)
+→ Embeddings (text-embedding-3-small o modelo local)
+→ Vector store (pgvector en Neon DB)
+→ Retrieval (búsqueda semántica + keyword hybrid)
+→ Prompt aumentado (contexto relevante + instrucciones legales)
+→ DeepSeek V4 Flash genera respuesta
+→ Validación de citas legales (cross-reference con fuentes originales)
+```
+
+### 13.4 Consideraciones éticas y legales
+
+- **No sustituye al abogado:** la IA es asistente, no emite opinión legal vinculante.
+- **Responsabilidad profesional:** el abogado firmante es responsable del contenido final.
+- **Confidencialidad:** los datos de casos no se usan para entrenar modelos.
+- **Sesgo:** el corpus debe incluir jurisprudencia de todas las salas y materias.
+- **Actualización:** las leyes derogadas deben marcarse como obsoletas en el corpus.
+
+---
+
+## 13bis. Sistema de facturación SAR-compliant (Honduras)
+
+### 13bis.1 Régimen fiscal hondureño aplicable
+
+| Concepto | Detalle | Estado |
+|---|---|---|
+| ISV (Impuesto Sobre Ventas) | 15% general, 0% exentos (medicinas, alimentos básicos, exportación) | Implementado: `firms.isvRate` configurable |
+| ISR (Impuesto Sobre Renta) | 25% personas jurídicas, retención escalonada personas naturales | [PENDIENTE] |
+| CAI (Código de Autorización de Impresión) | Obligatorio en toda factura, rango autorizado por SAR | [PENDIENTE] |
+| RTN (Registro Tributario Nacional) | Identificador fiscal del despacho, ya en `firms.taxId` | Parcial |
+| Factura electrónica | Resolución SAR-GER-2020-001, formato XML estándar | [PENDIENTE] |
+| Retención ISR 12.5% | Servicios profesionales facturados a personas jurídicas | [PENDIENTE] |
+| Libros contables | Diario, Mayor, Balances — formato electrónico | [PENDIENTE] |
+| Conservación registros | 5 años mínimo (Código Tributario, Art. 112) | Parcial (audit_logs) |
+
+### 13bis.2 Modelo de factura SAR-compliant
+
+```text
+Factura (invoices table ya existente)
+├── number (formato: FAC-{año}-{correlativo}, ej: FAC-2026-0001)
+├── CAI (texto: Código de Autorización de Impresión SAR)
+├── rango_cai (desde-hasta autorizado)
+├── fecha_limite_emision (fecha límite del CAI)
+├── rtn_emisor (firms.taxId)
+├── rtn_receptor (contacts.identityNumber)
+├── subtotal (sin ISV)
+├── isv_15 (15% del subtotal)
+├── isv_0 (exento, si aplica)
+├── retencion_isr (12.5% si aplica)
+├── total (subtotal + isv - retencion)
+├── estado_sar (pendiente_enviar | enviado | aceptado | rechazado)
+└── cai_response (XML respuesta SAR)
+```
+
+### 13bis.3 Flujo de facturación
+
+```text
+Crear factura → Asignar número correlativo + CAI
+→ Calcular ISV según firms.isvRate (15% default)
+→ Si cliente es persona jurídica: aplicar retención ISR 12.5%
+→ Emitir factura en estado "emitida"
+→ Enviar a SAR vía API/CVS (planificado Fase 2)
+→ Registrar pago → factura pasa a "pagada"
+→ Generar reporte mensual ISV/ISR para declaración SAR
+```
+
+### 13bis.4 Integración con SAR (planificado)
+
+- **API SAR:** Honduras está en proceso de implementar factura electrónica obligatoria (similar a GT/CR). Monitorear `www.sar.gob.hn` para endpoint oficial.
+- **Fase beta:** exportación CSV para carga manual en portal SAR.
+- **Fase 2:** integración directa cuando SAR libere API pública.
+- **Firma electrónica:** necesaria para facturación electrónica — pendiente evaluación de proveedores (Firma Virtual S.A., ACERTA, GSE).
+
 ---
 
 ## 14. Pipeline documental
@@ -791,3 +904,22 @@ Verificación: lint 0, typecheck 0, tests 34, build 37 rutas.
 **master.md actualizado**: v5.7 con RBAC, 19 tablas, service layer, 34 tests, soft-delete, health endpoint.
 
 Verificación: lint 0, typecheck 0, tests 34, build 37 rutas.
+
+### 2026-05-30 — Planificación Fase 2: IA jurídica y facturación SAR
+
+Se definió el alcance completo de Fase 2 en `master.md`:
+
+**Sección 13 — IA jurídica y RAG:**
+- Estrategia de recolección de datos en 3 fases (fuentes estáticas → jurisprudencia → corpus vivo)
+- Catálogo de 25-30 plantillas legales base (demandas, recursos, contratos, poderes, escritos)
+- Sistema de generación de borradores con IA contextual
+- Arquitectura RAG: chunking → embeddings → pgvector → retrieval híbrido → DeepSeek V4
+- Consideraciones éticas y legales (no sustituye al abogado, confidencialidad, sesgo)
+
+**Sección 13bis — Facturación SAR-compliant:**
+- Régimen fiscal hondureño: ISV 15%, ISR 25%, CAI, RTN, factura electrónica
+- Modelo de factura extendida con campos SAR (CAI, rango_cai, retencion_isr, estado_sar)
+- Flujo de facturación completo con cálculo dinámico de ISV + retención ISR 12.5%
+- Estrategia de integración SAR (Fase beta CSV → Fase 2 API directa)
+
+**Fuentes oficiales identificadas:** TSC, Poder Judicial, SEFIN, SRE, La Gaceta, SAR.
