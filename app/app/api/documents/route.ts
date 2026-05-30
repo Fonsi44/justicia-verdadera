@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { documents, cases } from "@/database/schema";
+import { documents, documentVersions, cases } from "@/database/schema";
 import { getFirmId } from "@/lib/auth/require-auth";
 import { eq, and, like, desc, count } from "drizzle-orm";
 
@@ -64,11 +64,11 @@ export async function POST(req: NextRequest) {
   try {
     const firmId = await getFirmId();
     const body = await req.json();
-    const { caseId, name, type } = body;
+    const { caseId, name, type, mimeType, fileUrl, fileKey, fileSize } = body;
 
-    if (!name || !type) {
+    if (!name) {
       return NextResponse.json(
-        { error: "Nombre y tipo son requeridos" },
+        { error: "Nombre del documento es requerido" },
         { status: 400 }
       );
     }
@@ -79,11 +79,31 @@ export async function POST(req: NextRequest) {
         firmId,
         caseId: caseId ?? null,
         name,
-        type,
+        type: type ?? "otro",
+        processingStatus: fileUrl ? "uploaded" : "pending",
       })
       .returning();
 
-    return NextResponse.json({ data: doc }, { status: 201 });
+    if (fileUrl) {
+      await db.insert(documentVersions).values({
+        documentId: doc.id,
+        version: 1,
+        fileUrl,
+        fileKey: fileKey ?? null,
+        fileSize: fileSize ?? null,
+        mimeType: mimeType ?? null,
+        changes: "Versión inicial",
+      });
+    }
+
+    const result = await db
+      .select()
+      .from(documents)
+      .leftJoin(documentVersions, eq(documents.id, documentVersions.documentId))
+      .where(eq(documents.id, doc.id))
+      .limit(1);
+
+    return NextResponse.json({ data: result[0] }, { status: 201 });
   } catch (error) {
     console.error("Error creating document:", error);
     return NextResponse.json({ error: "Error al crear documento" }, { status: 500 });

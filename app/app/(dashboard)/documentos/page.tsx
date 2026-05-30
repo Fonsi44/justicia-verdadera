@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FileText, Upload } from "lucide-react";
+import { FileText, Upload, X } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import PageHeader from "@/components/page-header";
 import SearchAndFilters from "@/components/search-and-filters";
@@ -9,6 +9,14 @@ import LoadingSkeleton from "@/components/loading-skeleton";
 import EmptyState from "@/components/empty-state";
 import StatusBadge from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import UploadDocument from "@/components/upload-document";
 
 interface Document {
   id: string;
@@ -69,6 +77,7 @@ export default function DocumentosPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -87,10 +96,15 @@ export default function DocumentosPage() {
         title="Documentos"
         description="Gestiona todos los documentos de tu despacho"
         actions={
-          <Button>
-            <Upload className="h-4 w-4" />
-            Subir documento
-          </Button>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger render={<Button><Upload className="h-4 w-4" />Subir documento</Button>} />
+            <DialogContent className="sm:max-w-xl">
+              <DialogHeader>
+                <DialogTitle>Subir documento</DialogTitle>
+              </DialogHeader>
+              <UploadDocument onSuccess={() => setOpen(false)} />
+            </DialogContent>
+          </Dialog>
         }
       />
 
