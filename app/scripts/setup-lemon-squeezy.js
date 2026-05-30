@@ -29,21 +29,21 @@ console.log(`
   ├─────────────────────────────────────────────────────────┤
   │ Name:        Justicia Verdadera — Starter              │
   │ Description: 1 usuario, 20 casos activos, 10 prompts IA│
-  │ Price:       $29.00 USD — Recurring → Monthly          │
+  │ Price:       750.00 HNL — Recurring → Monthly           │
   │ Variant:     Mensual                                   │
   ├─────────────────────────────────────────────────────────┤
   │ PLAN 2: Profesional                                    │
   ├─────────────────────────────────────────────────────────┤
   │ Name:        Justicia Verdadera — Profesional          │
   │ Description: 3 usuarios, 100 casos activos, 50 prompts │
-  │ Price:       $79.00 USD — Recurring → Monthly          │
+  │ Price:       2,050.00 HNL — Recurring → Monthly         │
   │ Variant:     Mensual                                   │
   ├─────────────────────────────────────────────────────────┤
   │ PLAN 3: Despacho                                       │
   ├─────────────────────────────────────────────────────────┤
   │ Name:        Justicia Verdadera — Despacho             │
   │ Description: 10 usuarios, casos ilimitados, 200 prompts│
-  │ Price:       $199.00 USD — Recurring → Monthly         │
+  │ Price:       5,150.00 HNL — Recurring → Monthly         │
   │ Variant:     Mensual                                   │
   └─────────────────────────────────────────────────────────┘
 

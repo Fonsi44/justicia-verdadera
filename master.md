@@ -843,9 +843,9 @@ Búsqueda full-text + UI de revisión
 
 | Plan | Precio mensual | Usuarios | Casos activos | IA incluida | Estado |
 |---|---:|---:|---:|---|---|
-| Starter | $29 | 1 | 20 | 10 prompts/mes | [SUPUESTO] |
-| Profesional | $79 | 3 | 100 | 50 prompts/mes | [SUPUESTO] |
-| Despacho | $199 | 10 | Ilimitados | 200 prompts/mes | [SUPUESTO] |
+| Starter | 750 L/mes | 1 | 20 | 10 prompts/mes | [SUPUESTO] |
+| Profesional | 2,050 L/mes | 3 | 100 | 50 prompts/mes | [SUPUESTO] |
+| Despacho | 5,150 L/mes | 10 | Ilimitados | 200 prompts/mes | [SUPUESTO] |
 | Enterprise | $499 | Ilimitados | Ilimitados | Personalización | [SUPUESTO] |
 
 ### Proyección financiera — escenario conservador
@@ -1092,7 +1092,7 @@ Todos usan CSS variables, `cn()`, shadcn/ui, lucide-react, TypeScript estricto, 
 - `app/app/page.tsx` reescrito (459 → ~580 líneas)
 - Nueva paleta: `bg-background`, `text-foreground`, `text-muted-foreground`, `bg-card`, `border`
 - Secciones: nav, hero, stats, features (6), how-it-works (3 pasos), testimonial, **pricing** (3 planes), **FAQ** (6 preguntas con `<details>`), CTA, footer
-- Pricing: Starter $29, Profesional $79, Despacho $199 — display visual sin checkout
+- Pricing: Starter 750 L/mes, Profesional 2,050 L/mes, Despacho 5,150 L/mes — display visual sin checkout
 - FAQ: 6 preguntas frecuentes con acordeón nativo `<details>`
 - Sin colores dark, sin glass-card, sin orbs
 

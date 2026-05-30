@@ -333,7 +333,7 @@ export default function LandingPage() {
                   <span className="relative flex h-2 w-2">
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-accent" />
                   </span>
-                  Beta privada — Precios de lanzamiento
+                  Precios en Lempiras (HNL) — Beta privada
                 </div>
               </div>
             </ScrollReveal>
@@ -342,8 +342,8 @@ export default function LandingPage() {
               {[
                 {
                   name: "Starter",
-                  price: "$29",
-                  period: "/mes",
+                  price: "750",
+                  period: " L/mes",
                   desc: "Para abogados independientes",
                   features: [
                     "1 usuario",
@@ -356,8 +356,8 @@ export default function LandingPage() {
                 },
                 {
                   name: "Profesional",
-                  price: "$79",
-                  period: "/mes",
+                  price: "2,050",
+                  period: " L/mes",
                   desc: "Para despachos en crecimiento",
                   features: [
                     "3 usuarios",
@@ -371,8 +371,8 @@ export default function LandingPage() {
                 },
                 {
                   name: "Despacho",
-                  price: "$199",
-                  period: "/mes",
+                  price: "5,150",
+                  period: " L/mes",
                   desc: "Para despachos consolidados",
                   features: [
                     "10 usuarios",

@@ -63,3 +63,8 @@ database/migrations/meta/
 *.png
 !public/**/*.png
 !public/**/*.svg
+
+# Credenciales temporales
+scripts/create-plans-live.js
+scripts/recon-products.js
+scripts/create-plans-v2.js

@@ -362,7 +362,7 @@ Resend solo enviará emails a direcciones verificadas en modo testing. Para veri
 4. Una vez dentro del dashboard, ve a **"Settings"** → **"Store"**
 5. Configura tu tienda:
    - **Store name**: `Justicia Verdadera`
-   - **Currency**: `USD`
+   - **Currency**: `HNL`
    - **Locale**: `es`
 6. Ve a **"Products"** → **"Create your first product"**
 7. Crea 3 productos (uno por plan):
@@ -370,18 +370,18 @@ Resend solo enviará emails a direcciones verificadas en modo testing. Para veri
    **Plan Starter:**
    - **Name**: `Justicia Verdadera — Starter`
    - **Description**: `1 usuario, 20 casos activos, 10 prompts IA/mes`
-   - **Price**: `$29.00 USD` — Recurring → Monthly
+   - **Price**: `750.00 HNL` — Recurring → Monthly
    - **Variant name**: `Mensual`
 
    **Plan Profesional:**
    - **Name**: `Justicia Verdadera — Profesional`
    - **Description**: `3 usuarios, 100 casos activos, 50 prompts IA/mes`
-   - **Price**: `$79.00 USD` — Recurring → Monthly
+   - **Price**: `2,050.00 HNL` — Recurring → Monthly
 
    **Plan Despacho:**
    - **Name**: `Justicia Verdadera — Despacho`
    - **Description**: `10 usuarios, casos ilimitados, 200 prompts IA/mes`
-   - **Price**: `$199.00 USD` — Recurring → Monthly
+   - **Price**: `5,150.00 HNL` — Recurring → Monthly
 
 8. Guarda los **Product ID** y **Variant ID** de cada plan (los necesitarás en el código).
 
