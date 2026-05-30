@@ -294,17 +294,16 @@ async function main() {
   for (let i = 0; i < EVENTS_DATA.length; i++) {
     const evt = EVENTS_DATA[i];
     const caseIdx = i % caseIds.length;
-    const eventDate = new Date(now);
-    eventDate.setDate(eventDate.getDate() + evt.days);
+    const eventDate = new Date(now.getTime() + evt.days * 86400000);
 
     await db.insert(caseEvents).values({
       caseId: caseIds[caseIdx],
       type: evt.type,
       title: evt.title,
       description: evt.desc,
-      date: eventDate.toISOString(),
+      date: eventDate,
       endDate: evt.durationDays > 0
-        ? new Date(eventDate.getTime() + evt.durationDays * 86400000).toISOString()
+        ? new Date(eventDate.getTime() + evt.durationDays * 86400000)
         : null,
       location: evt.location || null,
       isCompleted: evt.days < 0,
