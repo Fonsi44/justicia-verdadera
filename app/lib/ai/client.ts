@@ -6,7 +6,7 @@ const TIMEOUT_MS = 30000;
 
 export interface AIOptions {
   temperature?: number;
-  maxTokens?: number;
+  maxOutputTokens?: number;
 }
 
 export async function callAI(prompt: string, options?: AIOptions) {
@@ -19,7 +19,7 @@ export async function callAI(prompt: string, options?: AIOptions) {
         model: deepseek("deepseek-v4-flash"),
         prompt,
         temperature: options?.temperature ?? 0.7,
-        maxTokens: options?.maxTokens ?? 2048,
+        maxOutputTokens: options?.maxOutputTokens ?? 2048,
         abortSignal: controller.signal,
       });
 

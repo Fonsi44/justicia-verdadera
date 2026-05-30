@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { timeEntries, cases } from "@/database/schema";
-import { getSession, getFirmId } from "@/lib/auth/require-auth";
+import { getSessionAPI, getFirmId } from "@/lib/auth/require-auth";
 import { eq, and, desc, count } from "drizzle-orm";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { writeAuditLog } from "@/lib/audit";
@@ -57,7 +57,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getSession();
+    const session = await getSessionAPI();
     const firmId = await getFirmId();
 
     const rateCheck = await checkRateLimit("api", firmId);
