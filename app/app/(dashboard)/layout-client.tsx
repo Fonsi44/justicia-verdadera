@@ -16,6 +16,7 @@ import { signOut } from "next-auth/react";
 import { useState } from "react";
 import type { Session } from "next-auth";
 import NotificationsDropdown from "@/components/notifications-dropdown";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -150,7 +151,9 @@ export default function DashboardLayoutClient({
         </header>
 
         {/* Page content */}
-        <main className="relative z-10 p-6">{children}</main>
+        <main className="relative z-10 p-6">
+          <ErrorBoundary>{children}</ErrorBoundary>
+        </main>
       </div>
     </div>
   );

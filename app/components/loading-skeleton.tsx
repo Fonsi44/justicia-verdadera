@@ -1,111 +1,75 @@
-"use client"
-
-import { cn } from "@/lib/utils"
-import { Skeleton } from "@/components/ui/skeleton"
-
-interface LoadingSkeletonProps {
-  variant?: "card" | "table" | "list" | "text" | "stat-cards"
-  count?: number
-}
-
-function CardSkeleton() {
+export function TableSkeleton({ rows = 5, cols = 4 }: { rows?: number; cols?: number }) {
   return (
-    <div className="rounded-xl border bg-card p-6 ring-1 ring-foreground/10">
-      <div className="mb-4 space-y-2">
-        <Skeleton className="h-5 w-48" />
-        <Skeleton className="h-4 w-72" />
-      </div>
-      <div className="space-y-3">
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-5/6" />
-        <Skeleton className="h-4 w-4/6" />
-      </div>
-    </div>
-  )
-}
-
-function TableSkeleton() {
-  return (
-    <div className="space-y-3">
-      <div className="flex gap-4 border-b pb-3">
-        <Skeleton className="h-4 w-32" />
-        <Skeleton className="h-4 w-48" />
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="h-4 w-20 ml-auto" />
-      </div>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4 py-2">
-          <Skeleton className="h-4 w-32" />
-          <Skeleton className="h-4 w-48" />
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-4 w-20 ml-auto" />
+    <div className="space-y-4 animate-pulse">
+      <div className="h-10 bg-muted rounded-lg w-full" />
+      {Array.from({ length: rows }).map((_, i) => (
+        <div key={i} className="flex gap-4">
+          {Array.from({ length: cols }).map((_, j) => (
+            <div
+              key={j}
+              className="h-8 bg-muted rounded"
+              style={{ flex: j === 0 ? 2 : 1 }}
+            />
+          ))}
         </div>
       ))}
     </div>
-  )
+  );
 }
 
-function ListSkeleton() {
+export function CardSkeleton() {
   return (
-    <div className="space-y-2">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="flex items-center gap-3 rounded-lg border p-3">
-          <Skeleton className="size-8 shrink-0 rounded-full" />
-          <div className="flex-1 space-y-1.5">
-            <Skeleton className="h-4 w-3/5" />
-            <Skeleton className="h-3 w-2/5" />
+    <div className="rounded-xl border bg-card p-6 space-y-3 animate-pulse">
+      <div className="h-5 bg-muted rounded w-1/3" />
+      <div className="h-4 bg-muted rounded w-2/3" />
+      <div className="h-10 bg-muted rounded w-full mt-4" />
+    </div>
+  );
+}
+
+export function DashboardSkeleton() {
+  return (
+    <div className="space-y-6 animate-pulse">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="rounded-xl border bg-card p-5 space-y-3">
+            <div className="h-4 bg-muted rounded w-1/2" />
+            <div className="h-8 bg-muted rounded w-1/3" />
           </div>
-          <Skeleton className="h-4 w-16" />
+        ))}
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="rounded-xl border bg-card p-5 space-y-3">
+          <div className="h-5 bg-muted rounded w-1/3" />
+          <div className="h-40 bg-muted rounded" />
         </div>
-      ))}
+        <div className="rounded-xl border bg-card p-5 space-y-3">
+          <div className="h-5 bg-muted rounded w-1/3" />
+          <div className="h-40 bg-muted rounded" />
+        </div>
+      </div>
     </div>
-  )
-}
-
-function TextSkeleton({ count }: { count: number }) {
-  return (
-    <div className="space-y-2">
-      {Array.from({ length: count }).map((_, i) => (
-        <Skeleton
-          key={i}
-          className={cn("h-4", i === count - 1 ? "w-3/5" : "w-full")}
-        />
-      ))}
-    </div>
-  )
+  );
 }
 
 export default function LoadingSkeleton({
-  variant = "text",
-  count = 1,
-}: LoadingSkeletonProps) {
-  switch (variant) {
-    case "card":
-      return <CardSkeleton />
-    case "table":
-      return <TableSkeleton />
-    case "list":
-      return <ListSkeleton />
-    case "stat-cards":
-      return (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {Array.from({ length: count || 4 }).map((_, i) => (
-            <div
-              key={i}
-              className="flex animate-pulse flex-col gap-3 rounded-xl border bg-card p-5 ring-1 ring-foreground/10"
-            >
-              <div className="flex items-start justify-between">
-                <Skeleton className="h-8 w-20" />
-                <Skeleton className="size-10 rounded-lg" />
-              </div>
-              <Skeleton className="h-4 w-32" />
-              <Skeleton className="h-3 w-24" />
-            </div>
-          ))}
-        </div>
-      )
-    case "text":
-    default:
-      return <TextSkeleton count={count} />
+  variant = "table",
+  rows = 6,
+  cols = 4,
+}: {
+  variant?: "table" | "list" | "card";
+  rows?: number;
+  cols?: number;
+}) {
+  if (variant === "card") return <CardSkeleton />;
+  if (variant === "list") {
+    return (
+      <div className="space-y-3 animate-pulse">
+        {Array.from({ length: rows }).map((_, i) => (
+          <div key={i} className="h-16 bg-muted rounded-lg" />
+        ))}
+      </div>
+    );
   }
+  return <TableSkeleton rows={rows} cols={cols} />;
 }

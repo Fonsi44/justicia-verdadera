@@ -12,13 +12,13 @@
 |---|---|
 | Proyecto | Justicia Verdadera |
 | Responsable | Alfons Roiget, fundador |
-| Versión del documento | 5.6 — Auditoría master-audit.md aplicada, 42 tareas ejecutadas (30 mayo 2026) |
+| Versión del documento | 5.7 — Auditoría 100%, service layer 7 módulos, OCR mejorado, RBAC, soft-delete, CI/CD (30 mayo 2026) |
 | Fecha de actualización | 30 mayo 2026 |
-| Estado global | Fase 1 completada. Fase 1.5 completada. Frontend rediseñado a light theme. Auditoría repo ejecutada. CI/CD funcional. |
+| Estado global | Fase 1 completada. Fase 1.5 completada. Auditoría 78 hallazgos resueltos. Service layer implementado. CI/CD + Vercel funcional. |
 | Fuente de verdad | Solo `master.md` |
 | Última verificación técnica declarada | 30 mayo 2026 |
-| Comandos declarados como ejecutados | `npm run lint`, `npm run typecheck`, `npm run build` |
-| Resultado declarado | 0 errores lint (app), 0 errores typecheck, build exitoso con Turbopack (37 rutas) |
+| Comandos declarados como ejecutados | `npm run lint`, `npm run typecheck`, `npm run build`, `npm run test` |
+| Resultado declarado | 0 errores lint, 0 errores typecheck, 34 tests, build exitoso con Turbopack (37 rutas) |
 
 ### Etiquetas de trazabilidad
 
@@ -134,7 +134,7 @@ Fundador (Alfons)                         Kilo Code (IA)
 | `npm run build` | Exitoso con Turbopack | [VERIFICADO-REPO] |
 | Node.js local | v24.14.1 | [VERIFICADO-REPO] |
 | npm local | 11.11.0 | [VERIFICADO-REPO] |
-| DB schema | 18 tablas definidas | [VERIFICADO-REPO] |
+| DB schema | 19 tablas definidas (incluye ai_usage, verification_tokens) | [VERIFICADO-REPO] |
 | shadcn/ui | 25 componentes instalados | [VERIFICADO-REPO] |
 | React Query hooks | 6 archivos | [VERIFICADO-REPO] |
 | API route files | 19 archivos `route.ts` | [VERIFICADO-REPO] |
@@ -489,14 +489,16 @@ firms
 | Aspecto | Estado | Detalle |
 |---|---|---|
 | Autenticación | Implementado | NextAuth v5 JWT con Google + Microsoft Entra ID |
-| Autorización RBAC | Parcial | Roles definidos; verificación en proxy pendiente |
-| Multi-tenant | Implementado en aplicación | Filtrado por `firm_id` |
-| Cifrado en reposo | Pendiente de validar | Gestionado por proveedor |
+| Autorización RBAC | Implementado | Roles owner/admin/lawyer verified en proxy.ts + casos/[id] DELETE |
+| Multi-tenant | Implementado en aplicación | Filtrado por `firm_id` en todas las queries |
+| Cifrado en reposo | Pendiente de validar | Gestionado por Neon |
 | Cifrado en tránsito | Pendiente de validar | Gestionado por Vercel/Neon |
 | Secretos | Correcto | `.env.local`, no commitear |
-| Validación | Implementada | Manual en escrituras (Zod planificada para Fase 2) |
-| Rate limiting | Implementado | Auth 5/min, API 60/min, upload 10/min |
-| Audit logs | Implementado | create/update/delete registrados |
+| Validación | Implementada | Manual en escrituras + `api-wrapper.ts` Content-Length (Zod planificada Fase 2) |
+| Rate limiting | Implementado en 4 capas | Proxy global 300/min, auth 5/min, API 60/min, upload 10/min |
+| Audit logs | Implementado | create/update/delete en todos los endpoints de mutación. Purge con `.returning()` real. Índice en createdAt. |
+| Soft-delete | Implementado | `deletedAt` en cases, contacts, documents, invoices. GET filtran con `isNull`. |
+| Health endpoint | Implementado | `/api/health` verifica DB + 6 servicios externos |
 | Backups | Pendiente de validar | Verificar plan Neon |
 
 ---
