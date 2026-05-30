@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   pgTable,
   text,
@@ -230,6 +231,10 @@ export const documents = pgTable(
   },
   (table) => [
     index("document_firm_case_type_idx").on(table.firmId, table.caseId, table.type),
+    index("idx_documents_ocr_text").using(
+      "gin",
+      sql`to_tsvector('spanish', coalesce(${table.ocrText}, ''))`
+    ),
   ]
 );
 
