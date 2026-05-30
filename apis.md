@@ -439,10 +439,18 @@ Resend solo enviará emails a direcciones verificadas en modo testing. Para veri
 
    **Plan Despacho:**
    - **Name**: `Justicia Verdadera — Despacho`
-   - **Description**: `10 usuarios, casos ilimitados, 200 prompts IA/mes`
+   - **Description**: `10 usuarios, 500 casos activos, 200 prompts IA/mes`
    - **Price**: `5,150.00 HNL` — Recurring → Monthly
 
 8. Guarda los **Product ID** y **Variant ID** de cada plan (los necesitarás en el código).
+
+### Precio por uso (overage)
+
+Los prompts que excedan el límite del plan se cobran aparte:
+- **L. 5.00 por prompt extra** (~$0.50 USD).
+- Se facturan al final del ciclo mensual automáticamente.
+- El despacho configura un límite de gasto máximo mensual.
+- No requiere producto separado en Lemon Squeezy — se gestiona vía webhook y lógica interna.
 
 ### Obtener API Key
 

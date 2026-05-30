@@ -788,11 +788,11 @@ Subida del archivo → UploadThing → Guardar metadata + document_version
 ### Planes SaaS propuestos
 
 | Plan | Precio mensual | Usuarios | Casos activos | IA incluida | Estado |
-|---|---:|---:|---:|---|---|
+|---|---:|---:|---:|---:|---|---|
 | Starter | 750 L/mes | 1 | 20 | 10 prompts/mes | [SUPUESTO] |
 | Profesional | 2,050 L/mes | 3 | 100 | 50 prompts/mes | [SUPUESTO] |
-| Despacho | 5,150 L/mes | 10 | Ilimitados | 200 prompts/mes | [SUPUESTO] |
-| Enterprise | $499 | Ilimitados | Ilimitados | Personalización | [SUPUESTO] |
+| Despacho | 5,150 L/mes | 10 | 500 | 200 prompts/mes | [SUPUESTO] |
+| Enterprise | A medida | 50 | 2,000 | 1,000 prompts/mes | [SUPUESTO] |
 
 ### Pagos / pasarela comercial
 
@@ -820,18 +820,39 @@ Registro (Google/Microsoft OAuth) → Trial gratuito 14 días
 
 **Límites de uso por plan:**
 | Plan | Usuarios máx | Casos activos | Prompts IA/mes | Documentos | Almacenamiento |
-|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | Starter | 1 | 20 | 10 | 50 | 500 MB |
 | Profesional | 3 | 100 | 50 | 200 | 2 GB |
-| Despacho | 10 | Ilimitados | 200 | 500 | 10 GB |
-| Enterprise | Ilimitados | Ilimitados | Personalizado | Ilimitados | Personalizado |
+| Despacho | 10 | 500 | 200 | 500 | 10 GB |
+| Enterprise | 50 | 2,000 | 1,000 | 5,000 | 100 GB |
+
+**Precio por prompt extra (overage):**
+- Prompts adicionales fuera del plan: **L. 5.00 por prompt** (~$0.50 USD).
+- Facturación mensual por uso: al final del ciclo, los prompts excedentes se facturan automáticamente.
+- El despacho configura un **límite de gasto mensual en IA** (ej: "no gastar más de L. 500/mes en prompts extra").
+- Cuando se alcanza el límite de gasto, la IA se bloquea hasta el siguiente ciclo de facturación.
+- El administrador recibe una alerta cuando se consume el 80% del límite configurado.
+
+**Ejemplo de facturación con overage:**
+```text
+Plan Profesional: L. 2,050/mes (50 prompts incluidos)
+Uso real: 73 prompts este mes
+→ 50 incluidos + 23 extra
+→ Overage: 23 × L. 5.00 = L. 115.00
+→ Total facturado: L. 2,050 + L. 115 = L. 2,165
+→ Si el límite de gasto era L. 200, la IA se habría bloqueado al prompt #90 (50 incluidos + 40 extra)
+```
 
 **Estados de suscripción:**
 `trial` → `active` → `past_due` → `cancelled` / `expired`
 
-**Gestión de overage (tokens IA):**
-- Si un plan consume más prompts de los incluidos, se bloquea IA hasta siguiente ciclo.
-- Alternativa futura: compra de paquetes de tokens adicionales.
+**Gestión de overage (prompts IA):**
+- Cada plan incluye un número fijo de prompts IA al mes.
+- Los prompts excedentes se facturan a **L. 5.00 por prompt** al final del ciclo mensual.
+- El despacho configura un **límite de gasto mensual** en la sección de Configuración para controlar el presupuesto.
+- Al alcanzar el límite, la IA se deshabilita hasta el siguiente ciclo de facturación.
+- El administrador recibe un email de alerta al 80% del límite configurado.
+- Historial detallado de consumo visible en `/config/ai-usage`.
 
 **Facturación al despacho:**
 - Lemon Squeezy emite factura/recibo automático al cliente final (despacho).
