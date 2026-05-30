@@ -3,65 +3,97 @@ import { db } from "@/lib/db";
 import { documents } from "@/database/schema";
 import { eq } from "drizzle-orm";
 
-export const processDocumentOcr = inngest.createFunction(
-  {
-    id: "process-document-ocr",
-    triggers: [{ event: "document/ocr.process" }],
-  },
-  async ({ event, step }) => {
-    const { documentId, fileUrl, mimeType } = event.data;
+const DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
-    await step.run("update-status-processing", async () => {
-      await db
-        .update(documents)
-        .set({ processingStatus: "ocr_processing" })
-        .where(eq(documents.id, documentId));
-    });
+const configured = !!process.env.INNGEST_EVENT_KEY;
 
-    let ocrText = "";
-    let confidence = 0;
+export const processDocumentOcr = configured
+  ? inngest.createFunction(
+      {
+        id: "process-document-ocr",
+        triggers: [{ event: "document/ocr.process" }],
+        retries: 2,
+      },
+      async ({ event, step }) => {
+        const { documentId, fileUrl, mimeType } = event.data;
 
-    if (mimeType?.startsWith("image/")) {
-      await step.run("ocr-image", async () => {
-        const { extractTextFromImage } = await import("@/lib/ocr");
-        const result = await extractTextFromImage(fileUrl);
-        ocrText = result.text;
-        confidence = result.confidence;
-      });
-    } else if (mimeType === "application/pdf") {
-      await step.run("ocr-pdf", async () => {
-        const { extractTextFromPdf } = await import("@/lib/ocr");
-        try {
-          const result = await extractTextFromPdf(fileUrl);
-          ocrText = result.text;
-          confidence = result.confidence;
-        } catch {
-          ocrText = "";
-          confidence = 0;
+        await step.run("update-status-processing", async () => {
+          await db
+            .update(documents)
+            .set({ processingStatus: "ocr_processing" })
+            .where(eq(documents.id, documentId));
+        });
+
+        let ocrText = "";
+        let confidence = 0;
+
+        if (mimeType?.startsWith("image/")) {
+          await step.run("ocr-image", async () => {
+            const { extractTextFromImage } = await import("@/lib/ocr");
+            const result = await extractTextFromImage(fileUrl);
+            ocrText = result.text;
+            confidence = result.confidence;
+          });
+        } else if (mimeType === "application/pdf") {
+          await step.run("ocr-pdf", async () => {
+            const { extractTextFromPdf } = await import("@/lib/ocr");
+            try {
+              const result = await extractTextFromPdf(fileUrl);
+              ocrText = result.text;
+              confidence = result.confidence;
+            } catch {
+              ocrText = "";
+              confidence = 0;
+            }
+          });
+        } else if (mimeType === DOCX_MIME) {
+          await step.run("ocr-docx", async () => {
+            const { extractTextFromDocx } = await import("@/lib/ocr");
+            try {
+              const result = await extractTextFromDocx(fileUrl);
+              ocrText = result.text;
+              confidence = result.confidence;
+            } catch {
+              ocrText = "";
+              confidence = 0;
+            }
+          });
+        } else if (mimeType === "text/plain") {
+          await step.run("ocr-text", async () => {
+            const { extractTextFromPlainText } = await import("@/lib/ocr");
+            try {
+              const result = await extractTextFromPlainText(fileUrl);
+              ocrText = result.text;
+              confidence = result.confidence;
+            } catch {
+              ocrText = "";
+              confidence = 0;
+            }
+          });
         }
-      });
-    }
 
-    if (!ocrText.trim()) {
-      await step.run("update-status-skipped", async () => {
-        await db
-          .update(documents)
-          .set({ processingStatus: "ocr_skipped" })
-          .where(eq(documents.id, documentId));
-      });
-      return { status: "skipped" };
-    }
+        if (!ocrText.trim()) {
+          await step.run("update-status-skipped", async () => {
+            await db
+              .update(documents)
+              .set({ processingStatus: "ocr_skipped", ocrConfidence: Math.round(confidence * 100) })
+              .where(eq(documents.id, documentId));
+          });
+          return { status: "skipped" };
+        }
 
-    await step.run("update-status-complete", async () => {
-      await db
-        .update(documents)
-        .set({
-          ocrText: ocrText.substring(0, 50000),
-          processingStatus: "ocr_complete",
-        })
-        .where(eq(documents.id, documentId));
-    });
+        await step.run("update-status-complete", async () => {
+          await db
+            .update(documents)
+            .set({
+              ocrText: ocrText.substring(0, 50000),
+              ocrConfidence: Math.round(confidence * 100),
+              processingStatus: "ocr_complete",
+            })
+            .where(eq(documents.id, documentId));
+        });
 
-    return { status: "complete", textLength: ocrText.length, confidence };
-  }
-);
+        return { status: "complete", textLength: ocrText.length, confidence };
+      }
+    )
+  : undefined;

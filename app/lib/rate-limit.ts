@@ -28,12 +28,20 @@ const uploadLimiter = new Ratelimit({
   prefix: "ratelimit:upload",
 });
 
-type LimitKind = "auth" | "api" | "upload";
+const globalLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(300, "1 m"),
+  analytics: true,
+  prefix: "ratelimit:global",
+});
+
+type LimitKind = "auth" | "api" | "upload" | "global";
 
 const limiters: Record<LimitKind, Ratelimit> = {
   auth: authLimiter,
   api: apiLimiter,
   upload: uploadLimiter,
+  global: globalLimiter,
 };
 
 export async function checkRateLimit(

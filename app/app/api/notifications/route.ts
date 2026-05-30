@@ -1,13 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { notifications } from "@/database/schema";
-import { getFirmId } from "@/lib/auth/require-auth";
+import { getFirmId, handleUnauthorized } from "@/lib/auth/require-auth";
 import { auth } from "@/lib/auth";
 import { eq, and, desc, count } from "drizzle-orm";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function GET(req: NextRequest) {
   try {
     const firmId = await getFirmId();
+
+    const rateCheck = await checkRateLimit("api", firmId);
+    if (rateCheck instanceof NextResponse) return rateCheck;
+
     const session = await auth();
     const userId = session?.user?.id;
     const { searchParams } = new URL(req.url);
@@ -50,7 +55,9 @@ export async function GET(req: NextRequest) {
       unreadCount: Number(unreadCount),
     });
   } catch (error) {
-    console.error("Error fetching notifications:", error);
+    const unauthorized = handleUnauthorized(error);
+    if (unauthorized) return unauthorized;
+    console.error("Error fetching notifications:", error instanceof Error ? error.message : error);
     return NextResponse.json({ error: "Error al obtener notificaciones" }, { status: 500 });
   }
 }

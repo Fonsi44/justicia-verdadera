@@ -1,6 +1,17 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
+import type { Session } from "next-auth";
+import { UnauthorizedError } from "@/lib/errors";
+
+const UNAUTHORIZED_RESPONSE = NextResponse.json(
+  { error: "No autorizado. Inicia sesión para continuar." },
+  { status: 401 }
+);
+
+export function getUnauthorizedResponse(): NextResponse {
+  return UNAUTHORIZED_RESPONSE;
+}
 
 /**
  * getSessionSC: para Server Components.
@@ -16,24 +27,34 @@ export async function getSessionSC() {
 
 /**
  * getSessionAPI: para API Routes.
- * Lanza error si no hay sesión (debe ser manejado por try/catch en la route).
- * Retorna NextResponse.redirect para compatibilidad con API routes.
+ * Retorna el firmId del usuario autenticado.
+ * Lanza UnauthorizedError si no hay sesión — usar con withApiRoute o try/catch.
  */
-export async function getSessionAPI() {
+export async function getSessionAPI(): Promise<string> {
+  const session = await auth();
+  if (!session?.user?.firmId) {
+    throw new UnauthorizedError();
+  }
+  return session.user.firmId;
+}
+
+/**
+ * getSession: para API Routes que necesitan la sesión completa.
+ * Retorna la sesión o lanza UnauthorizedError.
+ */
+export async function getSession(): Promise<Session> {
   const session = await auth();
   if (!session?.user) {
-    throw new Error("Unauthorized");
+    throw new UnauthorizedError();
   }
   return session;
 }
 
 /**
- * getFirmId: para API Routes. Usa getSessionAPI internamente.
- * Lanza error si no hay sesión.
+ * getFirmId: alias de getSessionAPI para retrocompatibilidad.
  */
 export async function getFirmId() {
-  const session = await getSessionAPI();
-  return session.user.firmId;
+  return getSessionAPI();
 }
 
 /**
@@ -46,15 +67,12 @@ export async function getFirmIdSC() {
 }
 
 /**
- * handleUnauthorized: para API Routes, captura el error de getSessionAPI/getFirmId
+ * handleUnauthorized: captura el error de getSessionAPI/getFirmId
  * y retorna un NextResponse 401 consistente.
  */
 export function handleUnauthorized(error: unknown): NextResponse | null {
-  if (error instanceof Error && error.message === "Unauthorized") {
-    return NextResponse.json(
-      { error: "No autorizado. Inicia sesión para continuar." },
-      { status: 401 }
-    );
+  if (error instanceof UnauthorizedError) {
+    return UNAUTHORIZED_RESPONSE;
   }
   return null;
 }

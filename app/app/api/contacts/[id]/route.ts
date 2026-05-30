@@ -1,152 +1,120 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { contacts, caseParties, cases, invoices } from "@/database/schema";
-import { getFirmId } from "@/lib/auth/require-auth";
-import { eq, and, count, desc } from "drizzle-orm";
+import { caseParties, cases } from "@/database/schema";
+import { getFirmId, handleUnauthorized } from "@/lib/auth/require-auth";
+import { eq, and, desc } from "drizzle-orm";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { writeAuditLog } from "@/lib/audit";
+import { AppError } from "@/lib/errors";
+import { getContactById, updateContact, softDeleteContact } from "@/lib/services/contacts.service";
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const { id } = await params;
-  const firmId = await getFirmId();
+  try {
+    const { id } = await params;
+    const firmId = await getFirmId();
+    const contact = await getContactById(firmId, id);
 
-  const [contact] = await db
-    .select()
-    .from(contacts)
-    .where(and(eq(contacts.id, id), eq(contacts.firmId, firmId)))
-    .limit(1);
+    const relatedCases = await db
+      .select({
+        caseId: cases.id,
+        caseNumber: cases.number,
+        caseTitle: cases.title,
+        matter: cases.matter,
+        status: cases.status,
+        role: caseParties.role,
+        isMain: caseParties.isMain,
+      })
+      .from(caseParties)
+      .innerJoin(cases, eq(caseParties.caseId, cases.id))
+      .where(and(eq(caseParties.contactId, id), eq(cases.firmId, firmId)))
+      .orderBy(desc(cases.createdAt));
 
-  if (!contact) {
-    return NextResponse.json({ error: "Contacto no encontrado" }, { status: 404 });
+    return NextResponse.json({ data: contact, relatedCases });
+  } catch (error) {
+    const unauthorized = handleUnauthorized(error);
+    if (unauthorized) return unauthorized;
+    if (error instanceof AppError) return NextResponse.json(error.toJSON(), { status: error.status });
+    console.error("Error fetching contact:", error instanceof Error ? error.message : error);
+    return NextResponse.json({ error: "Error al obtener contacto" }, { status: 500 });
   }
-
-  const [{ value: caseCount }] = await db
-    .select({ value: count() })
-    .from(caseParties)
-    .where(eq(caseParties.contactId, id));
-
-  const relatedCases = await db
-    .select({
-      caseId: cases.id,
-      caseNumber: cases.number,
-      caseTitle: cases.title,
-      matter: cases.matter,
-      status: cases.status,
-      role: caseParties.role,
-      isMain: caseParties.isMain,
-    })
-    .from(caseParties)
-    .innerJoin(cases, eq(caseParties.caseId, cases.id))
-    .where(and(eq(caseParties.contactId, id), eq(cases.firmId, firmId)))
-    .orderBy(desc(cases.createdAt));
-
-  return NextResponse.json({
-    data: { ...contact, caseCount },
-    relatedCases,
-  });
 }
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const { id } = await params;
-  const firmId = await getFirmId();
+  try {
+    const { id } = await params;
+    const firmId = await getFirmId();
 
-  const rateCheck = await checkRateLimit("api", firmId);
-  if (rateCheck instanceof NextResponse) return rateCheck;
+    const rateCheck = await checkRateLimit("api", firmId);
+    if (rateCheck instanceof NextResponse) return rateCheck;
 
-  const body = await request.json();
+    const body = await request.json();
 
-  const [existing] = await db
-    .select({ id: contacts.id })
-    .from(contacts)
-    .where(and(eq(contacts.id, id), eq(contacts.firmId, firmId)))
-    .limit(1);
-
-  if (!existing) {
-    return NextResponse.json({ error: "Contacto no encontrado" }, { status: 404 });
-  }
-
-  const allowedFields = [
-    "type", "firstName", "lastName", "companyName",
-    "identityNumber", "email", "phone", "address", "notes",
-  ];
-
-  const updates: Record<string, unknown> = {};
-  for (const field of allowedFields) {
-    if (field in body) {
-      updates[field] = body[field] ?? null;
+    const updates: Record<string, unknown> = {};
+    const allowedFields = [
+      "type", "firstName", "lastName", "companyName",
+      "identityNumber", "email", "phone", "address", "notes",
+    ];
+    for (const field of allowedFields) {
+      if (field in body) updates[field] = body[field] ?? null;
     }
+
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json({ error: "No hay campos para actualizar" }, { status: 400 });
+    }
+
+    const updated = await updateContact(firmId, id, updates);
+
+    await writeAuditLog({
+      firmId,
+      action: "update",
+      entityType: "contact",
+      entityId: id,
+      changes: updates,
+    });
+
+    return NextResponse.json({ data: updated });
+  } catch (error) {
+    const unauthorized = handleUnauthorized(error);
+    if (unauthorized) return unauthorized;
+    if (error instanceof AppError) return NextResponse.json(error.toJSON(), { status: error.status });
+    console.error("Error updating contact:", error instanceof Error ? error.message : error);
+    return NextResponse.json({ error: "Error al actualizar contacto" }, { status: 500 });
   }
-
-  if (Object.keys(updates).length === 0) {
-    return NextResponse.json({ error: "No hay campos para actualizar" }, { status: 400 });
-  }
-
-  const [updated] = await db
-    .update(contacts)
-    .set(updates)
-    .where(eq(contacts.id, id))
-    .returning();
-
-  await writeAuditLog({
-    firmId,
-    action: "update",
-    entityType: "contact",
-    entityId: id,
-    changes: updates,
-  });
-
-  return NextResponse.json({ data: updated });
 }
 
 export async function DELETE(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const { id } = await params;
-  const firmId = await getFirmId();
+  try {
+    const { id } = await params;
+    const firmId = await getFirmId();
 
-  const rateCheck = await checkRateLimit("api", firmId);
-  if (rateCheck instanceof NextResponse) return rateCheck;
+    const rateCheck = await checkRateLimit("api", firmId);
+    if (rateCheck instanceof NextResponse) return rateCheck;
 
-  const [existing] = await db
-    .select({ id: contacts.id })
-    .from(contacts)
-    .where(and(eq(contacts.id, id), eq(contacts.firmId, firmId)))
-    .limit(1);
+    await softDeleteContact(firmId, id, { checkInvoices: true });
 
-  if (!existing) {
-    return NextResponse.json({ error: "Contacto no encontrado" }, { status: 404 });
+    await writeAuditLog({
+      firmId,
+      action: "delete",
+      entityType: "contact",
+      entityId: id,
+      changes: { deletedId: id },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    const unauthorized = handleUnauthorized(error);
+    if (unauthorized) return unauthorized;
+    if (error instanceof AppError) return NextResponse.json(error.toJSON(), { status: error.status });
+    console.error("Error deleting contact:", error instanceof Error ? error.message : error);
+    return NextResponse.json({ error: "Error al eliminar contacto" }, { status: 500 });
   }
-
-  const [linkedInvoice] = await db
-    .select({ id: invoices.id })
-    .from(invoices)
-    .where(and(eq(invoices.clientId, id), eq(invoices.firmId, firmId)))
-    .limit(1);
-
-  if (linkedInvoice) {
-    return NextResponse.json(
-      { error: "No se puede eliminar el contacto porque tiene facturas vinculadas" },
-      { status: 409 }
-    );
-  }
-
-  await db.delete(caseParties).where(eq(caseParties.contactId, id));
-  await db.delete(contacts).where(eq(contacts.id, id));
-
-  await writeAuditLog({
-    firmId,
-    action: "delete",
-    entityType: "contact",
-    entityId: id,
-    changes: { deletedId: id },
-  });
-
-  return NextResponse.json({ success: true });
 }

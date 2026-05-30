@@ -1,3 +1,5 @@
+"use client";
+
 export function exportToCsv(filename: string, headers: string[], rows: string[][]) {
   const bom = "\uFEFF";
   const csv = [

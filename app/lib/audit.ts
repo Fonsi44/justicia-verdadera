@@ -36,6 +36,9 @@ export async function writeAuditLog(entry: AuditEntry) {
  */
 export async function purgeOldAuditLogs(): Promise<{ deleted: number }> {
   const cutoff = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
-  await db.delete(auditLogs).where(lt(auditLogs.createdAt, cutoff));
-  return { deleted: 1 };
+  const deleted = await db
+    .delete(auditLogs)
+    .where(lt(auditLogs.createdAt, cutoff))
+    .returning({ id: auditLogs.id });
+  return { deleted: deleted.length };
 }

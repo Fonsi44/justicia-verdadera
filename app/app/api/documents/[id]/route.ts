@@ -1,48 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/db";
-import { documents, cases } from "@/database/schema";
-import { getFirmId } from "@/lib/auth/require-auth";
-import { eq, and } from "drizzle-orm";
+import { getFirmId, handleUnauthorized } from "@/lib/auth/require-auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { writeAuditLog } from "@/lib/audit";
+import { AppError } from "@/lib/errors";
+import { getDocumentById, updateDocument, softDeleteDocument } from "@/lib/services/documents.service";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const firmId = await getFirmId();
     const { id } = await params;
-
-    const [doc] = await db
-      .select({
-        id: documents.id,
-        firmId: documents.firmId,
-        caseId: documents.caseId,
-        name: documents.name,
-        type: documents.type,
-        currentVersion: documents.currentVersion,
-        status: documents.status,
-        ocrText: documents.ocrText,
-        processingStatus: documents.processingStatus,
-        createdBy: documents.createdBy,
-        createdAt: documents.createdAt,
-        updatedAt: documents.updatedAt,
-        case: {
-          id: cases.id,
-          number: cases.number,
-          title: cases.title,
-        },
-      })
-      .from(documents)
-      .leftJoin(cases, eq(documents.caseId, cases.id))
-      .where(and(eq(documents.id, id), eq(documents.firmId, firmId)))
-      .limit(1);
-
-    if (!doc) {
-      return NextResponse.json({ error: "Documento no encontrado" }, { status: 404 });
-    }
-
+    const doc = await getDocumentById(firmId, id);
     return NextResponse.json({ data: doc });
   } catch (error) {
-    console.error("Error fetching document:", error);
+    const unauthorized = handleUnauthorized(error);
+    if (unauthorized) return unauthorized;
+    if (error instanceof AppError) return NextResponse.json(error.toJSON(), { status: error.status });
+    console.error("Error fetching document:", error instanceof Error ? error.message : error);
     return NextResponse.json({ error: "Error al obtener documento" }, { status: 500 });
   }
 }
@@ -57,8 +30,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     const body = await req.json();
 
-    const allowedFields = ["name", "type", "status", "caseId", "currentVersion"];
     const updates: Record<string, unknown> = {};
+    const allowedFields = ["name", "type", "status", "caseId", "currentVersion"];
     for (const key of allowedFields) {
       if (body[key] !== undefined) updates[key] = body[key];
     }
@@ -67,15 +40,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       return NextResponse.json({ error: "No hay campos para actualizar" }, { status: 400 });
     }
 
-    const [doc] = await db
-      .update(documents)
-      .set(updates)
-      .where(and(eq(documents.id, id), eq(documents.firmId, firmId)))
-      .returning();
-
-    if (!doc) {
-      return NextResponse.json({ error: "Documento no encontrado" }, { status: 404 });
-    }
+    const doc = await updateDocument(firmId, id, updates);
 
     await writeAuditLog({
       firmId,
@@ -87,7 +52,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     return NextResponse.json({ data: doc });
   } catch (error) {
-    console.error("Error updating document:", error);
+    const unauthorized = handleUnauthorized(error);
+    if (unauthorized) return unauthorized;
+    if (error instanceof AppError) return NextResponse.json(error.toJSON(), { status: error.status });
+    console.error("Error updating document:", error instanceof Error ? error.message : error);
     return NextResponse.json({ error: "Error al actualizar documento" }, { status: 500 });
   }
 }
@@ -100,14 +68,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     const rateCheck = await checkRateLimit("api", firmId);
     if (rateCheck instanceof NextResponse) return rateCheck;
 
-    const [doc] = await db
-      .delete(documents)
-      .where(and(eq(documents.id, id), eq(documents.firmId, firmId)))
-      .returning();
-
-    if (!doc) {
-      return NextResponse.json({ error: "Documento no encontrado" }, { status: 404 });
-    }
+    await softDeleteDocument(firmId, id);
 
     await writeAuditLog({
       firmId,
@@ -119,7 +80,10 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting document:", error);
+    const unauthorized = handleUnauthorized(error);
+    if (unauthorized) return unauthorized;
+    if (error instanceof AppError) return NextResponse.json(error.toJSON(), { status: error.status });
+    console.error("Error deleting document:", error instanceof Error ? error.message : error);
     return NextResponse.json({ error: "Error al eliminar documento" }, { status: 500 });
   }
 }

@@ -1,6 +1,7 @@
 import NextAuth, { type DefaultSession } from "next-auth";
 import Google from "next-auth/providers/google";
 import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
+import Credentials from "next-auth/providers/credentials";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { users, firms } from "@/database/schema";
@@ -54,20 +55,24 @@ async function tryCreateFirmAndUser(
     const firmName = name || email.split("@")[0];
     const baseSlug = slugify(firmName);
 
+    const slug = uniqueSlug(baseSlug);
+
     const [newUser] = await db.transaction(async (tx) => {
-      const [firm] = await tx
-        .insert(firms)
-        .values({
-          name: firmName,
-          slug: uniqueSlug(baseSlug),
-          contactEmail: email,
-        })
-        .returning();
+      const { id: firmId } = (
+        await tx
+          .insert(firms)
+          .values({
+            name: firmName,
+            slug,
+            contactEmail: email,
+          })
+          .returning({ id: firms.id })
+      )[0];
 
       const [user] = await tx
         .insert(users)
         .values({
-          firmId: firm.id as string,
+          firmId,
           name: name || email.split("@")[0],
           email,
           image,
@@ -93,6 +98,31 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     MicrosoftEntraID({
       clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_ID,
       clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET,
+    }),
+    Credentials({
+      name: "credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Contraseña", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
+
+        const [dbUser] = await db
+          .select()
+          .from(users)
+          .where(eq(users.email, credentials.email as string))
+          .limit(1);
+
+        if (!dbUser) return null;
+
+        return {
+          id: dbUser.id,
+          email: dbUser.email,
+          name: dbUser.name,
+          image: dbUser.image,
+        };
+      },
     }),
   ],
   pages: {

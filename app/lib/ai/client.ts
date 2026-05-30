@@ -1,8 +1,10 @@
-import { generateText } from "ai";
+import { generateText, streamText } from "ai";
 import { deepseek } from "@ai-sdk/deepseek";
 
 const RETRIES = 3;
 const TIMEOUT_MS = 30000;
+
+const model = deepseek("deepseek-v4-flash");
 
 export interface AIOptions {
   temperature?: number;
@@ -16,7 +18,7 @@ export async function callAI(prompt: string, options?: AIOptions) {
       const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
       const result = await generateText({
-        model: deepseek("deepseek-v4-flash"),
+        model,
         prompt,
         temperature: options?.temperature ?? 0.7,
         maxOutputTokens: options?.maxOutputTokens ?? 2048,
@@ -28,8 +30,18 @@ export async function callAI(prompt: string, options?: AIOptions) {
     } catch (error) {
       if (attempt === RETRIES) throw error;
       console.warn(`[AI] Attempt ${attempt}/${RETRIES} failed, retrying...`);
-      // Backoff exponencial: 1s, 2s, 3s
       await new Promise((r) => setTimeout(r, 1000 * attempt));
     }
   }
+}
+
+export async function streamAI(prompt: string, options?: AIOptions) {
+  const result = streamText({
+    model,
+    prompt,
+    temperature: options?.temperature ?? 0.7,
+    maxOutputTokens: options?.maxOutputTokens ?? 2048,
+  });
+
+  return result;
 }

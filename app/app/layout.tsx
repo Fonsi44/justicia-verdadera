@@ -49,8 +49,8 @@ export default function RootLayout({
       <body className="min-h-full bg-background text-foreground font-body">
         <QueryProvider>
           <TooltipProvider>{children}</TooltipProvider>
+          <Toaster />
         </QueryProvider>
-        <Toaster />
       </body>
     </html>
   );

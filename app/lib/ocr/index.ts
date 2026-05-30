@@ -8,41 +8,121 @@ export type OcrResult = {
 export async function extractTextFromImage(
   imageUrl: string
 ): Promise<OcrResult> {
-  const worker = await createWorker("spa");
-  const { data } = await worker.recognize(imageUrl);
-  await worker.terminate();
-  return {
-    text: data.text,
-    confidence: data.confidence ?? 0,
-  };
+  let worker;
+  try {
+    worker = await createWorker("spa");
+    const { data } = await worker.recognize(imageUrl);
+    return {
+      text: data.text,
+      confidence: data.confidence ?? 0,
+    };
+  } finally {
+    if (worker) await worker.terminate();
+  }
 }
 
 export async function extractTextFromPdf(
   pdfUrl: string
 ): Promise<OcrResult> {
-  // Native PDF text extraction using Fetch API + basic text fallback
-  // For scanned PDFs (>3 pages or no text), returns empty for ocr_skipped
   try {
     const resp = await fetch(pdfUrl);
     const buffer = await resp.arrayBuffer();
     const bytes = new Uint8Array(buffer);
 
-    // Simple PDF text extraction (for text-based PDFs only)
     const decoder = new TextDecoder("utf-8");
     const content = decoder.decode(bytes);
-    const textMatches = content.match(/\(([^)]*)\)/g);
 
-    if (textMatches) {
-      const text = textMatches
+    const streamLines: string[] = [];
+    let inStream = false;
+
+    for (const line of content.split(/\r?\n/)) {
+      if (line.startsWith("BT")) inStream = true;
+      if (inStream) streamLines.push(line);
+      if (line.startsWith("ET")) inStream = false;
+    }
+
+    const textMatches: string[] = [];
+    for (const line of streamLines) {
+      const tjMatch = line.match(/\[(.*?)\]\s*TJ/i);
+      if (tjMatch) {
+        const tokens = tjMatch[1].match(/\(([^)]*)\)|<\w+>/g);
+        if (tokens) {
+          for (const token of tokens) {
+            if (token.startsWith("(")) textMatches.push(token.slice(1, -1));
+          }
+        }
+      }
+      const tMatch = line.match(/\(([^)]*)\)\s*Tj/i);
+      if (tMatch) textMatches.push(tMatch[1]);
+    }
+
+    if (textMatches.length > 0) {
+      const text = textMatches.filter((t) => t.length > 1).join(" ");
+      if (text.length > 50) return { text, confidence: 0.9 };
+    }
+
+    const fallbackText = content.match(/\(([^)]*)\)/g);
+    if (fallbackText) {
+      const text = fallbackText
         .map((m) => m.slice(1, -1))
         .filter((t) => t.length > 2)
         .join(" ");
+      if (text.length > 50) return { text, confidence: 0.7 };
+    }
 
+    // Fallback: try OCR via image if no text found (for scanned PDFs)
+    try {
+      const { extractTextFromImage } = await import("@/lib/ocr");
+      const result = await extractTextFromImage(pdfUrl);
+      if (result.text.trim().length > 0) {
+        return { text: result.text, confidence: result.confidence };
+      }
+    } catch {
+      // Image OCR fallback failed, return empty
+    }
+
+    return { text: "", confidence: 0 };
+  } catch {
+    return { text: "", confidence: 0 };
+  }
+}
+
+export async function extractTextFromDocx(
+  docxUrl: string
+): Promise<OcrResult> {
+  try {
+    const resp = await fetch(docxUrl);
+    const buffer = await resp.arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+    const decoder = new TextDecoder("utf-8");
+    const content = decoder.decode(bytes);
+
+    const textMatches = content.match(/<w:t[^>]*>([^<]+)<\/w:t>/g);
+    if (textMatches && textMatches.length > 0) {
+      const text = textMatches
+        .map((m) => m.replace(/<[^>]+>/g, ""))
+        .filter((t) => t.trim().length > 0)
+        .join(" ");
       if (text.length > 50) {
         return { text, confidence: 0.95 };
       }
     }
 
+    return { text: "", confidence: 0 };
+  } catch {
+    return { text: "", confidence: 0 };
+  }
+}
+
+export async function extractTextFromPlainText(
+  fileUrl: string
+): Promise<OcrResult> {
+  try {
+    const resp = await fetch(fileUrl);
+    const text = await resp.text();
+    if (text.trim().length > 0) {
+      return { text: text.trim(), confidence: 1.0 };
+    }
     return { text: "", confidence: 0 };
   } catch {
     return { text: "", confidence: 0 };

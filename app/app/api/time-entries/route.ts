@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { timeEntries, cases } from "@/database/schema";
-import { getSessionAPI, getFirmId } from "@/lib/auth/require-auth";
-import { eq, and, desc, count } from "drizzle-orm";
+import { getSession, getFirmId, handleUnauthorized } from "@/lib/auth/require-auth";
+import { eq, and, desc, count, or, gte, lte, isNull } from "drizzle-orm";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { writeAuditLog } from "@/lib/audit";
 
@@ -50,15 +50,18 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ data: rows, total: Number(total), page, limit, totalPages: Math.ceil(Number(total) / limit) });
   } catch (error) {
-    console.error("Error fetching time entries:", error);
+    const unauthorized = handleUnauthorized(error);
+    if (unauthorized) return unauthorized;
+    console.error("Error fetching time entries:", error instanceof Error ? error.message : error);
     return NextResponse.json({ error: "Error al obtener registros de tiempo" }, { status: 500 });
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getSessionAPI();
-    const firmId = await getFirmId();
+    const session = await getSession();
+    const firmId = session.user.firmId;
+    const userId = session.user.id;
 
     const rateCheck = await checkRateLimit("api", firmId);
     if (rateCheck instanceof NextResponse) return rateCheck;
@@ -74,9 +77,9 @@ export async function POST(req: NextRequest) {
     }
 
     const [caseExists] = await db
-      .select({ id: cases.id })
+      .select({ id: cases.id, firmId: cases.firmId })
       .from(cases)
-      .where(and(eq(cases.id, caseId), eq(cases.firmId, firmId)))
+      .where(and(eq(cases.id, caseId), eq(cases.firmId, firmId), isNull(cases.deletedAt)))
       .limit(1);
 
     if (!caseExists) {
@@ -87,14 +90,50 @@ export async function POST(req: NextRequest) {
       ? Math.round((new Date(endTime).getTime() - new Date(startTime).getTime()) / 60000)
       : null);
 
+    const newStart = new Date(startTime);
+    const newEnd = endTime ? new Date(endTime) : null;
+
+    // Check for overlapping time entries
+    const overlapConditions = [
+      eq(timeEntries.userId, userId),
+      eq(timeEntries.caseId, caseId),
+    ];
+
+    if (newEnd) {
+      overlapConditions.push(
+        or(
+          and(gte(timeEntries.startTime, newStart), lte(timeEntries.startTime, newEnd)),
+          and(gte(timeEntries.endTime, newStart), lte(timeEntries.endTime, newEnd)),
+          and(lte(timeEntries.startTime, newStart), gte(timeEntries.endTime, newEnd)),
+        )!
+      );
+    } else {
+      overlapConditions.push(
+        gte(timeEntries.endTime, newStart)
+      );
+    }
+
+    const [overlap] = await db
+      .select({ id: timeEntries.id })
+      .from(timeEntries)
+      .where(and(...overlapConditions))
+      .limit(1);
+
+    if (overlap) {
+      return NextResponse.json(
+        { error: "Ya existe un registro de tiempo que se solapa con este horario" },
+        { status: 409 }
+      );
+    }
+
     const [entry] = await db
       .insert(timeEntries)
       .values({
         caseId,
-        userId: session.user.id,
+        userId,
         description,
-        startTime: new Date(startTime),
-        endTime: endTime ? new Date(endTime) : null,
+        startTime: newStart,
+        endTime: newEnd,
         durationMinutes: computedDuration,
         hourlyRate: hourlyRate ?? null,
         isBillable: isBillable ?? true,
@@ -111,7 +150,9 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ data: entry }, { status: 201 });
   } catch (error) {
-    console.error("Error creating time entry:", error);
+    const unauthorized = handleUnauthorized(error);
+    if (unauthorized) return unauthorized;
+    console.error("Error creating time entry:", error instanceof Error ? error.message : error);
     return NextResponse.json({ error: "Error al crear registro de tiempo" }, { status: 500 });
   }
 }

@@ -2,7 +2,7 @@
 
 > Proyecto: SaaS de gestión legal con IA para despachos de abogados en Honduras.
 > Stack: Next.js 16 + TypeScript + PostgreSQL + DeepSeek V4 Flash.
-> Fase actual: Fase 1 completada. Fase 1.5 en curso — Subida de Documentos + OCR.
+> Fase actual: Fase 1 completada. Fase 1.5 completada. Fase 2 planificada — IA jurídica, RAG, automatizaciones.
 
 ---
 
@@ -37,7 +37,7 @@ workspace/
 
 - **ORM**: Drizzle ORM v0.45
 - **Host**: Neon DB serverless (PostgreSQL)
-- **Schema**: 18 tablas en `database/schema.ts`
+- **Schema**: 19 tablas en `database/schema.ts`
 - **Migrar**: `npx drizzle-kit push` (workdir: `app`)
 
 ## Servicios externos configurados
@@ -48,19 +48,19 @@ workspace/
 | DeepSeek V4 | `DEEPSEEK_API_KEY` | ✅ |
 | Upstash Redis | `UPSTASH_REDIS_*` | ✅ |
 | Resend | `RESEND_API_KEY` | ✅ |
-| Stripe | `STRIPE_SECRET_KEY` | ⚠️ Verificar cuentas Honduras |
+| Lemon Squeezy | `LEMON_SQUEEZY_API_KEY` | ✅ |
+| Stripe | `STRIPE_SECRET_KEY` | Archivado — pasarela no principal |
 | Google OAuth | `AUTH_GOOGLE_*` | ✅ |
-| Microsoft Entra ID | `AUTH_MICROSOFT_ENTRA_ID_*` | ⚠️ Pendiente configurar |
+| Microsoft Entra ID | `AUTH_MICROSOFT_ENTRA_ID_*` | ✅ |
 | UploadThing | `UPLOADTHING_TOKEN` | ✅ |
-| Inngest | `INNGEST_EVENT_KEY` | ✅ Pospuesto a Fase 2 |
+| Inngest | `INNGEST_EVENT_KEY` | ✅ Activo en pipeline documental OCR |
 
 ## Convenciones de código
 
 - **TypeScript estricto**: `tsconfig.json` con `strict: true`
 - **Formato**: Prettier con `prettier-plugin-tailwindcss`
-- **UI**: TailwindCSS 4 + shadcn/ui v4 (style: base-nova)
+- **UI**: TailwindCSS 4 + shadcn/ui v4 (style: base-nova, light theme)
 - **Fuentes**: Playfair Display (display) + DM Sans (body)
-- **Paleta**: Navy `#080b12` + oro `#c8a45c` + acero `#7ea8c4`
 - **Animaciones**: definidas en `globals.css`, usar clases `animate-fade-in-up`, `stagger-N`, `glass-card`, etc.
 
 ## No hacer

@@ -25,7 +25,8 @@ export const firms = pgTable(
     contactPhone: text("contact_phone"),
     address: text("address"),
     taxId: text("tax_id"),
-    settings: jsonb("settings"),
+    isvRate: numeric("isv_rate").default("15"),
+    settings: jsonb("settings").$type<{ theme?: string; language?: string }>(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
@@ -96,7 +97,8 @@ export const cases = pgTable(
     startDate: date("start_date").notNull(),
     endDate: date("end_date"),
     estimatedValue: numeric("estimated_value"),
-    metadata: jsonb("metadata"),
+    metadata: jsonb("metadata").$type<Record<string, unknown>>(),
+    deletedAt: timestamp("deleted_at"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
@@ -131,6 +133,7 @@ export const contacts = pgTable(
     phone: text("phone"),
     address: text("address"),
     notes: text("notes"),
+    deletedAt: timestamp("deleted_at"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
@@ -219,9 +222,11 @@ export const documents = pgTable(
       .default("borrador")
       .notNull(),
     ocrText: text("ocr_text"),
+    ocrConfidence: integer("ocr_confidence"),
     processingStatus: text("processing_status", {
       enum: ["pending", "uploaded", "ocr_processing", "ocr_complete", "ocr_skipped", "manual_review", "error", "retry_pending"],
     }).default("pending").notNull(),
+    deletedAt: timestamp("deleted_at"),
     createdBy: uuid("created_by").references(() => users.id),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
@@ -234,6 +239,10 @@ export const documents = pgTable(
     index("idx_documents_ocr_text").using(
       "gin",
       sql`to_tsvector('spanish', coalesce(${table.ocrText}, ''))`
+    ),
+    index("idx_documents_ocr_simple").using(
+      "gin",
+      sql`to_tsvector('simple', coalesce(${table.ocrText}, ''))`
     ),
   ]
 );
@@ -328,6 +337,7 @@ export const invoices = pgTable(
     dueDate: date("due_date").notNull(),
     paidAt: timestamp("paid_at"),
     notes: text("notes"),
+    deletedAt: timestamp("deleted_at"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => [
@@ -399,20 +409,24 @@ export const notifications = pgTable(
 );
 
 // ─── AUDIT LOGS ────────────────────────────────
-export const auditLogs = pgTable("audit_logs", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  firmId: uuid("firm_id")
-    .references(() => firms.id)
-    .notNull(),
-  userId: uuid("user_id").references(() => users.id),
-  action: text("action").notNull(),
-  entityType: text("entity_type").notNull(),
-  entityId: uuid("entity_id"),
-  changes: jsonb("changes"),
-  ipAddress: text("ip_address"),
-  userAgent: text("user_agent"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
+export const auditLogs = pgTable(
+  "audit_logs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    firmId: uuid("firm_id")
+      .references(() => firms.id)
+      .notNull(),
+    userId: uuid("user_id").references(() => users.id),
+    action: text("action").notNull(),
+    entityType: text("entity_type").notNull(),
+    entityId: uuid("entity_id"),
+    changes: jsonb("changes").$type<Record<string, unknown>>(),
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [index("audit_log_created_at_idx").on(table.createdAt)]
+);
 
 // ─── NEXT AUTH ─────────────────────────────────
 export const accounts = pgTable(
