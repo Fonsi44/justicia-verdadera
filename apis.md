@@ -160,6 +160,31 @@ Permite iniciar sesión con cuenta de Google. Es el método de login principal p
    - **Authorized redirect URIs**: `https://tudominio.com/api/auth/callback/google`
 3. Publica la app: **"OAuth consent screen"** → **"Publish App"**
 
+### Solicitar permisos de calendario en el login (sin segundo OAuth)
+
+Justicia Verdadera ya está configurado para pedir acceso al calendario de Google durante el login inicial. Los scopes están incluidos en `lib/auth/index.ts`:
+
+```typescript
+Google({
+  authorization: {
+    params: {
+      scope: "openid email profile https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.readonly",
+      access_type: "offline",  // Necesario para obtener refresh_token
+      prompt: "consent",       // Fuerza pantalla de consentimiento cada vez
+    },
+  },
+})
+```
+
+**Lo que ve el abogado:**
+1. Inicia sesión con Google por primera vez
+2. Google muestra: *"Justicia Verdadera quiere acceder a tu información básica Y gestionar tus calendarios"*
+3. Acepta una sola vez → todos los permisos concedidos
+4. El sistema guarda automáticamente `access_token` y `refresh_token` en la sesión JWT
+5. Los eventos de la agenda de Justicia Verdadera se sincronizan con Google Calendar automáticamente
+
+**No se necesita un segundo flujo OAuth separado para el calendario.**
+
 ### 2.3 Microsoft Entra ID OAuth (Azure AD)
 
 Permite iniciar sesión con cuenta de Microsoft (Outlook, Office 365, Hotmail). Muchos despachos de abogados usan Office 365/Outlook como correo corporativo, por lo que este método es muy relevante para el público objetivo.
@@ -195,6 +220,33 @@ AUTH_MICROSOFT_ENTRA_ID_ISSUER=https://login.microsoftonline.com/<ID_del_inquili
 1. Ve al mismo "App registration" en Azure Portal
 2. Añade otro Redirect URI: `https://tudominio.com/api/auth/callback/microsoft-entra-id`
 3. Crea un nuevo client secret para produccion
+
+### Solicitar permisos de calendario + correo en el login (sin segundo OAuth)
+
+Igual que con Google, Justicia Verdadera pide todos los permisos durante el login inicial. Los scopes están configurados en `lib/auth/index.ts`:
+
+```typescript
+MicrosoftEntraID({
+  authorization: {
+    params: {
+      scope: "openid email profile offline_access Calendars.ReadWrite Mail.Read",
+    },
+  },
+})
+```
+
+**Scopes incluidos:**
+- `Calendars.ReadWrite` — Sincronizar citas, vistas, audiencias con Outlook
+- `Mail.Read` — Leer correos (futuro: auto-archivar en expedientes)
+- `offline_access` — Obtener refresh_token para acceso permanente
+
+**Lo que ve el abogado:**
+1. Inicia sesión con Microsoft por primera vez
+2. Microsoft muestra: *"Justicia Verdadera necesita: Ver tu perfil, Leer y escribir en tus calendarios, Leer tu correo"*
+3. Acepta una sola vez → todos los permisos concedidos
+4. El sistema guarda tokens en sesión JWT para sincronización automática
+
+**No se necesita un segundo flujo OAuth separado para Outlook Calendar.**
 
 ---
 
@@ -612,7 +664,9 @@ El proyecto `justicia-verdadera` ya existe en Vercel (cuenta `Fonsi44`) pero **n
 
 > Sincronización bidireccional entre la agenda de Justicia Verdadera y Google Calendar del abogado. Audiencias, vistas, plazos y reuniones aparecen automáticamente en su calendario personal.
 
-### Paso a paso
+> ⚡ **Importante**: Los permisos de calendario YA se solicitan en el login inicial (sección 2.2). El abogado no necesita autorizar una segunda vez. Los tokens `access_token` y `refresh_token` se almacenan automáticamente en la sesión JWT y están disponibles vía `session.calendarAccess`.
+
+### Habilitar la API
 
 1. Ve a **https://console.cloud.google.com**
 2. Selecciona el mismo proyecto que creaste para Google OAuth (`justicia-verdadera`)
@@ -665,7 +719,9 @@ GOOGLE_CALENDAR_CLIENT_SECRET=
 
 ## 11. Microsoft Graph API — Outlook Calendar
 
-> Sincronización con el calendario de Outlook/Office 365. Muchos despachos hondureños usan Office 365 como suite corporativa. Se integra vía Microsoft Graph API usando la misma app registration de Entra ID o una nueva.
+> Sincronización con el calendario de Outlook/Office 365 a través de Microsoft Graph API.
+
+> ⚡ **Importante**: Los permisos de calendario y correo YA se solicitan en el login inicial (sección 2.3). Los scopes `Calendars.ReadWrite`, `Mail.Read` y `offline_access` están incluidos. El abogado autoriza todo de una vez.
 
 ### Opción A — Usar la misma App Registration de Entra ID
 

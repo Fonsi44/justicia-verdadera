@@ -15,6 +15,12 @@ declare module "next-auth" {
       barNumber?: string | null;
       specialty?: string | null;
     } & DefaultSession["user"];
+    calendarAccess?: {
+      accessToken?: string;
+      refreshToken?: string;
+      provider?: string;
+      expiresAt?: number;
+    };
   }
 }
 
@@ -94,10 +100,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Google({
       clientId: process.env.AUTH_GOOGLE_ID,
       clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      authorization: {
+        params: {
+          scope: "openid email profile https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/calendar.readonly",
+          access_type: "offline",
+          prompt: "consent",
+        },
+      },
     }),
     MicrosoftEntraID({
       clientId: process.env.AUTH_MICROSOFT_ENTRA_ID_ID,
       clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET,
+      authorization: {
+        params: {
+          scope: "openid email profile offline_access Calendars.ReadWrite Mail.Read",
+        },
+      },
     }),
     Credentials({
       name: "credentials",
@@ -133,27 +151,36 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     signIn({ user }) {
       return !!user.email;
     },
-    async jwt({ token, user, trigger }) {
-      if (trigger === "signIn" && user?.email) {
-        const dbUser = await tryGetDbUser(user.email);
+    async jwt({ token, user, trigger, account }) {
+      if (trigger === "signIn" || trigger === "signUp") {
+        if (account) {
+          (token as Record<string, unknown>).accessToken = account.access_token;
+          (token as Record<string, unknown>).refreshToken = account.refresh_token;
+          (token as Record<string, unknown>).provider = account.provider;
+          (token as Record<string, unknown>).expiresAt = account.expires_at;
+        }
 
-        if (dbUser) {
-          token.firmId = dbUser.firmId as string;
-          token.role = dbUser.role as string;
-          token.barNumber = dbUser.barNumber;
-          token.specialty = dbUser.specialty;
-        } else {
-          const newUser = await tryCreateFirmAndUser(
-            user.name ?? "",
-            user.email,
-            user.image ?? null,
-          );
+        if (user?.email) {
+          const dbUser = await tryGetDbUser(user.email);
 
-          if (newUser) {
-            token.firmId = newUser.firmId as string;
-            token.role = newUser.role as string;
-            token.barNumber = newUser.barNumber;
-            token.specialty = newUser.specialty;
+          if (dbUser) {
+            token.firmId = dbUser.firmId as string;
+            token.role = dbUser.role as string;
+            token.barNumber = dbUser.barNumber;
+            token.specialty = dbUser.specialty;
+          } else {
+            const newUser = await tryCreateFirmAndUser(
+              user.name ?? "",
+              user.email,
+              user.image ?? null,
+            );
+
+            if (newUser) {
+              token.firmId = newUser.firmId as string;
+              token.role = newUser.role as string;
+              token.barNumber = newUser.barNumber;
+              token.specialty = newUser.specialty;
+            }
           }
         }
       }
@@ -179,6 +206,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.barNumber = (token.barNumber as string | null) ?? null;
         session.user.specialty = (token.specialty as string | null) ?? null;
       }
+      session.calendarAccess = {
+        accessToken: (token as Record<string, unknown>).accessToken as string | undefined,
+        refreshToken: (token as Record<string, unknown>).refreshToken as string | undefined,
+        provider: (token as Record<string, unknown>).provider as string | undefined,
+        expiresAt: (token as Record<string, unknown>).expiresAt as number | undefined,
+      };
       return session;
     },
   },
