@@ -52,8 +52,12 @@ export async function checkRateLimit(
     }
 
     return { allowed: true, remaining };
-  } catch {
-    // If Redis is unavailable, allow the request to proceed
-    return { allowed: true, remaining: -1 };
+  } catch (error) {
+    // If Redis is unavailable, deny the request by default (fail-closed)
+    console.error("[RateLimit] Redis unavailable, denying request:", error);
+    return NextResponse.json(
+      { error: "Servicio temporalmente no disponible. Intenta de nuevo en unos minutos." },
+      { status: 503 }
+    );
   }
 }

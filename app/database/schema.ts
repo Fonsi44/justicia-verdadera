@@ -219,9 +219,9 @@ export const documents = pgTable(
       .default("borrador")
       .notNull(),
     ocrText: text("ocr_text"),
-    processingStatus: text("processing_status")
-      .default("pending")
-      .notNull(),
+    processingStatus: text("processing_status", {
+      enum: ["pending", "uploaded", "ocr_processing", "ocr_complete", "ocr_skipped", "manual_review", "error", "retry_pending"],
+    }).default("pending").notNull(),
     createdBy: uuid("created_by").references(() => users.id),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
@@ -360,7 +360,7 @@ export const payments = pgTable(
     invoiceId: uuid("invoice_id").references(() => invoices.id),
     amount: numeric("amount").notNull(),
     method: text("method", {
-      enum: ["transferencia", "efectivo", "cheque", "tarjeta", "stripe", "otro"],
+      enum: ["transferencia", "efectivo", "cheque", "tarjeta", "lemon_squeezy", "otro"],
     }).notNull(),
     reference: text("reference"),
     notes: text("notes"),
@@ -450,6 +450,20 @@ export const sessions = pgTable(
   },
   (table) => [index("session_token_idx").on(table.sessionToken)]
 );
+
+// ─── AI USAGE ─────────────────────────────────
+export const aiUsage = pgTable("ai_usage", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  firmId: uuid("firm_id")
+    .references(() => firms.id)
+    .notNull(),
+  userId: uuid("user_id").references(() => users.id),
+  model: text("model").notNull(),
+  promptTokens: integer("prompt_tokens"),
+  completionTokens: integer("completion_tokens"),
+  cost: numeric("cost"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
 
 export const verificationTokens = pgTable(
   "verification_tokens",

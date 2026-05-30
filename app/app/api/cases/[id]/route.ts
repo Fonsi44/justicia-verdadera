@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getSession } from "@/lib/auth/require-auth";
+import { getSessionAPI, handleUnauthorized } from "@/lib/auth/require-auth";
 import { cases, caseParties, users, contacts } from "@/database/schema";
 import { eq, and } from "drizzle-orm";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -11,7 +11,14 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const session = await getSession();
+  let session;
+  try {
+    session = await getSessionAPI();
+  } catch (error) {
+    const unauthorized = handleUnauthorized(error);
+    if (unauthorized) return unauthorized;
+    throw error;
+  }
 
   const [caseData] = await db
     .select({
@@ -56,7 +63,14 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const session = await getSession();
+  let session;
+  try {
+    session = await getSessionAPI();
+  } catch (error) {
+    const unauthorized = handleUnauthorized(error);
+    if (unauthorized) return unauthorized;
+    throw error;
+  }
   const firmId = session.user.firmId;
 
   const rateCheck = await checkRateLimit("api", firmId);
@@ -120,7 +134,14 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  const session = await getSession();
+  let session;
+  try {
+    session = await getSessionAPI();
+  } catch (error) {
+    const unauthorized = handleUnauthorized(error);
+    if (unauthorized) return unauthorized;
+    throw error;
+  }
   const firmId = session.user.firmId;
 
   const rateCheck = await checkRateLimit("api", firmId);

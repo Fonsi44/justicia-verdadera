@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { documents, documentVersions, cases } from "@/database/schema";
-import { getFirmId } from "@/lib/auth/require-auth";
+import { getFirmId, handleUnauthorized } from "@/lib/auth/require-auth";
 import { eq, and, like, desc, count, or, sql } from "drizzle-orm";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { writeAuditLog } from "@/lib/audit";
@@ -67,6 +67,8 @@ export async function GET(req: NextRequest) {
       totalPages: Math.ceil(total.count / limit),
     });
   } catch (error) {
+    const unauthorized = handleUnauthorized(error);
+    if (unauthorized) return unauthorized;
     console.error("Error fetching documents:", error);
     return NextResponse.json({ error: "Error al obtener documentos" }, { status: 500 });
   }
@@ -131,6 +133,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ data: doc }, { status: 201 });
   } catch (error) {
+    const unauthorized = handleUnauthorized(error);
+    if (unauthorized) return unauthorized;
     console.error("Error creating document:", error);
     return NextResponse.json({ error: "Error al crear documento" }, { status: 500 });
   }

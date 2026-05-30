@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { contacts, caseParties } from "@/database/schema";
-import { getFirmId } from "@/lib/auth/require-auth";
+import { getFirmId, handleUnauthorized } from "@/lib/auth/require-auth";
 import { and, eq, or, ilike, count, desc, inArray, type SQL } from "drizzle-orm";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { writeAuditLog } from "@/lib/audit";
@@ -70,6 +70,8 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({ data, total, page, limit });
   } catch (error) {
+    const unauthorized = handleUnauthorized(error);
+    if (unauthorized) return unauthorized;
     console.error("Error fetching contacts:", error);
     return NextResponse.json({ error: "Error al obtener contactos" }, { status: 500 });
   }
@@ -116,6 +118,8 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({ data: { ...contact, caseCount: 0 } }, { status: 201 });
   } catch (error) {
+    const unauthorized = handleUnauthorized(error);
+    if (unauthorized) return unauthorized;
     console.error("Error creating contact:", error);
     return NextResponse.json({ error: "Error al crear el contacto" }, { status: 500 });
   }

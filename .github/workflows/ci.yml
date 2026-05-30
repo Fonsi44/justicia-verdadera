@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: ["**"]
   pull_request:
     branches: [main]
 
@@ -24,4 +24,13 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run test -- --run
+        env:
+          DATABASE_URL: postgresql://mock:mock@localhost:5432/mock
+          AUTH_SECRET: mock-secret-for-ci
+          UPSTASH_REDIS_REST_URL: https://mock.upstash.io
+          UPSTASH_REDIS_REST_TOKEN: mock-token
+          DEEPSEEK_API_KEY: mock-key
+          RESEND_API_KEY: mock-key
+          UPLOADTHING_TOKEN: mock-token
+          INNGEST_EVENT_KEY: mock-key
       - run: npm run build

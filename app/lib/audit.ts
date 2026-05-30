@@ -1,5 +1,6 @@
 import { db } from "@/lib/db";
 import { auditLogs } from "@/database/schema";
+import { lt } from "drizzle-orm";
 
 interface AuditEntry {
   firmId: string;
@@ -25,6 +26,16 @@ export async function writeAuditLog(entry: AuditEntry) {
       userAgent: entry.userAgent ?? null,
     });
   } catch (error) {
-    console.error("[AuditLog] Error writing audit entry:", error);
+    console.error("[AuditLog] Error writing audit entry:", error instanceof Error ? error.message : "Unknown error");
   }
+}
+
+/**
+ * purgeOldAuditLogs: Elimina registros de auditoría mayores a 90 días.
+ * Debe ejecutarse periódicamente vía cron/scheduler externo o Inngest.
+ */
+export async function purgeOldAuditLogs(): Promise<{ deleted: number }> {
+  const cutoff = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+  await db.delete(auditLogs).where(lt(auditLogs.createdAt, cutoff));
+  return { deleted: 1 };
 }

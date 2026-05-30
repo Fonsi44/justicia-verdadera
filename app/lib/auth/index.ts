@@ -54,25 +54,29 @@ async function tryCreateFirmAndUser(
     const firmName = name || email.split("@")[0];
     const baseSlug = slugify(firmName);
 
-    const [firm] = await db
-      .insert(firms)
-      .values({
-        name: firmName,
-        slug: uniqueSlug(baseSlug),
-        contactEmail: email,
-      })
-      .returning();
+    const [newUser] = await db.transaction(async (tx) => {
+      const [firm] = await tx
+        .insert(firms)
+        .values({
+          name: firmName,
+          slug: uniqueSlug(baseSlug),
+          contactEmail: email,
+        })
+        .returning();
 
-    const [newUser] = await db
-      .insert(users)
-      .values({
-        firmId: firm.id as string,
-        name: name || email.split("@")[0],
-        email,
-        image,
-        role: "owner" as const,
-      })
-      .returning();
+      const [user] = await tx
+        .insert(users)
+        .values({
+          firmId: firm.id as string,
+          name: name || email.split("@")[0],
+          email,
+          image,
+          role: "owner" as const,
+        })
+        .returning();
+
+      return [user];
+    });
 
     return newUser;
   } catch {

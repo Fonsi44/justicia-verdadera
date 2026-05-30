@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getFirmId } from "@/lib/auth/require-auth";
+import { getFirmId, handleUnauthorized } from "@/lib/auth/require-auth";
 import { cases, users } from "@/database/schema";
 import { eq, and, ilike, or, desc, count, sql } from "drizzle-orm";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -75,6 +75,8 @@ export async function GET(request: NextRequest) {
     totalPages: Math.ceil(Number(total) / limit),
   });
   } catch (error) {
+    const unauthorized = handleUnauthorized(error);
+    if (unauthorized) return unauthorized;
     console.error("Error fetching cases:", error);
     return Response.json({ error: "Error al obtener casos" }, { status: 500 });
   }
@@ -123,6 +125,8 @@ export async function POST(request: NextRequest) {
 
   return Response.json(newCase, { status: 201 });
   } catch (error) {
+    const unauthorized = handleUnauthorized(error);
+    if (unauthorized) return unauthorized;
     console.error("Error creating case:", error);
     return Response.json({ error: "Error al crear el caso" }, { status: 500 });
   }
