@@ -338,6 +338,22 @@ export const invoices = pgTable(
     dueDate: date("due_date").notNull(),
     paidAt: timestamp("paid_at"),
     notes: text("notes"),
+
+    // Campos SAR (Servicio de Administración de Rentas)
+    cai: text("cai"),
+    caiExpiration: date("cai_expiration"),
+    rangoCaiFrom: text("rango_cai_from"),
+    rangoCaiTo: text("rango_cai_to"),
+    estadoSar: text("estado_sar", {
+      enum: ["pendiente_enviar", "enviado", "aceptado", "rechazado"],
+    }).default("pendiente_enviar"),
+    caiResponse: jsonb("cai_response"),
+    retencionIsr: numeric("retencion_isr"),
+
+    rtnEmisor: text("rtn_emisor"),
+    rtnReceptor: text("rtn_receptor"),
+    isv0: numeric("isv_0"),
+
     deletedAt: timestamp("deleted_at"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
