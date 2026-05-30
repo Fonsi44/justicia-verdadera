@@ -8,8 +8,8 @@ import {
   Receipt,
   Settings,
   Search,
-  Bell,
 } from "lucide-react";
+import NotificationsDropdown from "@/components/notifications-dropdown";
 
 const navItems = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -75,13 +75,7 @@ export default function DashboardGroupLayout({
             </button>
           </div>
           <div className="flex items-center gap-3">
-            <button
-              aria-label="Notificaciones"
-              className="relative text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Bell className="h-4 w-4" />
-              <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-primary" />
-            </button>
+            <NotificationsDropdown />
             <div className="h-6 w-px bg-border" />
             <div className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary">

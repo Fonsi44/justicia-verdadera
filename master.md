@@ -1399,6 +1399,28 @@ Todos usan CSS variables, `cn()`, shadcn/ui, lucide-react, TypeScript estricto, 
 | `npm run typecheck` | 0 errores |
 | `npm run build` | Exitoso (26 rutas, +1 `/documentos/[id]`) |
 
+### 2026-05-30 — Notificaciones + paginación implementadas
+
+| Campo | Resultado |
+|---|---|
+| Tipo | Nuevo sistema de notificaciones + paginación frontend |
+| Duración | ~15 min con 3 subagentes |
+| Archivos creados | `api/notifications/route.ts` (GET list), `api/notifications/[id]/route.ts` (PATCH read), `components/notifications-dropdown.tsx`, `components/pagination.tsx` |
+| Archivos modificados | `layout.tsx` (header con dropdown), `documentos/page.tsx` (paginación), `api/seed-mock/route.ts` (5 notificaciones demo) |
+
+#### Detalle
+- **Notificaciones API**: GET /api/notifications (filtro por firmId+userId, unreadOnly, paginado) + PATCH /api/notifications/[id] (marcar leída)
+- **Dropdown UI**: Icono Bell con badge de no leídas, dropdown con 5 notificaciones recientes, iconos por tipo, fecha relativa, clic marca como leída, cierre al hacer clic fuera
+- **Paginación**: Componente reutilizable con range colapsado, elipsis, botones anterior/siguiente. Implementado en documentos/page.tsx
+- **Seed data**: 5 notificaciones demo (plazo, vista, factura, documento, sistema)
+
+#### Validaciones
+
+| Comando | Resultado |
+|---|---|
+| `npm run typecheck` | 0 errores |
+| `npm run build` | Exitoso (28 rutas) |
+
 ---
 
 ## 23. Estado final

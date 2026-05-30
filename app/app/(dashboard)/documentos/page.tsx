@@ -17,6 +17,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import UploadDocument from "@/components/upload-document";
+import Pagination from "@/components/pagination";
 
 interface Document {
   id: string;
@@ -89,18 +90,32 @@ export default function DocumentosPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, typeFilter]);
 
   useEffect(() => {
     const params = new URLSearchParams();
     if (search) params.set("search", search);
     if (typeFilter) params.set("type", typeFilter);
+    params.set("page", String(page));
+    params.set("limit", "20");
+    setLoading(true);
     fetch(`/api/documents?${params.toString()}`)
       .then((r) => r.json())
-      .then((res) => setDocuments(res.data ?? []))
+      .then((res) => {
+        setDocuments(res.data ?? []);
+        setTotalPages(res.totalPages ?? 1);
+        setTotal(res.total ?? 0);
+      })
       .catch(console.error)
       .finally(() => setLoading(false));
-  }, [search, typeFilter]);
+  }, [search, typeFilter, page]);
 
   return (
     <div className="space-y-6">
@@ -262,6 +277,7 @@ export default function DocumentosPage() {
             </tbody>
           </table>
         )}
+        {!loading && <Pagination page={page} totalPages={totalPages} total={total} onPageChange={setPage} />}
       </div>
     </div>
   );

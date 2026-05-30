@@ -330,32 +330,61 @@ export async function seedMockData(firmId: string, userId: string) {
   }
 
   // ── NOTIFICATIONS ──
-  const notifTemplates = [
-    { type: "plazo", title: "Recordatorio: Plazo de presentación de pruebas", body: "El plazo vence en 48 horas. Caso Martínez vs. Constructora." },
-    { type: "vista", title: "Vista programada mañana", body: "Vista oral a las 9:00 AM en Tribunal de Sentencia, Sala 3." },
-    { type: "audiencia", title: "Audiencia preliminar confirmada", body: "Se confirma audiencia para el próximo lunes. Preparar memorial." },
-    { type: "factura", title: "Factura emitida — FAC-2026-0018", body: "Se ha emitido la factura por HNL 42,000.00 a Constructora Atlántida." },
-    { type: "documento", title: "Documento actualizado", body: "Se ha añadido una nueva versión del documento: Demanda v3." },
+  const notificationData = [
+    {
+      firmId,
+      userId,
+      type: "plazo" as const,
+      title: "Vence plazo de contestación",
+      body: "El caso HC-2026-001 tiene un plazo de contestación que vence en 3 días.",
+      channel: "in_app" as const,
+      isRead: false,
+      createdAt: new Date(Date.now() - 3600000),
+    },
+    {
+      firmId,
+      userId,
+      type: "vista" as const,
+      title: "Vista programada para mañana",
+      body: "Vista oral en el caso HC-2026-003 programada para las 9:00 AM.",
+      channel: "in_app" as const,
+      isRead: false,
+      createdAt: new Date(Date.now() - 7200000),
+    },
+    {
+      firmId,
+      userId,
+      type: "factura" as const,
+      title: "Factura FAC-001 próxima a vencer",
+      body: "La factura FAC-001 del cliente María García vence en 5 días.",
+      channel: "in_app" as const,
+      isRead: true,
+      readAt: new Date(),
+      createdAt: new Date(Date.now() - 86400000),
+    },
+    {
+      firmId,
+      userId,
+      type: "documento" as const,
+      title: "Documento subido correctamente",
+      body: "El documento 'Dictamen Pericial' fue subido al caso HC-2026-002.",
+      channel: "in_app" as const,
+      isRead: false,
+      createdAt: new Date(Date.now() - 1800000),
+    },
+    {
+      firmId,
+      userId,
+      type: "sistema" as const,
+      title: "Bienvenido a Justicia Verdadera",
+      body: "Tu cuenta ha sido activada. Revisa la guía de inicio rápido para comenzar.",
+      channel: "in_app" as const,
+      isRead: false,
+      createdAt: new Date(Date.now() - 604800000),
+    },
   ];
 
-  for (let i = 0; i < 8; i++) {
-    const notif = notifTemplates[i % notifTemplates.length];
-    const sentDate = new Date(now);
-    sentDate.setDate(sentDate.getDate() - (i * 2));
-
-    await db.insert(notifications).values({
-      firmId,
-      userId: userId,
-      caseId: caseIds[i % caseIds.length],
-      type: notif.type,
-      title: notif.title,
-      body: notif.body,
-      channel: i % 2 === 0 ? "in_app" : "email",
-      isRead: i < 4,
-      sentAt: sentDate.toISOString(),
-      readAt: i < 4 ? new Date(sentDate.getTime() + 3600000).toISOString() : null,
-    } as any);
-  }
+  await db.insert(notifications).values(notificationData);
 
   return {
     caseCount: caseIds.length,
