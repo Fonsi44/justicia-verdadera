@@ -103,7 +103,17 @@ export async function createInvoice(firmId: string, input: CreateInvoiceInput) {
 
   const isvRate = await getFirmIsvRate(firmId);
   const tax = subtotal * (isvRate / 100);
-  const total = subtotal + tax;
+
+  // ISR retention 12.5% for legal entities (persona_juridica)
+  const [client] = await db
+    .select({ type: contacts.type, identityNumber: contacts.identityNumber })
+    .from(contacts)
+    .where(eq(contacts.id, input.clientId))
+    .limit(1);
+
+  const isLegalEntity = client?.type === "persona_juridica" || client?.type === "institucion";
+  const retencionIsr = isLegalEntity ? subtotal * 0.125 : 0;
+  const total = subtotal + tax - retencionIsr;
 
   const [inv] = await db
     .insert(invoices)
@@ -115,6 +125,8 @@ export async function createInvoice(firmId: string, input: CreateInvoiceInput) {
       subtotal: subtotal.toString(),
       tax: tax.toString(),
       total: total.toString(),
+      retencionIsr: retencionIsr > 0 ? retencionIsr.toString() : null,
+      rtnReceptor: client?.identityNumber ?? null,
       issueDate: input.issueDate,
       dueDate: input.dueDate,
       notes: input.notes ?? null,
@@ -133,7 +145,7 @@ export async function createInvoice(firmId: string, input: CreateInvoiceInput) {
     );
   }
 
-  return { inv, subtotal, tax, total, isvRate };
+  return { inv, subtotal, tax, total, isvRate, retencionIsr };
 }
 
 export async function getInvoiceById(firmId: string, id: string) {
