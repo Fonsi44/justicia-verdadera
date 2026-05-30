@@ -1164,6 +1164,43 @@ Todos usan CSS variables, `cn()`, shadcn/ui, lucide-react, TypeScript estricto, 
 - Se mantuvo la paleta navy `#1e3a5f` como primario (profesional legal) y teal `#0d9488` como acento.
 - Las ilustraciones SVG usan 6 colores semánticos distintos para dar identidad a cada módulo.
 
+### 2026-05-30 — Rediseño frontend completo (dark → light theme)
+
+---
+
+### 2026-05-30 — F1.5B + F1.5C + F1.5E: Schema documental, UploadThing real, Hardening
+
+| Campo | Resultado |
+|---|---|
+| Tipo | Implementación continua de Fase 1.5 |
+| Orquestador | DeepSeek V4 Pro |
+| Duración | ~1 hora |
+
+#### F1.5B — Schema documental
+- `database/schema.ts`: añadido índice GIN `idx_documents_ocr_text` con `to_tsvector('spanish', ...)`
+- `database/manual-migrations/001-fase1.5-check-gin.sql`: CHECK constraint + GIN index (ya existía)
+
+#### F1.5C — UploadThing real
+- `lib/uploadthing.ts`: File router con auth middleware, límite 8MB, PDF/image
+- `app/api/uploadthing/route.ts`: Route handler UploadThing
+- `components/upload-document.tsx`: UploadDropzone wrapper con POST a /api/documents
+- `app/(dashboard)/documentos/page.tsx`: Dialog modal para subida, feedback toast
+- `app/api/documents/route.ts`: POST ahora crea document_version y setea processing_status="uploaded"
+- Build: 24 páginas (+1: /api/uploadthing)
+
+#### F1.5E — Hardening
+- `lib/rate-limit.ts`: Rate limiter con Upstash (auth 5/min, api 60/min, upload 10/min)
+- `lib/audit.ts`: Auditoría para operaciones create/update/delete
+- Aplicado rate limit + audit a POST /api/documents y POST /api/cases
+- `__tests__/basic.test.ts`: 6 tests (utils, status mapping, pricing)
+- `vitest.config.ts`: Configuración vitest con alias @
+- `npm run test`: 6/6 passed
+
+#### Pendientes
+- F1.5D: OCR async con Inngest + Tesseract.js
+- Aplicar rate limit + audit a PATCH/DELETE routes restantes
+- Tests multi-tenant
+
 ### 2026-05-30 — Microsoft Entra ID verificado + sistema mock data
 
 | Campo | Resultado |
