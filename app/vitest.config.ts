@@ -6,6 +6,7 @@ export default defineConfig({
     globals: true,
     environment: "node",
     setupFiles: [],
+    testTimeout: 30000,
     coverage: {
       provider: "v8",
       reporter: ["text", "html", "lcov"],

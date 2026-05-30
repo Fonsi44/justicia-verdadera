@@ -27,6 +27,11 @@ export const firms = pgTable(
     address: text("address"),
     taxId: text("tax_id"),
     isvRate: numeric("isv_rate").default("15"),
+    subscriptionStatus: text("subscription_status").default("trial"),
+    subscriptionTier: text("subscription_tier").default("starter"),
+    subscriptionEndDate: timestamp("subscription_end_date"),
+    aiSpendingLimit: numeric("ai_spending_limit").default("200"),
+    subscriptionId: text("subscription_id"),
     settings: jsonb("settings").$type<{
       theme?: string;
       language?: string;
