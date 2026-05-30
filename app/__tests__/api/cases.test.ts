@@ -26,7 +26,7 @@ const dbSelectChain = (() => {
     transaction: vi.fn(),
   };
   // Simula el comportamiento de Promise.all llamando al callback del último método
-  methods.then = vi.fn(function (onFulfilled: (v: any) => any) {
+  methods.then = vi.fn(function (onFulfilled: (v: unknown) => unknown) {
     return Promise.resolve(onFulfilled([mockCaseData, mockCountResult]));
   });
   methods.catch = vi.fn();
