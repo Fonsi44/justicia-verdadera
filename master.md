@@ -14,7 +14,7 @@
 | Responsable | Alfons Roiget, fundador |
 | Versión del documento | 6.3 — Corpus legal completo: scraper, seed, 75 chunks de 19 fuentes, 58 rutas (31 mayo 2026) |
 | Fecha de actualización | 31 mayo 2026 |
-| Estado global | Fase 1, 1.5 y 2 completadas. pgvector activado (v0.8.0). Corpus legal con 75 chunks de 19 fuentes (códigos, leyes, jurisprudencia, tratados). Frontend IA construido. Scraper modular listo para fuentes reales. |
+| Estado global | Fase 1, 1.5 y 2 completadas. Corpus legal con 6,781 chunks de 24 fuentes. 8 de 9 códigos principales con texto extraído de PDFs oficiales reales. Pendiente: Código Procesal Civil. |
 | Fuente de verdad | Solo `master.md` |
 | Última verificación técnica declarada | 31 mayo 2026 |
 | Comandos declarados como ejecutados | `npm run lint`, `npm run typecheck`, `npm run build`, `npm run test` |
