@@ -42,11 +42,21 @@ export const processDocumentOcr = configured
           });
         } else if (mimeType === "application/pdf") {
           await step.run("ocr-pdf", async () => {
-            const { extractTextFromPdf } = await import("@/lib/ocr");
+            const { extractTextFromPdf, extractTextFromScannedPdf } = await import("@/lib/ocr");
             try {
               const result = await extractTextFromPdf(fileUrl);
-              ocrText = result.text;
-              confidence = result.confidence;
+              if (result.text.length > 50) {
+                ocrText = result.text;
+                confidence = result.confidence;
+              } else {
+                // Scanned PDF: try Tesseract OCR directly on the PDF
+                console.log("[OCR] PDF sin capa de texto, intentando OCR por imágenes...");
+                const scannedResult = await extractTextFromScannedPdf(fileUrl);
+                if (scannedResult.text.trim().length > 0) {
+                  ocrText = scannedResult.text;
+                  confidence = scannedResult.confidence;
+                }
+              }
             } catch {
               ocrText = "";
               confidence = 0;
@@ -79,18 +89,16 @@ export const processDocumentOcr = configured
         }
 
         if (!ocrText.trim()) {
-          const isScannedPdf = mimeType === "application/pdf";
           await step.run("update-status-skipped", async () => {
             await db
               .update(documents)
               .set({
-                processingStatus: isScannedPdf ? "manual_review" : "ocr_skipped",
-                ocrText: isScannedPdf ? "[PDF escaneado — sin capa de texto. El OCR requiere procesamiento en servidor dedicado.]" : null,
-                ocrConfidence: Math.round(confidence * 100),
+                processingStatus: "manual_review",
+                ocrText: "[PDF escaneado — sin capa de texto. El OCR requiere procesamiento local con mas recursos.]",
               })
               .where(eq(documents.id, documentId));
           });
-          return { status: isScannedPdf ? "manual_review" : "skipped" };
+          return { status: "manual_review" };
         }
 
         await step.run("update-status-complete", async () => {

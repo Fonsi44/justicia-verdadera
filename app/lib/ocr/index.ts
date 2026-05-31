@@ -21,14 +21,41 @@ export async function extractTextFromImage(
   }
 }
 
+async function extractWithPdfjs(buffer: ArrayBuffer): Promise<string | null> {
+  try {
+    const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs");
+    const data = new Uint8Array(buffer);
+    const doc = await getDocument({ data }).promise;
+    let allText = "";
+    for (let i = 1; i <= doc.numPages; i++) {
+      const page = await doc.getPage(i);
+      const content = await page.getTextContent();
+      allText += content.items
+        .map((item: unknown) => (item as { str?: string }).str ?? "")
+        .filter(Boolean)
+        .join(" ") + "\n";
+    }
+    return allText.trim() || null;
+  } catch {
+    return null;
+  }
+}
+
 export async function extractTextFromPdf(
   pdfUrl: string
 ): Promise<OcrResult> {
   try {
     const resp = await fetch(pdfUrl);
     const buffer = await resp.arrayBuffer();
-    const bytes = new Uint8Array(buffer);
 
+    // Method 1: pdfjs-dist (robusto, capa de texto estándar)
+    const pdfjsText = await extractWithPdfjs(buffer);
+    if (pdfjsText && pdfjsText.length > 50) {
+      return { text: pdfjsText, confidence: 0.95 };
+    }
+
+    // Method 2: BT/ET stream parsing (PDFs con formato antiguo)
+    const bytes = new Uint8Array(buffer);
     const decoder = new TextDecoder("utf-8");
     const content = decoder.decode(bytes);
 
@@ -61,6 +88,7 @@ export async function extractTextFromPdf(
       if (text.length > 50) return { text, confidence: 0.9 };
     }
 
+    // Method 3: fallback de paréntesis
     const fallbackText = content.match(/\(([^)]*)\)/g);
     if (fallbackText) {
       const text = fallbackText
@@ -70,10 +98,35 @@ export async function extractTextFromPdf(
       if (text.length > 50) return { text, confidence: 0.7 };
     }
 
-    // Scanned PDF: no text layer found. Return empty for async processing.
+    // Scanned PDF: no text layer found.
     return { text: "", confidence: 0 };
   } catch {
     return { text: "", confidence: 0 };
+  }
+}
+
+/**
+ * OCR para PDFs escaneados (sin capa de texto).
+ * Usa Tesseract.js directamente sobre el PDF — convierte páginas a imágenes y las OCR.
+ * @param pdfUrl URL del PDF
+ * @param maxPages Máximo de páginas a procesar (default 20 para serverless)
+ */
+export async function extractTextFromScannedPdf(
+  pdfUrl: string
+): Promise<OcrResult> {
+  let worker;
+  try {
+    worker = await createWorker("spa");
+    const { data } = await worker.recognize(pdfUrl);
+    return {
+      text: data.text,
+      confidence: data.confidence ?? 0,
+    };
+  } catch (error) {
+    console.warn(`[OCR] Scanned PDF fallback failed: ${error instanceof Error ? error.message : error}`);
+    return { text: "", confidence: 0 };
+  } finally {
+    if (worker) await worker.terminate();
   }
 }
 

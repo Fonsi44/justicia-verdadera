@@ -162,7 +162,11 @@ export default async function DocumentDetailPage({
             <div className="flex items-center gap-2 rounded bg-muted p-4 text-sm text-muted-foreground">
               <EyeOff className="h-4 w-4 shrink-0" />OCR omitido — el tipo de archivo no es compatible para extracción automática.
             </div>
-          ) : procStatus === "manual_review" ? (
+          ) : (procStatus as string) === "error" ? (
+            <div className="flex items-center gap-2 rounded bg-red-500/10 p-4 text-sm text-red-700">
+              <AlertCircle className="h-4 w-4 shrink-0" />El procesamiento OCR encontró un error.
+            </div>
+          ) : procStatus === ("manual_review" as string) ? (
             <div className="rounded bg-amber-500/10 p-4 text-sm text-amber-700">
               <div className="flex items-center gap-2 mb-2">
                 <AlertCircle className="h-4 w-4 shrink-0" />
@@ -173,10 +177,6 @@ export default async function DocumentDetailPage({
               {doc.ocrText && doc.ocrText.startsWith("[PDF escaneado") && (
                 <p className="mt-2 text-xs opacity-80">Puedes descargar el PDF original y usar un OCR externo (Adobe Acrobat, Google Drive) para extraer el texto.</p>
               )}
-            </div>
-          ) : procStatus === "error" ? (
-            <div className="flex items-center gap-2 rounded bg-red-500/10 p-4 text-sm text-red-700">
-              <AlertCircle className="h-4 w-4 shrink-0" />El procesamiento OCR encontró un error.
             </div>
           ) : (
             <div className="rounded bg-muted p-4 text-sm text-muted-foreground">
