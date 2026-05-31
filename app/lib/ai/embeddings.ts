@@ -81,14 +81,55 @@ async function generateEmbeddingLocal(text: string, dims = 1536): Promise<number
 }
 
 export async function generateEmbedding(text: string, dims = 1536): Promise<number[]> {
-  const provider = process.env.EMBEDDINGS_PROVIDER || "semantic";
+  const provider = process.env.EMBEDDINGS_PROVIDER || "local";
   
+  if (provider === "deepseek") {
+    return generateEmbeddingDeepSeek(text);
+  }
   if (provider === "semantic") {
     return generateEmbeddingSemantic(text);
   }
   
-  // Fallback: hash-based local
   return generateEmbeddingLocal(text, dims);
+}
+
+// ─── DeepSeek Embeddings API ─────────────────────
+async function generateEmbeddingDeepSeek(text: string): Promise<number[]> {
+  const apiKey = process.env.DEEPSEEK_API_KEY;
+  if (!apiKey) throw new Error("DEEPSEEK_API_KEY no configurada");
+
+  const res = await fetch("https://api.deepseek.com/v1/embeddings", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: "deepseek-embedding",
+      input: text,
+      encoding_format: "float",
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`DeepSeek embeddings error (${res.status}): ${err}`);
+  }
+
+  const json = await res.json();
+  const rawEmbedding = json.data?.[0]?.embedding as number[] | undefined;
+  if (!rawEmbedding) {
+    throw new Error("No se recibio embedding de DeepSeek");
+  }
+
+  // DeepSeek devuelve 2048 dims, truncar a 1536 para el schema actual
+  const dims = 1536;
+  const truncated = new Float64Array(dims);
+  for (let i = 0; i < Math.min(rawEmbedding.length, dims); i++) {
+    truncated[i] = rawEmbedding[i];
+  }
+
+  return Array.from(truncated);
 }
 
 // ─── Store & index ────────────────────────────

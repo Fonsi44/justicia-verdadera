@@ -226,51 +226,77 @@ def explorar_sitio(domain, config, visited, stats):
                     if not href or href.startswith("javascript:"):
                         continue
                     
-                    # Es un PDF?
-                    if ".pdf" in href.lower():
-                        # Saltar dominios no accesibles
-                        if 'congresonacional.hn' in href.lower():
-                            continue
-                        # Filtrar solo basura obvia (no legal en absoluto)
-                        name_lower = href.lower().split('/')[-1]
-                        skip_keywords = ['carretera','manual de','tomo','diseno','diseño','marca','boletin',
-                                        'estadistico','estadístico','informe','comunicado','formato','imagen',
-                                        'foto','graphic','logo','icono','solicitud','certificado',
-                                        'curriculum','hoja de vida']
-                        if any(kw in name_lower for kw in skip_keywords):
-                            continue
-                        pdfs_encontrados += 1
-                        pdf_hash = hashlib.md5(href.encode()).hexdigest()[:12]
+                    # Saltar solo congresonacional.hn (bloqueado)
+                    if 'congresonacional.hn' in href.lower():
+                        continue
+                    
+                    # Es un PDF? Descargarlo
+                    if ".pdf" in href.lower() or "wpdmdl=" in href.lower():
+                        nombre = href.lower().split('/')[-1].split('?')[0].split('#')[0]
                         
-                        if pdf_hash not in downloaded_pdfs:
-                            log(f"  📥 PDF nuevo: {href[:100]}")
-                            src_name = f"{domain.replace('.','-')}_{pdf_hash}"
-                            out = PDF_DIR / f"{src_name}.pdf"
-                            
-                            try:
-                                import requests
-                                r = requests.get(href, timeout=120, 
-                                    headers={"User-Agent": "Mozilla/5.0"})
-                                if r.status_code == 200 and len(r.content) > 5000:
-                                    out.write_bytes(r.content)
-                                    downloaded_pdfs.append(pdf_hash)
-                                    log(f"    ✅ {len(r.content)//1024} KB")
-                                    
-                                    text = ocr_pdf(str(out))
-                                    if text and len(text) > 100:
-                                        palabras = len(text) // 5
-                                        link_title = link["text"][:100] if link["text"] else f"PDF {src_name}"
-                                        indexar_en_db(src_name, f"{link_title} - {domain}", text)
-                                        nuevos += 1
-                                        
-                                        stats = corpus_stats()
-                                        if stats:
-                                            log(f"    📊 +{palabras:,} palabras | Total: {stats['palabras']:,} palabras")
-                                    else:
-                                        log(f"    ⚠️ Texto insuficiente tras OCR")
-                                time.sleep(PAGE_DELAY)
-                            except Exception as e:
-                                log(f"    ❌ {str(e)[:80]}")
+                        # Solo descargar PDFs con contenido legal relevante para las 9 ramas
+                        legal_kw = [
+                            # Civil
+                            'civil','contrato','contratos','propiedad','notariado','notarial',
+                            # Penal  
+                            'penal','delito','sentencia','jurisprudencia',
+                            # Laboral
+                            'trabajo','laboral','salario','ihss','empleo','prestaciones',
+                            # Familia
+                            'familia','matrimonio','divorcio','alimentos','adopción',
+                            # Mercantil/Comercial
+                            'comercio','mercantil','contratacion','contratación','sociedades',
+                            'licitación','licitacion','compras',
+                            # Procesal
+                            'procesal','procedimiento','recursos','casación','apelación',
+                            # Tributario/Fiscal
+                            'tributario','fiscal','isr','isv','impuesto','renta','aduanas','hacienda',
+                            # Administrativo
+                            'municipal','transparencia',
+                            # Constitucional
+                            'constitucion','constitución','constitucional','amparo','garantías',
+                            # Generales (esenciales)
+                            'ley','codigo','código','decreto','acuerdo','reglamento','reforma',
+                            'norma','disposiciones','presupuesto','pcm','la gaceta',
+                            'convenio','tratado']
+                        if not any(kw in nombre for kw in legal_kw):
+                            continue
+                        
+                        if not nombre:
+                            nombre = f"doc_{hashlib.md5(href.encode()).hexdigest()[:8]}.pdf"
+                        
+                        pdf_hash = hashlib.md5(href.encode()).hexdigest()[:12]
+                        if pdf_hash in downloaded_pdfs:
+                            continue
+                        
+                        pdfs_encontrados += 1
+                        log(f"  📥 PDF: {href[:100]}")
+                        src_name = f"{domain.replace('.','-')}_{pdf_hash}"
+                        out = PDF_DIR / f"{src_name}.pdf"
+                        
+                        try:
+                            import requests
+                            r = requests.get(href, timeout=120, 
+                                headers={"User-Agent": "Mozilla/5.0"})
+                            if r.status_code == 200 and len(r.content) > 5000:
+                                out.write_bytes(r.content)
+                                downloaded_pdfs.append(pdf_hash)
+                                log(f"    ✅ {len(r.content)//1024} KB")
+                                
+                                text = ocr_pdf(str(out))
+                                if text and len(text) > 100:
+                                    palabras = len(text) // 5
+                                    link_title = link["text"][:100] if link["text"] else f"PDF {src_name}"
+                                    indexar_en_db(src_name, f"{link_title} - {domain}", text)
+                                    nuevos += 1
+                                    stats = corpus_stats()
+                                    if stats:
+                                        log(f"    📊 +{palabras:,} palabras | Total: {stats['palabras']:,} palabras")
+                                else:
+                                    log(f"    ⚠️ Texto insuficiente tras OCR")
+                            time.sleep(PAGE_DELAY)
+                        except Exception as e:
+                            log(f"    ❌ {str(e)[:80]}")
                         continue
                     
                     # Saltar URLs de descarga directa o dominios no accesibles
@@ -385,6 +411,8 @@ def run_cycle():
         if len(stats['fuentes']) > 12:
             log(f"  ... y {len(stats['fuentes'])-12} fuentes mas")
         log(f"{'='*55}")
+    
+    return stats
 
 def main():
     if not load_db_url():
@@ -396,23 +424,19 @@ def main():
     log(f"📁 PDFs: {PDF_DIR}")
     log(f"🌐 Sitios a explorar: {len(SEEDS)}")
     log(f"📋 URLs fijas: {len(URLS_FIJAS)}")
-    log(f"⏱  Ciclo cada {CYCLE_DELAY}s | Ctrl+C para detener")
+    log(f"⏱  Ctrl+C para detener")
     log(f"{'='*55}")
     
     ciclo = 0
-    while True:
-        ciclo += 1
-        log(f"\n🔄 CICLO #{ciclo}")
-        try:
+    try:
+        while True:
+            ciclo += 1
+            log(f"\n🔄 CICLO #{ciclo}")
             run_cycle()
-        except KeyboardInterrupt:
-            log("\n⏹️ Detenido por el usuario")
-            break
-        except Exception as e:
-            log(f"Error en ciclo: {e}")
-        
-        log(f"\n⏳ Siguiente ciclo en {CYCLE_DELAY}s...")
-        time.sleep(CYCLE_DELAY)
+            log(f"\n⏳ Siguiente ciclo en 60s...")
+            time.sleep(60)
+    except KeyboardInterrupt:
+        log("\n⏹️ Detenido por el usuario")
 
 if __name__ == "__main__":
     import argparse
