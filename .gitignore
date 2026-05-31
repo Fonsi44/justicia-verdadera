@@ -53,3 +53,6 @@ informe.md
 
 # Corpus crawler data
 app/corpus_data/
+# Python cache
+__pycache__/
+*.pyc
