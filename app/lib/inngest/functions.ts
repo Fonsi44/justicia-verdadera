@@ -79,13 +79,18 @@ export const processDocumentOcr = configured
         }
 
         if (!ocrText.trim()) {
+          const isScannedPdf = mimeType === "application/pdf";
           await step.run("update-status-skipped", async () => {
             await db
               .update(documents)
-              .set({ processingStatus: "ocr_skipped", ocrConfidence: Math.round(confidence * 100) })
+              .set({
+                processingStatus: isScannedPdf ? "manual_review" : "ocr_skipped",
+                ocrText: isScannedPdf ? "[PDF escaneado — sin capa de texto. El OCR requiere procesamiento en servidor dedicado.]" : null,
+                ocrConfidence: Math.round(confidence * 100),
+              })
               .where(eq(documents.id, documentId));
           });
-          return { status: "skipped" };
+          return { status: isScannedPdf ? "manual_review" : "skipped" };
         }
 
         await step.run("update-status-complete", async () => {

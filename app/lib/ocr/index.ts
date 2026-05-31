@@ -70,17 +70,7 @@ export async function extractTextFromPdf(
       if (text.length > 50) return { text, confidence: 0.7 };
     }
 
-    // Fallback: try OCR via image if no text found (for scanned PDFs)
-    try {
-      const { extractTextFromImage } = await import("@/lib/ocr");
-      const result = await extractTextFromImage(pdfUrl);
-      if (result.text.trim().length > 0) {
-        return { text: result.text, confidence: result.confidence };
-      }
-    } catch {
-      // Image OCR fallback failed, return empty
-    }
-
+    // Scanned PDF: no text layer found. Return empty for async processing.
     return { text: "", confidence: 0 };
   } catch {
     return { text: "", confidence: 0 };
