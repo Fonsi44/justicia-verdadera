@@ -128,15 +128,19 @@ export async function searchSimilarDocuments(
 ): Promise<Array<{ title: string; content: string; source: string; similarity: number }>> {
   const results: Array<{ title: string; content: string; source: string; similarity: number }> = [];
 
+  // Excluir fuentes no legales (presupuestos, etc.)
+  const excludeSources = sql`${legalDocuments.source} NOT IN ('presupuesto')`;
+
   // 1. Búsqueda vectorial (pgvector cosine similarity)
   try {
     const queryEmbedding = await generateEmbedding(query);
     const embeddingStr = `[${queryEmbedding.join(",")}]`;
 
-    const vectorConditions: ReturnType<typeof eq>[] = [
+    const vectorConditions: ReturnType<typeof sql>[] = [
+      excludeSources,
       sql`1 - (embedding <=> ${embeddingStr}::vector) > 0.3`,
     ];
-    if (sourceFilter) vectorConditions.push(eq(legalDocuments.source, sourceFilter));
+    if (sourceFilter) vectorConditions.push(sql`${legalDocuments.source} = ${sourceFilter}`);
 
     const vectorResults = await db
       .select({
@@ -166,6 +170,7 @@ export async function searchSimilarDocuments(
 
   if (tsquery) {
     const kwConditions: ReturnType<typeof sql>[] = [
+      excludeSources,
       sql`to_tsvector('spanish', coalesce(${legalDocuments.content}, '')) @@ to_tsquery('spanish', ${tsquery})`,
     ];
     if (sourceFilter) kwConditions.push(sql`${legalDocuments.source} = ${sourceFilter}`);
