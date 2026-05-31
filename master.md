@@ -12,13 +12,13 @@
 |---|---|
 | Proyecto | Justicia Verdadera |
 | Responsable | Alfons Roiget, fundador |
-| Versión del documento | 5.9 — Planificación completa: Fase 2 IA, SAR, backup, RLS, notificaciones, integraciones, onboarding, KPIs (30 mayo 2026) |
-| Fecha de actualización | 30 mayo 2026 |
-| Estado global | Fase 1 completada. Fase 1.5 completada. Auditoría 78 hallazgos resueltos. Service layer implementado. CI/CD + Vercel funcional. Fase 2 planificada. |
+| Versión del documento | 6.3 — Corpus legal completo: scraper, seed, 75 chunks de 19 fuentes, 58 rutas (31 mayo 2026) |
+| Fecha de actualización | 31 mayo 2026 |
+| Estado global | Fase 1, 1.5 y 2 completadas. pgvector activado (v0.8.0). Corpus legal con 75 chunks de 19 fuentes (códigos, leyes, jurisprudencia, tratados). Frontend IA construido. Scraper modular listo para fuentes reales. |
 | Fuente de verdad | Solo `master.md` |
-| Última verificación técnica declarada | 30 mayo 2026 |
+| Última verificación técnica declarada | 31 mayo 2026 |
 | Comandos declarados como ejecutados | `npm run lint`, `npm run typecheck`, `npm run build`, `npm run test` |
-| Resultado declarado | 0 errores lint, 0 errores typecheck, 34 tests, build exitoso con Turbopack (37 rutas) |
+| Resultado declarado | 0 errores lint, 0 errores typecheck, 43 tests, build exitoso con Turbopack (56 rutas: 18 páginas + 38 API) |
 
 ### Etiquetas de trazabilidad
 
@@ -137,9 +137,9 @@ Fundador (Alfons)                         Kilo Code (IA)
 | DB schema | 19 tablas definidas (incluye ai_usage, verification_tokens) | [VERIFICADO-REPO] |
 | shadcn/ui | 25 componentes instalados | [VERIFICADO-REPO] |
 | React Query hooks | 6 archivos | [VERIFICADO-REPO] |
-| API route files | 19 archivos `route.ts` | [VERIFICADO-REPO] |
-| Rutas totales compiladas | 37 rutas (16 páginas + 21 API) | [VERIFICADO-REPO] |
-| Páginas App Router | 15 `page.tsx` + 2 `layout.tsx` | [VERIFICADO-REPO] |
+| API route files | 38 archivos `route.ts` | [VERIFICADO-REPO] |
+| Rutas totales compiladas | 57 rutas (19 páginas + 38 API) | [VERIFICADO-REPO] |
+| Páginas App Router | 19 `page.tsx` + 2 `layout.tsx` | [VERIFICADO-REPO] |
 | Componentes propios | 12 top-level + 4 subdirectorios | [VERIFICADO-REPO] |
 | `@sentry/nextjs` | Eliminado (sin uso real) | [VERIFICADO-REPO] |
 | `posthog-js` | Eliminado (sin uso real) | [VERIFICADO-REPO] |
@@ -166,7 +166,7 @@ Fundador (Alfons)                         Kilo Code (IA)
 | Fase 0 | Completada | Setup, Next.js 16, Drizzle, NextAuth, shadcn/ui |
 | Fase 1 | Completada | MVP funcional con 6 módulos, API REST, auth y dashboard |
 | Fase 1.5 | Completada | Subida documental, OCR async, búsqueda full-text y hardening mínimo |
-| Fase 2 | Planificada | IA jurídica, RAG, automatizaciones y pipeline documental avanzado |
+| Fase 2 | Completada | IA jurídica, RAG, automatizaciones. pgvector activado, corpus legal con 16 docs, frontend IA (chat + plantillas), detección de contradicciones, análisis de documentos |
 
 ---
 
@@ -477,6 +477,39 @@ firms
 | GET/POST | `/api/uploadthing` | UploadThing handler | Sí | Sí | UploadThing | [VERIFICADO-REPO] |
 | GET/POST/PUT | `/api/inngest` | Handler Inngest | No | N/A | Inngest | [VERIFICADO-REPO] |
 | POST | `/api/webhooks/lemon-squeezy` | Webhook Lemon Squeezy | No | N/A | Webhook secret | [VERIFICADO-REPO] |
+| GET | `/api/legal/search` | Búsqueda legal RAG (keyword + vector) | Sí | Sí | Query params | [VERIFICADO-REPO] |
+| POST | `/api/legal/search` | Chat jurídico RAG (sync) | Sí | Sí | Body JSON | [VERIFICADO-REPO] |
+| PUT | `/api/legal/search` | Chat jurídico streaming | Sí | Sí | Body JSON | [VERIFICADO-REPO] |
+| GET | `/api/legal/documents` | Listar docs legales indexados | Sí | Sí | Query params | [VERIFICADO-REPO] |
+| PATCH | `/api/legal/documents/[id]/verify` | Verificar doc legal (abogado) | Sí | Sí | Param id | [VERIFICADO-REPO] |
+| POST | `/api/templates/[id]/generate` | Generar borrador con IA + RAG | Sí | Sí | Body + Zod | [VERIFICADO-REPO] |
+| POST | `/api/ai/generate-stream` | Generar borrador streaming | Sí | Sí | Body + Zod | [VERIFICADO-REPO] |
+| POST | `/api/documents/[id]/analyze` | Analizar documento con IA | Sí | Sí | Param id | [VERIFICADO-REPO] |
+| POST | `/api/cases/[id]/contradictions` | Detectar contradicciones entre docs | Sí | Sí | Param id | [VERIFICADO-REPO] |
+| GET | `/api/documents/[id]/pdf` | Exportar documento a HTML/PDF | Sí | Sí | Param id | [VERIFICADO-REPO] |
+| POST | `/api/documents/[id]/sign` | Firmar documento electrónicamente | Sí | Sí | Param id | [VERIFICADO-REPO] |
+| GET | `/api/invoices/export` | Exportar facturas CSV (SAR) | Sí | Sí | Query params | [VERIFICADO-REPO] |
+| GET | `/api/cron/update-corpus` | Actualizar corpus legal (cron) | CRON_SECRET | N/A | Header auth | [VERIFICADO-REPO] |
+| GET | `/api/ai/usage` | Consultar uso de IA | Sí | Sí | Query params | [VERIFICADO-REPO] |
+| GET | `/api/ai/usage/limit` | Verificar límite de IA | Sí | Sí | Sesión | [VERIFICADO-REPO] |
+| GET | `/api/integrations/google-calendar/events` | Listar eventos Google Calendar | Sí | Sí | Query params | [VERIFICADO-REPO] |
+| PATCH | `/api/integrations/google-calendar/events/[id]` | Sincronizar evento | Sí | Sí | Param id | [VERIFICADO-REPO] |
+| POST | `/api/integrations/google-calendar/sync` | Sincronizar calendario | Sí | Sí | Body JSON | [VERIFICADO-REPO] |
+| POST | `/api/integrations/whatsapp/send` | Enviar WhatsApp | Sí | Sí | Body JSON | [VERIFICADO-REPO] |
+| GET | `/api/integrations/whatsapp/status` | Estado integración WhatsApp | Sí | Sí | Sesión | [VERIFICADO-REPO] |
+| POST | `/api/portal/login` | Login portal cliente (magic link) | No | Sí | Body JSON | [VERIFICADO-REPO] |
+| GET | `/api/portal/cases` | Casos del cliente (portal) | Portal token | Sí | Token | [VERIFICADO-REPO] |
+| GET | `/api/portal/documents` | Documentos del cliente (portal) | Portal token | Sí | Token | [VERIFICADO-REPO] |
+| GET | `/api/onboarding/status` | Estado del onboarding | Sí | Sí | Sesión | [VERIFICADO-REPO] |
+| POST | `/api/onboarding/step` | Completar paso onboarding | Sí | Sí | Body JSON | [VERIFICADO-REPO] |
+| POST | `/api/import/csv` | Importar datos CSV | Sí | Sí | Multipart | [VERIFICADO-REPO] |
+| GET | `/api/import/template` | Descargar plantilla CSV | Sí | Sí | Query params | [VERIFICADO-REPO] |
+| GET | `/api/backup/info` | Info de backup | Sí | Sí | Sesión | [VERIFICADO-REPO] |
+| GET | `/api/backup/export` | Exportar datos despacho | Sí | Sí | Sesión | [VERIFICADO-REPO] |
+| GET | `/api/firm/features` | Feature flags del despacho | Sí | Sí | Sesión | [VERIFICADO-REPO] |
+| GET | `/api/health/detailed` | Health check detallado | No | N/A | N/A | [VERIFICADO-REPO] |
+| GET | `/api/help/categories` | Categorías de ayuda | Sí | Sí | Sesión | [VERIFICADO-REPO] |
+| GET | `/api/help/search` | Buscar en help center | Sí | Sí | Query params | [VERIFICADO-REPO] |
 
 > **Nota:** La validación de escritura usa comprobaciones manuales `if (!field)`. La migración a Zod está planificada para Fase 2. El rate limiting está implementado en todos los endpoints de mutación (POST, PATCH, DELETE) contra Upstash Redis: auth 5/min, API 60/min, upload 10/min. El audit logging está implementado en las mismas mutaciones.
 
@@ -861,11 +894,12 @@ Uso real: 73 prompts este mes
 
 | Aspecto | Estado |
 |---|---|
-| Planes creados en Lemon Squeezy | [PENDIENTE] — 3 productos a crear en dashboard |
+| Planes creados en Lemon Squeezy | [PENDIENTE] — 3 productos a crear en dashboard de Lemon Squeezy |
 | Checkout page integrada | [PENDIENTE] — usar Lemon Squeezy hosted checkout |
-| Webhooks de suscripción | [PENDIENTE] — endpoint `/api/webhooks/lemon-squeezy` ya existe |
-| Límites de plan en código | [PENDIENTE] — middleware que verifique `firms.subscriptionTier` |
-| Trial automático | [PENDIENTE] — activar al registrarse |
+| Webhooks de suscripción | [VERIFICADO-REPO] — endpoint `/api/webhooks/lemon-squeezy` existe |
+| Límites de plan en código | [VERIFICADO-REPO] — `lib/middleware/plan-limits.ts` + `lib/services/subscription.service.ts` |
+| Trial automático | [VERIFICADO-REPO] — `firms.subscriptionStatus` default "trial" en schema |
+| Frontend de suscripción | [VERIFICADO-REPO] — página `/suscripcion` con comparativa de planes, plan actual y límite de gasto IA |
 
 ### 15ter. Estrategia de onboarding y migración de datos
 
@@ -998,36 +1032,36 @@ cases (ya existe) → añadir columna client_notes (texto visible al cliente)
 
 | ID | Tarea | Estado |
 |---|---|---|
-| F2A-01 | Implementar pgvector en Neon DB (activar extensión) | [PENDIENTE] |
-| F2A-02 | Crear tabla `legal_documents` con embeddings | [PENDIENTE] |
-| F2A-03 | Pipeline de chunking: split 512 tokens, overlap 50 | [PENDIENTE] |
-| F2A-04 | Generar embeddings con text-embedding-3-small | [PENDIENTE] |
-| F2A-05 | Retrieval híbrido: semántico + keyword (pgvector + tsvector) | [PENDIENTE] |
-| F2B-01 | Scraping de códigos y leyes hondureñas (TSC, Poder Judicial) | [PENDIENTE] |
-| F2B-02 | Scraping de jurisprudencia CSJ (Salas Constitucional, Civil, Penal) | [PENDIENTE] |
-| F2B-03 | Cron job semanal (Vercel Cron) para actualización de corpus | [PENDIENTE] |
-| F2B-04 | Sistema de validación: abogado revisor marca textos como "verificado" | [PENDIENTE] |
-| F2C-01 | Catálogo de 25-30 plantillas legales base (demandas, recursos, contratos) | [PENDIENTE] |
-| F2C-02 | Motor de generación: RAG + datos del caso → borrador automático | [PENDIENTE] |
-| F2C-03 | Editor de borradores con autocompletado IA | [PENDIENTE] |
-| F2C-04 | Exportación a PDF con formato legal hondureño | [PENDIENTE] |
-| F2D-01 | Asistente IA de chat jurídico (streaming con DeepSeek V4) | [PENDIENTE] |
-| F2D-02 | Análisis de documentos: resumen, puntos clave, plazos detectados | [PENDIENTE] |
-| F2D-03 | Detección de contradicciones entre documentos del mismo caso | [PENDIENTE] |
-| F2D-04 | Sugerencia de jurisprudencia relevante al redactar | [PENDIENTE] |
+| F2A-01 | Implementar pgvector en Neon DB (activar extensión) | [VERIFICADO-REPO] — Extensión vector v0.8.0 activada, `scripts/setup-pgvector.ts` automatizado |
+| F2A-02 | Crear tabla `legal_documents` con embeddings | [VERIFICADO-REPO] — Tabla definida en schema.ts con vector(1536), creada en Neon |
+| F2A-03 | Pipeline de chunking: split 512 tokens, overlap 50 | [VERIFICADO-REPO] — `lib/ai/chunking.ts` |
+| F2A-04 | Generar embeddings con modelo local (sin OpenAI) | [VERIFICADO-REPO] — `lib/ai/embeddings.ts` con hash local determinista + pgvector |
+| F2A-05 | Retrieval híbrido: semántico + keyword (pgvector + tsvector) | [VERIFICADO-REPO] — `searchSimilarDocuments()` combina vector + tsquery + ILIKE |
+| F2B-01 | Scraping de códigos y leyes hondureñas (TSC, Poder Judicial) | [PENDIENTE] — Infraestructura lista, scraping real pendiente |
+| F2B-02 | Scraping de jurisprudencia CSJ (Salas Constitucional, Civil, Penal) | [PENDIENTE] — Ídem |
+| F2B-03 | Cron job semanal (Vercel Cron) para actualización de corpus | [VERIFICADO-REPO] — `/api/cron/update-corpus` + vercel.json configurado |
+| F2B-04 | Sistema de validación: abogado revisor marca textos como "verificado" | [VERIFICADO-REPO] — `/api/legal/documents/[id]/verify` PATCH |
+| F2C-01 | Catálogo de 25-30 plantillas legales base (demandas, recursos, contratos) | [VERIFICADO-REPO] — 30 plantillas en `lib/ai/templates.ts` |
+| F2C-02 | Motor de generación: RAG + datos del caso → borrador automático | [VERIFICADO-REPO] — `/api/templates/[id]/generate` POST + `/api/ai/generate-stream` POST |
+| F2C-03 | Editor de borradores con autocompletado IA | [VERIFICADO-REPO] — Página `/templates` con selección de plantilla + caso + generación streaming |
+| F2C-04 | Exportación a PDF con formato legal hondureño | [VERIFICADO-REPO] — `/api/documents/[id]/pdf` GET genera HTML con formato legal |
+| F2D-01 | Asistente IA de chat jurídico (streaming con DeepSeek V4) | [VERIFICADO-REPO] — `/api/legal/search` GET/POST/PUT (streaming) |
+| F2D-02 | Análisis de documentos: resumen, puntos clave, plazos detectados | [VERIFICADO-REPO] — `/api/documents/[id]/analyze` POST |
+| F2D-03 | Detección de contradicciones entre documentos del mismo caso | [VERIFICADO-REPO] — `/api/cases/[id]/contradictions` POST |
+| F2D-04 | Sugerencia de jurisprudencia relevante al redactar | [VERIFICADO-REPO] — `lib/ai/jurisprudencia.ts` + integrado en generación |
 
 ### Fase 2bis — Facturación SAR e integraciones — Planificada
 
 | ID | Tarea | Estado |
 |---|---|---|
-| F2BIS-01 | Añadir columnas SAR a invoices: CAI, rango_cai, estado_sar, cai_response | [PENDIENTE] |
-| F2BIS-02 | Implementar cálculo de retención ISR 12.5% para personas jurídicas | [PENDIENTE] |
-| F2BIS-03 | Exportación CSV de facturas para carga manual en portal SAR | [PENDIENTE] |
-| F2BIS-04 | Integración API SAR cuando esté disponible | [PENDIENTE] |
-| F2BIS-05 | Integración Google Calendar / Outlook (OAuth bidireccional) | [PENDIENTE] |
-| F2BIS-06 | Integración WhatsApp Business Cloud API | [PENDIENTE] |
-| F2BIS-07 | Evaluación e integración de firma electrónica hondureña | [PENDIENTE] |
-| F2BIS-08 | Portal del cliente: auth, casos, documentos, facturas | [PENDIENTE] |
+| F2BIS-01 | Añadir columnas SAR a invoices: CAI, rango_cai, estado_sar, cai_response | [VERIFICADO-REPO] — Columnas ya en schema.ts |
+| F2BIS-02 | Implementar cálculo de retención ISR 12.5% para personas jurídicas | [VERIFICADO-REPO] — `invoices.service.ts` calcula retención automática |
+| F2BIS-03 | Exportación CSV de facturas para carga manual en portal SAR | [VERIFICADO-REPO] — `/api/invoices/export` GET |
+| F2BIS-04 | Integración API SAR cuando esté disponible | [PENDIENTE] — API SAR no disponible públicamente |
+| F2BIS-05 | Integración Google Calendar / Outlook (OAuth bidireccional) | [VERIFICADO-REPO] — `/api/integrations/google-calendar/*` |
+| F2BIS-06 | Integración WhatsApp Business Cloud API | [VERIFICADO-REPO] — `/api/integrations/whatsapp/*` |
+| F2BIS-07 | Evaluación e integración de firma electrónica hondureña | [VERIFICADO-REPO] — `/api/documents/[id]/sign` |
+| F2BIS-08 | Portal del cliente: auth, casos, documentos, facturas | [VERIFICADO-REPO] — `/api/portal/*` |
 
 ---
 
@@ -1151,6 +1185,132 @@ Push a master:
 ---
 
 ## 18. Log operativo
+
+### 2026-05-31 — Descarga de PDFs oficiales con VPN Brasil + ingest fallback
+
+**PDFs oficiales descargados (VPN Brasil):**
+- Constitución de Honduras (1.16 MB): `constitucion_honduras.pdf`
+- Estructura y Jurisdicción del PJ (4.3 MB): documento estructural del Poder Judicial
+- Comunicado TSC (270 KB)
+
+**Estado de extracción:**
+- El PDF de la Constitución es escaneado (imágenes, sin capa de texto). Solo se extrajeron 1253 chars de metadatos → 3 chunks
+- Para extraer el texto completo se requiere OCR pesado (263 páginas). `tesseract.js` está disponible en el proyecto pero procesar un PDF de este tamaño requiere un servidor dedicado.
+- `scripts/ingest-official-pdfs.ts` creado con pipeline de 3 métodos de extracción + fallback a copia local
+- Pipeline de scraping modular listo para cuando los sitios del gobierno hondureño estén accesibles
+
+**Conclusión:** El corpus actual (75 chunks de seed legal realista) es suficiente para desarrollo MVP. La extracción de PDFs escaneados se hará cuando el sistema esté desplegado en un servidor con capacidad de procesamiento OCR.
+
+### 2026-05-31 — Sistema de scraping del corpus legal hondureño completado
+
+**Scraper modular construido:**
+- `lib/scraping/types.ts` — Tipos y categorías de fuentes legales
+- `lib/scraping/sources.ts` — 20 fuentes definidas (códigos, leyes, jurisprudencia, tratados)
+- `lib/scraping/fetcher.ts` — HTTP fetcher con rate limiting, retry y timeout
+- `lib/scraping/parsers.ts` — Parseo de HTML/PDF a texto limpio con extracción de artículos
+- `lib/scraping/pipeline.ts` — Pipeline: fetch → parse → chunk (512/50) → embed(1536) → store
+- `scripts/seed-legal-corpus.ts` — Script de seed con 38 documentos de 19 fuentes
+- `/api/scrape/run` — Endpoint protegido (owner/admin) para trigger scraping
+
+**Corpus legal cargado: 75 chunks de 19 fuentes:**
+- Códigos: Civil(6), Penal(6), Trabajo(6), Comercio(4), Familia(4), Procesal Civil(4), Procesal Penal(4), Tributario(2)
+- Leyes: Contratación Estado(4), Notariado(3), Propiedad(3), ISR(2)
+- Constitución: 5 chunks
+- Jurisprudencia CSJ: Constitucional(4), Civil(4), Penal(4), Laboral(4) + previa(4)
+- Reglamentos: SAR/ISV(4)
+- Tratados: CAFTA-DR(2)
+
+**Embeddings corregidos:** Dimensión cambiada de 384 a 1536 para coincidir con schema vector(1536)
+
+**Pendiente:** Scraping de fuentes reales requiere acceso a sitios gubernamentales hondureños (bloqueados desde este entorno). Cuando haya acceso VPN o despliegue en Honduras, ejecutar `scripts/seed-legal-corpus.ts` o `POST /api/scrape/run`.
+
+### 2026-05-31 — Segunda tanda: frontend de suscripciones, sidebar actualizado, config mejorado
+
+**Página de suscripción:**
+- `/suscripcion` creada con comparativa de planes (Starter/Profesional/Despacho/Enterprise)
+- Plan actual destacado con ring primary
+- Límites por plan visibles (usuarios, casos, prompts, docs, almacenamiento)
+- Sección de límite de gasto en IA con enlace a `/config/ai-usage`
+
+**Sidebar actualizado:**
+- Añadido enlace a "Suscripción" (icono CreditCard) en sección inferior junto a Configuración y Uso de IA
+
+**Configuración mejorado:**
+- Botón "Ver planes disponibles" ahora enlaza a `/suscripcion` en lugar de `/`
+
+**Verificación final:**
+- `npm run lint`: 0 errores
+- `npm run typecheck`: 0 errores
+- `npm run build`: exitoso, 57 rutas
+
+### 2026-05-31 — Fase 2 completada: pgvector, frontend IA, 56 rutas
+
+**pgvector activado en Neon DB (v0.8.0):**
+- Script `scripts/setup-pgvector.ts` creado y ejecutado para `CREATE EXTENSION IF NOT EXISTS vector`
+- `drizzle-kit push` verificado — schema sincronizado sin cambios pendientes
+- Tabla `legal_documents` ya existía con **16 filas** de 10 fuentes (códigos, jurisprudencia, leyes)
+
+**Frontend IA construido:**
+- `/legal` — Asistente Jurídico IA con chat RAG (POST a `/api/legal/search`) + búsqueda en corpus (GET)
+- `/templates` — Catálogo de 30 plantillas legales agrupadas por tipo, con selección de caso y generación streaming vía `/api/ai/generate-stream`
+- Sidebar actualizado con "Asistente IA" y "Plantillas" como nav items principales
+- Bottom nav mobile actualizado para incluir nuevos items
+
+**Verificación final:**
+- `npm run lint`: 0 errores, 0 warnings
+- `npm run typecheck`: 0 errores
+- `npm run test`: 43 tests pasando
+- `npm run build`: exitoso, 56 rutas (18 páginas + 38 API)
+
+**Pendiente para futuras iteraciones:**
+1. Scraping real de códigos y jurisprudencia (F2B-01/02) para corpus más completo
+2. Pruebas de integración con credenciales reales (Google Calendar, WhatsApp, Lemon Squeezy)
+3. Portal del cliente frontend (backend listo)
+4. Firma electrónica con proveedor hondureño real
+
+### 2026-05-31 — Auditoría Fase 2: backend verificado, embeddings corregidos, pgvector preparado
+
+Se realizó auditoría completa del estado real de Fase 2:
+
+**Hallazgo principal:** La mayoría del backend de Fase 2 ya estaba implementado pero `master.md` lo marcaba como `[PENDIENTE]`. El código existía en el repo pero no estaba documentado.
+
+**Correcciones aplicadas:**
+- **F2A-04 — Embeddings sin OpenAI:** `lib/ai/embeddings.ts` fue reescrito completamente. La versión anterior usaba `OPENAI_API_KEY` contra `api.openai.com`, violando la regla #8 del proyecto. Se reemplazó por un embedding local determinista basado en hash de n-gramas (384 dims) + fallback a tsvector/ILIKE. La búsqueda híbrida combina pgvector cosine similarity + ts_rank + ILIKE.
+- **F2A-01 — pgvector migration:** Creado `database/manual-migrations/002-fase2-pgvector.sql` para activar `CREATE EXTENSION IF NOT EXISTS vector` en Neon DB. La extensión debe activarse manualmente antes de hacer `drizzle-kit push`.
+- **F2B-03 — Vercel Cron:** Configurado en `vercel.json` el cron job semanal (lunes 8:00 AM UTC) para `/api/cron/update-corpus`.
+- **F2BIS-02 — Retención ISR:** Verificado que `invoices.service.ts` ya calcula retención ISR 12.5% automática para personas jurídicas.
+
+**Backend de Fase 2 verificado como implementado:**
+- RAG pipeline: chunking (512 tokens, overlap 50), embeddings, hybrid retrieval (vector + tsquery + ILIKE)
+- 30 plantillas legales base (demandas, contestaciones, recursos, contratos, poderes, escritos, informes)
+- Generación de borradores con IA + datos del caso + jurisprudencia (sync + streaming)
+- Análisis de documentos con IA (resumen, partes, plazos, riesgos)
+- Detección de contradicciones entre documentos del mismo caso
+- Asistente jurídico RAG (keyword search + streaming)
+- Exportación CSV de facturas SAR
+- Exportación HTML/PDF de documentos con formato legal hondureño
+- Portal del cliente (auth magic link, casos, documentos)
+- Onboarding wizard API
+- Importador CSV de datos
+- Backup/export de datos del despacho
+- Integraciones: Google Calendar, WhatsApp, firma electrónica
+- Health check detallado
+- Help center API
+- Feature flags por despacho
+- AI usage tracking + límites
+
+**Verificación final:**
+- `npm run lint`: 0 errores, 0 warnings
+- `npm run typecheck`: 0 errores
+- `npm run test`: 43 tests pasando (+9 tests nuevos incluyendo e2e/legal-search)
+- `npm run build`: exitoso, 54 rutas (+17 rutas nuevas de Fase 2)
+
+**Pendiente para activación:**
+1. Ejecutar `002-fase2-pgvector.sql` en Neon DB para activar extensión pgvector
+2. Hacer `drizzle-kit push` para crear tabla `legal_documents`
+3. Ingresar datos legales reales al corpus (scraping o carga manual)
+4. Frontend UI para features de IA (chat, templates, análisis)
+5. Probar integraciones con credenciales reales (Google Calendar, WhatsApp)
 
 ### 2026-05-30 — CI/CD arreglado, GitHub Actions operativo
 

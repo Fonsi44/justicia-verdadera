@@ -3,38 +3,33 @@ import { config } from "dotenv";
 
 config({ path: ".env.local" });
 
-const sql = neon(process.env.DATABASE_URL!);
-
-async function main() {
-  try {
-    await sql`
-      CREATE EXTENSION IF NOT EXISTS vector;
-    `;
-    console.log("✅ pgvector extension verified");
-
-    await sql`
-      CREATE TABLE IF NOT EXISTS legal_documents (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        source TEXT NOT NULL,
-        title TEXT NOT NULL,
-        content TEXT NOT NULL,
-        chunk_index INTEGER DEFAULT 0 NOT NULL,
-        embedding vector(1536),
-        metadata JSONB,
-        verified_by UUID REFERENCES users(id),
-        verified_at TIMESTAMP,
-        created_at TIMESTAMP DEFAULT now() NOT NULL
-      );
-    `;
-    console.log("✅ legal_documents table created");
-
-    await sql`
-      CREATE INDEX IF NOT EXISTS legal_docs_source_idx ON legal_documents(source);
-    `;
-    console.log("✅ legal_docs_source_idx created");
-  } catch (e) {
-    console.error("❌ Error:", (e as Error).message);
+async function setupPgvector() {
+  const DATABASE_URL = process.env.DATABASE_URL;
+  if (!DATABASE_URL) {
+    console.error("DATABASE_URL no configurada en .env.local");
+    process.exit(1);
   }
+
+  const sql = neon(DATABASE_URL);
+
+  console.log("🔧 Activando extensión pgvector en Neon DB...");
+
+  try {
+    await sql`CREATE EXTENSION IF NOT EXISTS vector`;
+    console.log("✅ Extensión pgvector activada correctamente");
+  } catch (error) {
+    console.error("❌ Error al activar pgvector:", error instanceof Error ? error.message : error);
+    process.exit(1);
+  }
+
+  try {
+    const [result] = await sql`SELECT extname, extversion FROM pg_extension WHERE extname = 'vector'`;
+    console.log(`   Versión: ${result.extversion}`);
+  } catch {
+    // ignore
+  }
+
+  console.log("\n📋 Ahora ejecuta: npx drizzle-kit push");
 }
 
-main();
+setupPgvector();

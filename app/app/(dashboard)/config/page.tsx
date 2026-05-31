@@ -260,7 +260,7 @@ export default function ConfigPage() {
         </div>
         <div className="border-t pt-4">
           <Button
-            render={<Link href="/" />}
+            render={<Link href="/suscripcion" />}
             variant="outline"
             size="sm"
             className="gap-2"

@@ -14,6 +14,8 @@ import {
   Menu,
   X,
   Sparkles,
+  FilePen,
+  CreditCard,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useState } from "react";
@@ -29,6 +31,8 @@ const navItems = [
   { label: "Documentos", href: "/documentos", icon: FileText },
   { label: "Agenda", href: "/agenda", icon: Calendar },
   { label: "Facturación", href: "/facturacion", icon: Receipt },
+  { label: "Asistente IA", href: "/legal", icon: Sparkles },
+  { label: "Plantillas", href: "/templates", icon: FilePen },
 ];
 
 function getUserInitials(name?: string | null, email?: string | null): string {
@@ -98,6 +102,14 @@ function SidebarContent({
         >
           <Sparkles className="h-4 w-4 text-muted-foreground group-hover:text-sidebar-foreground transition-colors duration-200" />
           Uso de IA
+        </Link>
+        <Link
+          href="/suscripcion"
+          onClick={onClose}
+          className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-foreground transition-all duration-200 group"
+        >
+          <CreditCard className="h-4 w-4 text-muted-foreground group-hover:text-sidebar-foreground transition-colors duration-200" />
+          Suscripción
         </Link>
       </div>
     </>

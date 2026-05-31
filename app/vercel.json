@@ -6,5 +6,11 @@
   "regions": ["iad1"],
   "env": {
     "NEXT_PUBLIC_APP_URL": "https://justiciaverdadera.com"
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/update-corpus",
+      "schedule": "0 8 * * 1"
+    }
+  ]
 }

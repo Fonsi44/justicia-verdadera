@@ -38,3 +38,12 @@ next-env.d.ts
 .kilo/package-lock.json
 
 .vercel
+
+# PDFs descargados / temp
+*.pdf
+tmp/
+temp/
+*.tmp
+
+# Informes generados
+informe.md
