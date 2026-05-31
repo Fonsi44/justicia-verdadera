@@ -231,67 +231,13 @@ def explorar_sitio(domain, config, visited, stats):
                         # Saltar dominios no accesibles
                         if 'congresonacional.hn' in href.lower():
                             continue
-                        # Filtrar por nombre: solo PDFs con contenido legal
+                        # Filtrar solo basura obvia (no legal en absoluto)
                         name_lower = href.lower().split('/')[-1]
-                        legal_keywords = [
-                            # Codigos y leyes generales
-                            'ley','codigo','codígo','decreto','reglamento','acuerdo','reforma',
-                            'constitucion','constitución','norma','jurisprudencia','sentencia',
-                            'disposiciones',
-                            # Civil
-                            'civil','contrato','obligaciones','sucesiones','arrendamiento','compraventa',
-                            'responsabilidad','hipoteca','prenda','fianza','mandato',
-                            # Penal
-                            'penal','delito','crimen','extorsión','estafa','homicidio','violación',
-                            'narcotráfico','lavado','activos',
-                            # Laboral
-                            'trabajo','laboral','salario','sindicato','huelga','ihss','seguridad social',
-                            'empleo','prestaciones','jornada',
-                            # Familia
-                            'familia','matrimonio','divorcio','alimentos','adopción','filiación',
-                            'patria potestad','niñez','adolescencia',
-                            # Mercantil/Comercial
-                            'comercio','mercantil','sociedades','quiebra','acciones','valores',
-                            'bancos','seguros','titulos',
-                            # Procesal
-                            'procesal','procedimiento','ejecución','pruebas','recursos','apelación',
-                            'casación','amparo',
-                            # Administrativo
-                            'administrativo','contratación','contratacion','municipal','municipio',
-                            'función pública','transparencia','licitación',
-                            # Tributario/Fiscal
-                            'tributario','isr','isv','impuesto','renta','ventas','aduanas','fiscal',
-                            'contribución','retención',
-                            # Constitucional
-                            'constitucional','garantías','derechos humanos','habeas corpus',
-                            # Notarial/Registral
-                            'notariado','notarial','propiedad','registro','catastro',
-                            # Internacional
-                            'tratado','cafta','convenio','internacional',
-                            # Ambiental
-                            'ambiente','ecológico','forestal','agua','biodiversidad',
-                            # Salud
-                            'salud','sanidad','medicamento','hospital',
-                            # Educación
-                            'educación','universidad','docente',
-                            # Seguridad
-                            'seguridad','defensa','policía','fuerzas armadas',
-                            # Agrario
-                            'agrario','rural','agricultura','ganadería',
-                            # Mineria/Energia
-                            'minería','energía','eléctrica','hidrocarburos',
-                            # Consumidor
-                            'consumidor','usuario',
-                            # Presupuesto/Hacienda
-                            'presupuesto','hacienda','finanzas','tributos',
-                        ]
-                        skip_keywords = ['carretera','manual','tomo','diseno','diseño','marca','boletin',
+                        skip_keywords = ['carretera','manual de','tomo','diseno','diseño','marca','boletin',
                                         'estadistico','estadístico','informe','comunicado','formato','imagen',
                                         'foto','graphic','logo','icono','solicitud','certificado',
                                         'curriculum','hoja de vida']
                         if any(kw in name_lower for kw in skip_keywords):
-                            continue
-                        if not any(kw in name_lower for kw in legal_keywords):
                             continue
                         pdfs_encontrados += 1
                         pdf_hash = hashlib.md5(href.encode()).hexdigest()[:12]
@@ -328,7 +274,7 @@ def explorar_sitio(domain, config, visited, stats):
                         continue
                     
                     # Saltar URLs de descarga directa o dominios no accesibles
-                    if any(x in href.lower() for x in ['wpdmdl=', '.pdf', 'download/', '/wp-content/uploads/']):
+                    if any(x in href.lower() for x in ['wpdmdl=', 'download/']):
                         continue
                     if 'congresonacional.hn' in href.lower():
                         continue
