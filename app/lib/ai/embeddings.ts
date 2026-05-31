@@ -3,9 +3,41 @@ import { legalDocuments } from "@/database/schema";
 import { chunkWithMetadata } from "@/lib/ai/chunking";
 import { eq, and, or, sql, ilike, desc } from "drizzle-orm";
 
-// ─── Embedding local optimizado (single-pass, Float64Array) ─────
-// ~10x más rápido que la versión anterior: sin regex, sin substring, 
-// sin arrays normales. Procesa palabras y bigramas en una sola pasada.
+// ─── Embedding semántico local con transformers.js ────
+// Usa @xenova/transformers para embeddings BERT reales.
+// Sin llamadas a API externas, sin costo, totalmente offline.
+// Modelo: all-MiniLM-L6-v2 (384 dims → padded a 1536)
+
+const MODEL = "Xenova/all-MiniLM-L6-v2";
+const EMBED_DIMS = 384;
+let pipeline: any = null;
+
+async function getEmbeddingPipeline() {
+  if (!pipeline) {
+    const { pipeline: pipe } = await import("@xenova/transformers");
+    pipeline = await pipe("feature-extraction", MODEL);
+  }
+  return pipeline;
+}
+
+async function generateEmbeddingSemantic(text: string): Promise<number[]> {
+  try {
+    const extractor = await getEmbeddingPipeline();
+    const result = await extractor(text, { pooling: "mean", normalize: true });
+    const embedding = Array.from(result.data) as number[];
+    // Pad a 1536 (el schema requiere vector(1536))
+    const padded = new Float64Array(1536);
+    for (let i = 0; i < Math.min(embedding.length, 1536); i++) {
+      padded[i] = embedding[i];
+    }
+    return Array.from(padded);
+  } catch (error) {
+    console.warn("[Embeddings] Transformers falló, usando fallback hash:", error);
+    return generateEmbeddingLocal(text);
+  }
+}
+
+// ─── Fallback hash-based optimizado (~10x más rápido que original) ──
 
 async function generateEmbeddingLocal(text: string, dims = 1536): Promise<number[]> {
   const vec = new Float64Array(dims);
@@ -49,24 +81,14 @@ async function generateEmbeddingLocal(text: string, dims = 1536): Promise<number
 }
 
 export async function generateEmbedding(text: string, dims = 1536): Promise<number[]> {
-  const provider = process.env.EMBEDDINGS_PROVIDER || "local";
-
-  if (provider === "deepseek") {
-    return generateEmbeddingDeepSeek(text);
+  const provider = process.env.EMBEDDINGS_PROVIDER || "semantic";
+  
+  if (provider === "semantic") {
+    return generateEmbeddingSemantic(text);
   }
-
+  
+  // Fallback: hash-based local
   return generateEmbeddingLocal(text, dims);
-}
-
-async function generateEmbeddingDeepSeek(text: string): Promise<number[]> {
-  // DeepSeek no tiene endpoint de embeddings nativo.
-  // Usamos el modelo chat para extraer un vector conceptual.
-  // Esto es experimental y no recomendado para producción.
-  const apiKey = process.env.DEEPSEEK_API_KEY;
-  if (!apiKey) throw new Error("DEEPSEEK_API_KEY no configurada");
-
-  // Fallback a local si DeepSeek embeddings no disponible
-  return generateEmbeddingLocal(text, 1536);
 }
 
 // ─── Store & index ────────────────────────────
