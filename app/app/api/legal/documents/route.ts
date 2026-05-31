@@ -3,11 +3,13 @@ import { db } from "@/lib/db";
 import { legalDocuments } from "@/database/schema";
 import { count, eq, and, sql } from "drizzle-orm";
 import { getFirmId, handleUnauthorized } from "@/lib/auth/require-auth";
+import { requireActiveSubscription } from "@/lib/middleware/plan-limits";
 import { AppError } from "@/lib/errors";
 
 export async function GET(request: NextRequest) {
   try {
-    await getFirmId();
+    const firmId = await getFirmId();
+    await requireActiveSubscription(firmId);
     const { searchParams } = request.nextUrl;
 
     const verified = searchParams.get("verified");

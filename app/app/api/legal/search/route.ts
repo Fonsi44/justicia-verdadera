@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFirmId, handleUnauthorized } from "@/lib/auth/require-auth";
+import { requireActiveSubscription } from "@/lib/middleware/plan-limits";
 import { AppError } from "@/lib/errors";
 import { searchSimilarDocuments } from "@/lib/ai/embeddings";
 import { generateText, streamText } from "ai";
@@ -7,9 +8,15 @@ import { deepseek } from "@ai-sdk/deepseek";
 
 const model = deepseek("deepseek-v4-flash");
 
+async function gateSubscription() {
+  const firmId = await getFirmId();
+  await requireActiveSubscription(firmId);
+  return firmId;
+}
+
 export async function GET(req: NextRequest) {
   try {
-    await getFirmId();
+    const firmId = await gateSubscription();
     const { searchParams } = new URL(req.url);
     const query = searchParams.get("q");
     const source = searchParams.get("source") ?? undefined;
@@ -32,7 +39,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    await getFirmId();
+    await gateSubscription();
     const { query } = await req.json();
 
     if (!query || typeof query !== "string" || query.trim().length < 3) {
@@ -71,7 +78,7 @@ INSTRUCCIONES:
 
 export async function PUT(req: NextRequest) {
   try {
-    await getFirmId();
+    await gateSubscription();
     const { query } = await req.json();
     if (!query || typeof query !== "string") {
       return NextResponse.json({ error: "Consulta requerida" }, { status: 400 });

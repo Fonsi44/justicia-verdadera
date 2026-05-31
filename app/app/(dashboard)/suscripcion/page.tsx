@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Check, Sparkles, Loader2, ArrowRight, ArrowUp } from "lucide-react";
+import { Check, Sparkles, Loader2, ArrowRight, ArrowUp, BookOpen } from "lucide-react";
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -151,6 +151,36 @@ export default function SuscripcionPage() {
             </div>
           );
         })}
+      </div>
+
+      <div className="rounded-xl border bg-card ring-1 ring-foreground/10 p-6">
+        <div className="flex items-center gap-3 mb-4">
+          <BookOpen className="h-5 w-5 text-primary" />
+          <h2 className="font-display text-lg font-semibold text-foreground">Corpus Legal Especializado Honduras</h2>
+        </div>
+        <p className="text-sm text-muted-foreground mb-4">
+          Todos los planes incluyen acceso completo al corpus legal más extenso de Honduras en formato digital.
+          Textos extraídos directamente de los PDFs oficiales del Poder Judicial, TSC, SAR y Secretaría de Trabajo.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div className="rounded-lg bg-muted p-4 text-center">
+            <p className="text-2xl font-bold text-foreground">9</p>
+            <p className="text-xs text-muted-foreground">Códigos principales</p>
+          </div>
+          <div className="rounded-lg bg-muted p-4 text-center">
+            <p className="text-2xl font-bold text-foreground">877K</p>
+            <p className="text-xs text-muted-foreground">Palabras indexadas</p>
+          </div>
+          <div className="rounded-lg bg-muted p-4 text-center">
+            <p className="text-2xl font-bold text-foreground">24</p>
+            <p className="text-xs text-muted-foreground">Fuentes legales</p>
+          </div>
+        </div>
+        <ul className="mt-4 space-y-1.5 text-sm text-muted-foreground">
+          <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 shrink-0 text-emerald-500" />Constitución, Civil, Penal, Trabajo, Comercio, Familia</li>
+          <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 shrink-0 text-emerald-500" />Procesal Civil, Procesal Penal, Tributario, ISR, Amparo</li>
+          <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 shrink-0 text-emerald-500" />Jurisprudencia CSJ, Leyes especiales, Tratados internacionales</li>
+        </ul>
       </div>
 
       <div className="rounded-xl border bg-card ring-1 ring-foreground/10 p-6">
