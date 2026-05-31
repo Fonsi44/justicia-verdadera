@@ -50,3 +50,6 @@ informe.md
 
 # Tesseract traineddata
 *.traineddata
+
+# Corpus crawler data
+app/corpus_data/
