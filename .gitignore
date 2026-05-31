@@ -47,3 +47,6 @@ temp/
 
 # Informes generados
 informe.md
+
+# Tesseract traineddata
+*.traineddata
