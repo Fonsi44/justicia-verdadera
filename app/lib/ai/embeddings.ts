@@ -3,43 +3,29 @@ import { legalDocuments } from "@/database/schema";
 import { chunkWithMetadata } from "@/lib/ai/chunking";
 import { eq, and, or, sql, ilike, desc } from "drizzle-orm";
 
+// Dimension del vector en BD: 384 (all-MiniLM-L6-v2 nativo)
+const EMBEDDING_DIMS = 384;
+
 // ─── Embedding semántico local con transformers.js ────
-// Usa @xenova/transformers para embeddings BERT reales.
-// Sin llamadas a API externas, sin costo, totalmente offline.
-// Modelo: all-MiniLM-L6-v2 (384 dims → padded a 1536)
-
+// Usa @xenova/transformers para embeddings BERT reales (384 dims).
+// Sin padding artificial: el vector se almacena con las dimensiones reales del modelo.
 const MODEL = "Xenova/all-MiniLM-L6-v2";
-const EMBED_DIMS = 384;
-let pipeline: any = null;
-
-async function getEmbeddingPipeline() {
-  if (!pipeline) {
-    const { pipeline: pipe } = await import("@xenova/transformers");
-    pipeline = await pipe("feature-extraction", MODEL);
-  }
-  return pipeline;
-}
 
 async function generateEmbeddingSemantic(text: string): Promise<number[]> {
   try {
-    const extractor = await getEmbeddingPipeline();
+    const { pipeline: pipe } = await import("@xenova/transformers");
+    const extractor = await pipe("feature-extraction", MODEL);
     const result = await extractor(text, { pooling: "mean", normalize: true });
-    const embedding = Array.from(result.data) as number[];
-    // Pad a 1536 (el schema requiere vector(1536))
-    const padded = new Float64Array(1536);
-    for (let i = 0; i < Math.min(embedding.length, 1536); i++) {
-      padded[i] = embedding[i];
-    }
-    return Array.from(padded);
+    return Array.from(result.data as Float32Array).slice(0, EMBEDDING_DIMS);
   } catch (error) {
     console.warn("[Embeddings] Transformers falló, usando fallback hash:", error);
     return generateEmbeddingLocal(text);
   }
 }
 
-// ─── Fallback hash-based optimizado (~10x más rápido que original) ──
+// ─── Fallback hash-based optimizado ──
 
-async function generateEmbeddingLocal(text: string, dims = 1536): Promise<number[]> {
+async function generateEmbeddingLocal(text: string, dims = EMBEDDING_DIMS): Promise<number[]> {
   const vec = new Float64Array(dims);
   const len = text.length;
   let i = 0;
@@ -80,8 +66,8 @@ async function generateEmbeddingLocal(text: string, dims = 1536): Promise<number
   return Array.from(vec);
 }
 
-export async function generateEmbedding(text: string, dims = 1536): Promise<number[]> {
-  const provider = process.env.EMBEDDINGS_PROVIDER || "local";
+export async function generateEmbedding(text: string, dims = EMBEDDING_DIMS): Promise<number[]> {
+  const provider = process.env.EMBEDDINGS_PROVIDER || "semantic";
   
   if (provider === "deepseek") {
     return generateEmbeddingDeepSeek(text);
@@ -122,10 +108,9 @@ async function generateEmbeddingDeepSeek(text: string): Promise<number[]> {
     throw new Error("No se recibio embedding de DeepSeek");
   }
 
-  // DeepSeek devuelve 2048 dims, truncar a 1536 para el schema actual
-  const dims = 1536;
-  const truncated = new Float64Array(dims);
-  for (let i = 0; i < Math.min(rawEmbedding.length, dims); i++) {
+  // DeepSeek devuelve 2048 dims, truncar a 384
+  const truncated = new Float64Array(EMBEDDING_DIMS);
+  for (let i = 0; i < Math.min(rawEmbedding.length, EMBEDDING_DIMS); i++) {
     truncated[i] = rawEmbedding[i];
   }
 

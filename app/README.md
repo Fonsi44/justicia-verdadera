@@ -129,6 +129,56 @@ app/
 
 ---
 
+## Crawler Autonomo — Corpus Legal v3.0
+
+**OpenCode puede no tener Internet.** Solo URLs externamente verificadas van en `URLS_FIJAS_CORE`. El resto se valida en runtime con `--validate-sources`.
+
+### Estructura de fuentes
+
+| Bloque | Cantidad | Procesa por defecto |
+|---|---|---|
+| `URLS_FIJAS_CORE` | 15 PDFs directos | ✅ `--only-fixed` |
+| `URLS_FIJAS_COMPLEMENTARIAS` | 4 PDFs | `--include-complementary` |
+| `URLS_FIJAS_PENDIENTES` | 5 pendientes | `--include-pending` |
+| `SEEDS_OFICIALES` | 14+ sitios | `--only-seeds` |
+
+### Comandos
+
+```bash
+# Diagnostico sin descargar
+python crawler.py --once --dry-run
+
+# Validar fuentes core (sin descargar)
+python crawler.py --once --validate-sources --dry-run
+
+# Solo URLs fijas core
+python crawler.py --once --only-fixed --no-ai
+
+# Core + complementarias
+python crawler.py --once --only-fixed --include-complementary --no-ai
+
+# Solo semillas
+python crawler.py --once --only-seeds --no-ai --max-pages 3
+
+# Bucle continuo
+python crawler.py
+
+# Reprocesar PDFs existentes
+python crawler.py --once --reprocess-existing --no-ai
+```
+
+**Variables:** `DATABASE_URL`, `DEEPSEEK_API_KEY` (en `app/.env.local`). Modelo: `deepseek-v4-flash`.  
+**Dependencias Python:** `pip install -r requirements.txt` — `lxml` recomendado (fallback `html.parser`).
+
+**Carpetas usadas** (`app/corpus_data/`):
+- `pdfs/` — PDFs descargados
+- `textos/` — texto extraido
+- `metadata/` — JSON con metadatos por documento
+- `logs/` — crawler.log
+- `_stats.js` — estadisticas del corpus (no modificar)
+
+---
+
 ## Documentacion completa
 
 El plan de ejecucion detallado esta en [`master.md`](../master.md) en la raiz del workspace.

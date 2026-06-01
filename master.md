@@ -12,13 +12,13 @@
 |---|---|
 | Proyecto | Justicia Verdadera |
 | Responsable | Alfons Roiget, fundador |
-| Versión del documento | 6.3 — Corpus legal completo: scraper, seed, 75 chunks de 19 fuentes, 58 rutas (31 mayo 2026) |
-| Fecha de actualización | 31 mayo 2026 |
+| Versión del documento | 6.4 — Facturación SAR completamente definida: marco legal HN, CAI, retenciones, libros contables, calendario fiscal (1 junio 2026) |
+| Fecha de actualización | 1 junio 2026 |
 | Estado global | Fase 1, 1.5 y 2 completadas. Corpus legal con 6,781 chunks de 24 fuentes. 8 de 9 códigos principales con texto extraído de PDFs oficiales reales. Pendiente: Código Procesal Civil. |
 | Fuente de verdad | Solo `master.md` |
-| Última verificación técnica declarada | 31 mayo 2026 |
+| Última verificación técnica declarada | 1 junio 2026 |
 | Comandos declarados como ejecutados | `npm run lint`, `npm run typecheck`, `npm run build`, `npm run test` |
-| Resultado declarado | 0 errores lint, 0 errores typecheck, 43 tests, build exitoso con Turbopack (56 rutas: 18 páginas + 38 API) |
+| Resultado declarado | 3 errores lint preexistentes, 0 errores typecheck, 41/43 tests pasando, build exitoso con Turbopack (58 rutas: 20 páginas + 38 API) |
 
 ### Etiquetas de trazabilidad
 
@@ -660,56 +660,249 @@ Documentos legales (PDF, HTML, texto)
 
 ## 13bis. Sistema de facturación SAR-compliant (Honduras)
 
+### 13bis.0 Marco normativo hondureño
+
+El sistema de facturación debe cumplir con el siguiente marco legal hondureño:
+
+| Norma | Alcance | Estado |
+|---|---|---|
+| Código Tributario (Decreto 223-2004 y sus reformas) | Obligaciones formales, plazos, sanciones | Implementado parcial |
+| Reglamento del Código Tributario (Acuerdo 001-2006) | Procedimientos, retenciones, libros | Implementado parcial |
+| Ley del ISV (Impuesto Sobre Ventas, Decreto 24-1988) | Hecho generador, tasa 15%, exenciones | Implementado |
+| Reglamento de la Ley del ISV (Acuerdo 110-1989) | Base imponible, crédito fiscal, declaraciones | Implementado parcial |
+| Ley del ISR (Impuesto Sobre la Renta, Decreto 35-1963) | Renta gravable, tarifas, retenciones | [PENDIENTE-VALIDAR] |
+| Resolución SAR-GER-2020-001 | Facturación electrónica (CFD) | [PENDIENTE] |
+| Acuerdo CD-SAR-002-2025 | Nuevas disposiciones facturación electrónica obligatoria | [PENDIENTE-MONITOREAR] |
+| Ley de Firmas Electrónicas (Decreto 149-2013) | Validez jurídica de documentos electrónicos | [PENDIENTE] |
+
 ### 13bis.1 Régimen fiscal hondureño aplicable
 
 | Concepto | Detalle | Estado |
 |---|---|---|
-| ISV (Impuesto Sobre Ventas) | 15% general, 0% exentos (medicinas, alimentos básicos, exportación) | Implementado: `firms.isvRate` configurable |
-| ISR (Impuesto Sobre Renta) | 25% personas jurídicas, retención escalonada personas naturales | [PENDIENTE] |
-| CAI (Código de Autorización de Impresión) | Obligatorio en toda factura, rango autorizado por SAR | [PENDIENTE] |
-| RTN (Registro Tributario Nacional) | Identificador fiscal del despacho, ya en `firms.taxId` | Parcial |
-| Factura electrónica | Resolución SAR-GER-2020-001, formato XML estándar | [PENDIENTE] |
-| Retención ISR 12.5% | Servicios profesionales facturados a personas jurídicas | [PENDIENTE] |
-| Libros contables | Diario, Mayor, Balances — formato electrónico | [PENDIENTE] |
-| Conservación registros | 5 años mínimo (Código Tributario, Art. 112) | Parcial (audit_logs) |
+| ISV (Impuesto Sobre Ventas) — servicios profesionales | **15%** sobre honorarios legales. El abogado cobra ISV al cliente y lo declara mensualmente al SAR. Crédito fiscal por ISV pagado en compras. | Implementado: `firms.isvRate` configurable (default 15%) |
+| ISV 0% (exentos) | Servicios educativos, seguros, exportación de servicios. NO aplica a servicios legales generales. | — |
+| ISR (Impuesto Sobre la Renta) | **25%** para personas jurídicas (despachos constituidos como sociedad). **Tarifa progresiva 0%–25%** para personas naturales y profesionales independientes. | [PENDIENTE-VALIDAR] cálculo de tarifa según renta neta |
+| Retención ISR 12.5% | **Obligatoria** cuando una persona jurídica (empresa, institución) contrata y paga a un profesional o persona natural. La empresa retiene el 12.5% del monto bruto y lo entera al SAR. El profesional recibe el 87.5%. El profesional descuenta lo retenido en su declaración anual de ISR. | Implementado en `invoices.service.ts` — se aplica cuando `contact.type = 'persona_juridica'` o `'institucion'` |
+| CAI (Código de Autorización de Impresión) | Código alfanumérico de **37 caracteres** emitido por el SAR que autoriza la impresión de facturas (físicas o electrónicas). Cada CAI tiene: número de resolución, rango numérico autorizado (desde–hasta), y fecha de vencimiento máxima (1 año desde emisión). | [PENDIENTE] — Requiere gestión activa en portal SAR |
+| RTN (Registro Tributario Nacional) | Identificador fiscal de **14 dígitos** con formato `X-XXXX-XXXX-XXXXX` (ej: `8-8001-2001-12345`). Obligatorio en toda factura. El RTN del emisor (`firms.taxId`) y del receptor (`contacts.identityNumber`) deben validarse con dígito verificador. | Parcial — almacenado en BD, sin validación de formato/dígito |
+| Factura electrónica (CFD — Comprobante Fiscal Digital) | Resolución SAR-GER-2020-001 establece el formato XML obligatorio. *Fase 1:* auto-impresión con CAI aprobado. *Fase 2 (2025+):* CFD en línea con transmisión en tiempo real al SAR. | [PENDIENTE] — Exportación CSV implementada como puente |
+| Declaración mensual ISV | Presentar **antes del día 15 de cada mes** la declaración del ISV del mes anterior (Formulario SAR-ISV-1). Incluye: total facturado, ISV debitado, ISV acreditado (compras), ISV a pagar o saldo a favor. | [PENDIENTE] — Pendiente generar reporte mensual |
+| Declaración anual ISR | Presentar en **enero–marzo** de cada año (período fiscal enero–diciembre). Personas jurídicas: tasa fija 25%. Personas naturales: tarifa progresiva. | [PENDIENTE] |
+| Retención ISV 1% y 2% | Personas jurídicas inscritas en el régimen de gran contribuyente deben retener ISV adicional a sus proveedores (1% o 2% según actividad). Aplica si el despacho tiene un cliente gran contribuyente. | [PENDIENTE] |
+| Libros contables obligatorios | **Libro de Ventas** (ISV debitado), **Libro de Compras** (ISV acreditado), **Libro Diario**, **Libro Mayor**, **Libro de Balances**. Todos deben estar registrados ante el SAR (impresión o libro electrónico autorizado). | [PENDIENTE] — Tabla `invoices` + `invoice_items` tienen la data, falta generar los reportes |
+| Conservación de registros | **5 años mínimo** (Código Tributario Art. 112). Aplica a facturas emitidas, recibidas, libros contables, declaraciones y comprobantes de pago. | Parcial — audit_logs + soft-delete implementados |
+| Factura de contingencia | Cuando el sistema de facturación falla, se emite factura manual con sello "SIN VALIDEZ FISCAL — FACTURA DE CONTINGENCIA". Debe reportarse al SAR en 24h. | [PENDIENTE] |
+| Sanciones | No emitir factura: multa de 1 a 3 salarios mínimos. No declarar ISV: 35% de recargo + multa. No retener ISR: la retención no enterada es responsabilidad solidaria del agente retenedor. | — |
 
 ### 13bis.2 Modelo de factura SAR-compliant
 
-```text
-Factura (invoices table ya existente)
-├── number (formato: FAC-{año}-{correlativo}, ej: FAC-2026-0001)
-├── CAI (texto: Código de Autorización de Impresión SAR)
-├── rango_cai (desde-hasta autorizado)
-├── fecha_limite_emision (fecha límite del CAI)
-├── rtn_emisor (firms.taxId)
-├── rtn_receptor (contacts.identityNumber)
-├── subtotal (sin ISV)
-├── isv_15 (15% del subtotal)
-├── isv_0 (exento, si aplica)
-├── retencion_isr (12.5% si aplica)
-├── total (subtotal + isv - retencion)
-├── estado_sar (pendiente_enviar | enviado | aceptado | rechazado)
-└── cai_response (XML respuesta SAR)
-```
-
-### 13bis.3 Flujo de facturación
+La tabla `invoices` ya incluye todas las columnas SAR. El modelo conceptual completo es:
 
 ```text
-Crear factura → Asignar número correlativo + CAI
-→ Calcular ISV según firms.isvRate (15% default)
-→ Si cliente es persona jurídica: aplicar retención ISR 12.5%
-→ Emitir factura en estado "emitida"
-→ Enviar a SAR vía API/CVS (planificado Fase 2)
-→ Registrar pago → factura pasa a "pagada"
-→ Generar reporte mensual ISV/ISR para declaración SAR
+Factura (invoices table)
+├── Campos obligatorios SAR:
+│   ├── number                  → formato: FAC-{año}-{correlativo 4 dígitos}
+│   │                              ej: FAC-2026-0001 (correlativo único por despacho y año)
+│   ├── rtn_emisor              → firms.taxId (14 dígitos, validado con dígito verificador)
+│   ├── rtn_receptor            → contacts.identityNumber (14 dígitos)
+│   ├── cai                     → Código de Autorización de Impresión (37 caracteres)
+│   ├── rango_cai_desde         → Primer número autorizado en el rango CAI
+│   ├── rango_cai_hasta         → Último número autorizado en el rango CAI
+│   ├── fecha_vencimiento_cai   → Fecha límite de vigencia del CAI (máx 1 año)
+│   ├── subtotal                → Suma de items sin ISV (numeric)
+│   ├── isv_15                  → 15% del subtotal (numeric)
+│   ├── isv_0                   → Monto exento, si aplica (numeric, default 0)
+│   ├── total                   → subtotal + isv_15 - retencion_isr (numeric)
+│   ├── issue_date              → Fecha de emisión (date)
+│   ├── due_date                → Fecha de vencimiento para pago (date)
+│   └── estado_sar              → pendiente_enviar | enviado | aceptado | rechazado
+│
+├── Campos de retención:
+│   ├── retencion_isr           → 12.5% si cliente es persona jurídica (numeric, default 0)
+│   ├── retencion_isv           → 1% o 2% si aplica (numeric, default 0)
+│   └── tipo_retencion          → isr_125 | isv_1 | isv_2 | ninguna
+│
+├── Campos de negocio:
+│   ├── client_id               → FK a contacts (receptor del servicio)
+│   ├── case_id                 → FK a cases (opcional)
+│   ├── status                  → borrador | emitida | pagada | anulada | vencida
+│   ├── currency                → HNL por defecto
+│   ├── paid_at                 → Fecha de pago
+│   ├── payment_method          → transferencia | efectivo | cheque | tarjeta | lemon_squeezy
+│   ├── payment_reference       → Número de cheque, referencia transferencia, etc.
+│   └── notes                   → Notas internas
+│
+├── Campos de contingencia:
+│   ├── contingency             → boolean (true si es factura de contingencia)
+│   ├── contingency_reason      → motivo de la contingencia
+│   └── contingency_reported_at → timestamp de reporte al SAR
+│
+└── Items (invoice_items):
+    ├── description             → Descripción del servicio (text)
+    ├── quantity                → Cantidad de horas/servicios (numeric)
+    ├── unit_price              → Precio unitario sin ISV (numeric)
+    ├── total                   → quantity × unit_price (numeric)
+    ├── is_exempt               → boolean (true si está exento de ISV)
+    ├── time_entry_id           → FK a time_entries (horas facturables)
+    └── type                    → honorarios | gastos_administrativos | costas_judiciales | otros
 ```
 
-### 13bis.4 Integración con SAR (planificado)
+**Formato del CAI (37 caracteres):**
+```
+Resolución SAR: XXX-XXX-XXX-XXXXX-XXXX (ej: 001-2025-001-12345-2025)
+CAI completo:    7 caracteres de identificación fiscal + 30 de control alfanumérico
+                 generados por el sistema SAR al aprobar la solicitud.
+```
 
-- **API SAR:** Honduras está en proceso de implementar factura electrónica obligatoria (similar a GT/CR). Monitorear `www.sar.gob.hn` para endpoint oficial.
-- **Fase beta:** exportación CSV para carga manual en portal SAR.
-- **Fase 2:** integración directa cuando SAR libere API pública.
-- **Firma electrónica:** necesaria para facturación electrónica — pendiente evaluación de proveedores (Firma Virtual S.A., ACERTA, GSE).
+**Numeración de facturas:**
+- Formato: `{prefijo}-{año}-{correlativo}` donde prefijo = `FAC` (factura general), `FPE` (factura de servicios profesionales), `FEX` (exportación).
+- El rango numérico debe estar dentro del rango autorizado por el CAI.
+- Al agotar el rango o vencer el CAI, se debe solicitar uno nuevo al SAR.
+
+### 13bis.3 Flujo de facturación completo
+
+```text
+[Pre-facturación]
+1. Configurar RTN del despacho en Configuración → Información del despacho
+2. Registrar CAI(s) activos en Configuración → Facturación → CAIs
+   └─ Cada CAI tiene: código, rango desde-hasta, fecha de vencimiento
+   └─ El sistema asigna automáticamente el siguiente número disponible del CAI activo
+3. Verificar que `firms.isvRate` sea el correcto (15% default)
+
+[Creación de factura]
+4. Seleccionar cliente (debe tener RTN válido de 14 dígitos)
+5. Seleccionar caso (opcional)
+6. Añadir items (descripción, cantidad, precio unitario)
+   └─ Opción: importar horas facturables de time_entries del caso
+7. Sistema calcula automáticamente:
+   ├─ subtotal = Σ (quantity × unitPrice)
+   ├─ isv_15 = subtotal × firms.isvRate (default 15%)
+   ├─ retencion_isr: Si contacto es persona_jurídica o institución → 12.5% del subtotal
+   ├─ retencion_isv: Si contacto es gran contribuyente → 1% del subtotal
+   └─ total = subtotal + isv_15 - retencion_isr - retencion_isv
+8. Asignar número correlativo del CAI activo
+9. Guardar como "borrador" (permite editar antes de emitir)
+
+[Emisión]
+10. Emitir factura → estado pasa a "emitida"
+11. El número correlativo se consume y no puede reutilizarse
+12. Enviar al cliente por email con PDF adjunto
+
+[Ciclo de vida]
+13. Factura "emitida" → al vencerse (due_date) → "vencida"
+14. Factura vencida → acciones de cobranza (automáticas):
+    ├─ Recordatorio email día 1, 7, 15, 30 después de vencimiento
+    └─ Intereses moratorios: tasa legal (6% anual sobre saldo)
+15. Factura "vencida" → se registra pago → "pagada"
+16. Factura "emitida" → se registra pago → "pagada"
+17. Factura en borrador/emitida/vencida → se anula → "anulada"
+    └─ Motivo de anulación obligatorio
+    └─ La anulación debe reportarse al SAR (factura electrónica)
+
+[Declaración SAR]
+18. Reporte mensual ISV: total facturado del mes, ISV debitado, ISV acreditado
+19. Reporte anual ISR: ingresos, gastos, retenciones sufridas, ISR a pagar
+20. Exportación CSV de facturas para carga manual en portal SAR
+21. [Futuro] Transmisión automática CFD en línea al SAR
+```
+
+### 13bis.4 Tratamiento de retenciones
+
+| Escenario | Cliente es... | Aplicar retención | Neto a recibir |
+|---|---|---|---|
+| Consultoría legal a empresa | Persona jurídica (S.A., S. de R.L., institución) | ISR 12.5% del subtotal | Subtotal + ISV − 12.5% |
+| Consultoría legal a individuo | Persona natural | No aplica retención | Subtotal + ISV |
+| Consultoría a entidad gobierno | Estado, municipalidad, ente autónomo | ISR 12.5% del subtotal | Subtotal + ISV − 12.5% |
+| Consultoría a ONG/cooperante | ONG registrada en SAR | ISR 12.5% del subtotal (si es contribuyente ISR) | Subtotal + ISV − 12.5% |
+| Exportación de servicios | Cliente en el extranjero | 0% ISV (exportación), sin retención ISR | Subtotal |
+| Cliente gran contribuyente | Inscrito en régimen de gran contribuyente SAR | ISR 12.5% + ISV 1% o 2% | Subtotal + ISV − 12.5% − 1%/2% |
+
+**Base legal de retenciones:**
+- **ISR 12.5%:** Art. 50 Reglamento Ley del ISR — Servicios profesionales pagados por personas jurídicas a personas naturales o sociedades de servicios. Quien paga retiene el 12.5% del monto bruto y lo entera al SAR dentro de los primeros 10 días del mes siguiente.
+- **ISV 1%/2%:** Art. 12-A Ley del ISV — Grandes contribuyentes retienen 1% (bienes) o 2% (servicios) a sus proveedores como anticipo de ISV.
+
+### 13bis.5 Gestión de CAI (Código de Autorización de Impresión)
+
+**Proceso de obtención:**
+1. El despacho solicita CAI a través del portal SAR (www.sar.gob.hn) o con imprenta autorizada.
+2. El SAR emite resolución con: número de CAI, rango autorizado (desde–hasta), fecha de vigencia.
+3. El CAI tiene vigencia máxima de **1 año** desde su emisión.
+4. Al agotar el rango o vencer la fecha, debe solicitarse un nuevo CAI.
+
+**Ciclo de vida de cada CAI en el sistema:**
+```text
+Registrar CAI → estado "activo" → asignar facturas hasta agotar rango
+→ o vencer fecha límite → estado "agotado" o "vencido"
+→ Solicitar nuevo CAI → repetir ciclo
+```
+
+**Alertas automáticas necesarias:**
+- Cuando el 80% del rango CAI está consumido → notificar al administrador
+- Cuando faltan 30 días para el vencimiento del CAI → notificar
+- Cuando no hay CAI activo (todos vencidos o agotados) → bloquear emisión de facturas
+
+**Estructura de datos del CAI en el sistema:**
+```text
+cais (nueva tabla)
+├── id (uuid PK)
+├── firm_id (FK → firms)
+├── codigo (text, 37 caracteres — el CAI)
+├── rango_desde (integer)
+├── rango_hasta (integer)
+├── siguiente_numero (integer — próximo número disponible)
+├── fecha_emision (date)
+├── fecha_vencimiento (date)
+├── resolucion_sar (text — número de resolución)
+├── estado (activo | agotado | vencido)
+├── created_at (timestamp)
+└── updated_at (timestamp)
+```
+
+### 13bis.6 Libros contables obligatorios
+
+| Libro | Descripción | Generación |
+|---|---|---|
+| **Libro de Ventas (ISV)** | Todas las facturas emitidas en el período: RTN cliente, número factura, fecha, subtotal, ISV 15%, ISV 0%, retenciones, total. | Exportable desde `GET /api/invoices/export?libro=ventas&from=2026-01-01&to=2026-01-31` |
+| **Libro de Compras (ISV)** | Todas las compras/gastos del despacho con ISV acreditable: RTN proveedor, factura, fecha, subtotal, ISV. | [PENDIENTE] — Requiere nueva tabla `purchase_invoices` |
+| **Libro Diario** | Asientos contables cronológicos de todas las operaciones. | [PENDIENTE] — Post-MVP |
+| **Libro Mayor** | Cuentas contables con saldos. | [PENDIENTE] — Post-MVP |
+| **Libro de Balances** | Balance general, estado de resultados. | [PENDIENTE] — Post-MVP |
+
+Todos los libros deben estar registrados ante el SAR (impresión física o libro electrónico autorizado).
+
+### 13bis.7 Calendario fiscal obligatorio
+
+| Obligación | Frecuencia | Fecha límite | Formulario |
+|---|---|---|---|
+| Declaración ISV mensual | Mensual | Día 15 del mes siguiente | SAR-ISV-1 |
+| Declaración ISR anual (personas jurídicas) | Anual | 31 de marzo | SAR-ISR-1 |
+| Declaración ISR anual (personas naturales) | Anual | 30 de abril | SAR-ISR-2 |
+| Enterar retenciones ISR (12.5%) | Mensual | Día 10 del mes siguiente | SAR-RET-1 |
+| Presentar libro de ventas ISV | Mensual | Junto con declaración ISV | Anexo LV-ISV |
+| Presentar libro de compras ISV | Mensual | Junto con declaración ISV | Anexo LC-ISV |
+| Solicitud nuevo CAI | Antes de agotar/vencer | Al 80% de consumo o 30 días antes | Portal SAR |
+
+**Alertas automáticas planificadas:**
+- Recordatorio 7 días antes de cada fecha límite fiscal.
+- Dashboard con estado de cumplimiento fiscal del mes.
+- Marcador visual de días restantes para cada obligación.
+
+### 13bis.8 Integración con SAR (planificado)
+
+| Fase | Estrategia | Estado |
+|---|---|---|
+| **Beta (actual)** | Exportación CSV para carga manual en portal SAR. Formato: `RTN_EMISOR, RTN_RECEPTOR, NUMERO_FACTURA, FECHA_EMISION, FECHA_VENCIMIENTO, SUBTOTAL, ISV_15, TOTAL, CAI, ESTADO_SAR` | Implementado: `/api/invoices/export` GET |
+| **Fase 1 (próxima)** | Portal SAR permite subida CSV masiva de facturas. El sistema genera el reporte mensual ISV (LV-ISV) en formato SAR. | [PENDIENTE] |
+| **Fase 2 (futuro)** | Integración API REST con SAR cuando libere endpoint oficial de CFD en línea. Monitorear `www.sar.gob.hn` y `api.sar.gob.hn`. | [PENDIENTE] — API SAR no disponible públicamente |
+| **Fase 3** | CFD en línea: transmisión en tiempo real al SAR al momento de emitir cada factura. Firma electrónica integrada (Firma Virtual S.A., ACERTA, GSE). | [PENDIENTE] |
+
+**Proveedores de firma electrónica para facturación CFD:**
+| Proveedor | Tipo | Estado |
+|---|---|---|
+| Firma Virtual S.A. | Autoridad Certificadora acreditada por SAR | [PENDIENTE-EVALUAR] |
+| ACERTA (Autoridad Certificadora de Honduras) | AC pública bajo Ley de Firmas Electrónicas | [PENDIENTE-EVALUAR] |
+| GSE (Gestión de Servicios Electrónicos) | Proveedor de facturación electrónica | [PENDIENTE-EVALUAR] |
+| Certicamara (internacional) | AC con presencia regional | [PENDIENTE-EVALUAR] |
 
 ---
 
@@ -1050,18 +1243,25 @@ cases (ya existe) → añadir columna client_notes (texto visible al cliente)
 | F2D-03 | Detección de contradicciones entre documentos del mismo caso | [VERIFICADO-REPO] — `/api/cases/[id]/contradictions` POST |
 | F2D-04 | Sugerencia de jurisprudencia relevante al redactar | [VERIFICADO-REPO] — `lib/ai/jurisprudencia.ts` + integrado en generación |
 
-### Fase 2bis — Facturación SAR e integraciones — Planificada
+### Fase 2bis — Facturación SAR, integraciones y cumplimiento fiscal — Planificada
 
 | ID | Tarea | Estado |
 |---|---|---|
-| F2BIS-01 | Añadir columnas SAR a invoices: CAI, rango_cai, estado_sar, cai_response | [VERIFICADO-REPO] — Columnas ya en schema.ts |
-| F2BIS-02 | Implementar cálculo de retención ISR 12.5% para personas jurídicas | [VERIFICADO-REPO] — `invoices.service.ts` calcula retención automática |
-| F2BIS-03 | Exportación CSV de facturas para carga manual en portal SAR | [VERIFICADO-REPO] — `/api/invoices/export` GET |
-| F2BIS-04 | Integración API SAR cuando esté disponible | [PENDIENTE] — API SAR no disponible públicamente |
-| F2BIS-05 | Integración Google Calendar / Outlook (OAuth bidireccional) | [VERIFICADO-REPO] — `/api/integrations/google-calendar/*` |
-| F2BIS-06 | Integración WhatsApp Business Cloud API | [VERIFICADO-REPO] — `/api/integrations/whatsapp/*` |
-| F2BIS-07 | Evaluación e integración de firma electrónica hondureña | [VERIFICADO-REPO] — `/api/documents/[id]/sign` |
-| F2BIS-08 | Portal del cliente: auth, casos, documentos, facturas | [VERIFICADO-REPO] — `/api/portal/*` |
+| F2BIS-01 | Columnas SAR en invoices: CAI, rango_cai, estado_sar, cai_response | [VERIFICADO-REPO] — Columnas ya en schema.ts |
+| F2BIS-02 | Cálculo retención ISR 12.5% para personas jurídicas | [VERIFICADO-REPO] — `invoices.service.ts` calcula retención automática |
+| F2BIS-03 | Exportación CSV facturas para carga manual en portal SAR | [VERIFICADO-REPO] — `/api/invoices/export` GET |
+| F2BIS-04 | Integración API SAR directa (CFD en línea) | [PENDIENTE] — API SAR no disponible públicamente aún |
+| F2BIS-05 | Crear tabla `cais` para gestión de CAIs por despacho (código, rango, vigencia, estado) | [PENDIENTE] — Nueva tabla + CRUD en schema + API + UI |
+| F2BIS-06 | Validación de RTN (14 dígitos + dígito verificador) en formularios de factura y contacto | [PENDIENTE] — `lib/validations/hn-rtn.ts` |
+| F2BIS-07 | Alertas automáticas de CAI: 80% consumido, 30 días antes de vencer, sin CAI activo | [PENDIENTE] — Servicio + Inngest jobs + notificaciones |
+| F2BIS-08 | Libro de Ventas ISV: reporte mensual exportable en formato SAR | [PENDIENTE] — Endpoint `/api/invoices/libro-ventas` con formato SAR |
+| F2BIS-09 | Factura de contingencia: flujo de emisión manual + reporte automático | [PENDIENTE] — Nuevo estado + campo en invoices |
+| F2BIS-10 | Calendario fiscal integrado: dashboard con fechas límite SAR y alertas | [PENDIENTE] — Componente UI + servicio de alertas |
+| F2BIS-11 | Reporte mensual ISV para declaración (Formulario SAR-ISV-1 prellenado) | [PENDIENTE] — `GET /api/invoices/reporte-isv?month=2026-01` |
+| F2BIS-12 | Evaluación e integración de firma electrónica hondureña | [VERIFICADO-REPO] — `/api/documents/[id]/sign` endpoint existe |
+| F2BIS-13 | Portal del cliente: auth, casos, documentos, facturas | [VERIFICADO-REPO] — `/api/portal/*` |
+| F2BIS-14 | Integración Google Calendar / Outlook (OAuth bidireccional) | [VERIFICADO-REPO] — `/api/integrations/google-calendar/*` |
+| F2BIS-15 | Integración WhatsApp Business Cloud API | [VERIFICADO-REPO] — `/api/integrations/whatsapp/*` |
 
 ---
 
@@ -1495,6 +1695,25 @@ Verificación: lint 0, typecheck 0, tests 34, build 37 rutas.
 **master.md actualizado**: v5.7 con RBAC, 19 tablas, service layer, 34 tests, soft-delete, health endpoint.
 
 Verificación: lint 0, typecheck 0, tests 34, build 37 rutas.
+
+### 2026-06-01 — Facturación SAR expandida con marco legal hondureño completo
+
+Se reescribió la sección 13bis del documento maestro para reflejar la legislación fiscal hondureña vigente:
+
+**Cambios realizados en 13bis:**
+- **13bis.0 Marco normativo:** 8 normas legales identificadas (Código Tributario, Ley ISV, Ley ISR, Resolución SAR-GER-2020-001, Acuerdo CD-SAR-002-2025, Ley de Firmas Electrónicas, etc.)
+- **13bis.1 Régimen fiscal:** Tabla con 17 conceptos detallados incluyendo retención ISV 1%/2% para grandes contribuyentes, factura de contingencia, sanciones, declaración mensual ISV y anual ISR
+- **13bis.2 Modelo de factura:** Campos extendidos con tipo de retención, contingencia, payment_method, payment_reference, invoice_items.type (honorarios/gastos/costas/otros). Formato CAI (37 caracteres) y numeración de facturas documentados
+- **13bis.3 Flujo completo:** 21 pasos desde pre-facturación (registro CAI, config RTN) hasta declaraciones SAR, con ciclos de cobranza e intereses moratorios
+- **13bis.4 Tratamiento de retenciones:** 6 escenarios (persona jurídica, natural, gobierno, ONG, exportación, gran contribuyente) con base legal (Art. 50 Reglamento ISR, Art. 12-A Ley ISV)
+- **13bis.5 Gestión de CAI:** Proceso de obtención, ciclo de vida, alertas automáticas, estructura de datos de nueva tabla `cais`
+- **13bis.6 Libros contables:** 5 libros obligatorios (Ventas, Compras, Diario, Mayor, Balances) con generación desde el sistema
+- **13bis.7 Calendario fiscal:** 7 obligaciones periódicas con fechas límite, formularios SAR y alertas automáticas planificadas
+- **13bis.8 Integración SAR:** 4 fases (Beta CSV → Fase 1 subida portal → Fase 2 API directa → Fase 3 CFD en línea) + 4 proveedores de firma electrónica evaluados
+
+**Fase 2bis actualizada:** De 8 a 15 tareas, incluyendo tabla `cais`, validación RTN, alertas CAI, libro de ventas, factura de contingencia, calendario fiscal y reporte mensual ISV.
+
+**Estado:** Documentación completa. Implementación de las nuevas tareas pendiente (F2BIS-05 a F2BIS-11).
 
 ### 2026-05-30 — Planificación Fase 2: IA jurídica y facturación SAR
 

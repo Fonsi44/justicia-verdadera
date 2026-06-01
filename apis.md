@@ -1,29 +1,31 @@
 # Guía de Obtención de API Keys y Configuración
 
 > Documento paso a paso para conseguir todas las credenciales necesarias del proyecto Justicia Verdadera. Cada sección incluye la URL exacta y el proceso detallado.
+>
+> **Convención:** Toda integración mencionada en `master.md` tiene su explicación detallada de implementación en este documento.
 
-## Estado de verificación de servicios (2026-05-30)
+## Estado de verificación de servicios (1 junio 2026)
 
-| Servicio | Estado |
-|---|---|
-| Neon DB | ✅ Funcionando |
-| Google OAuth | ✅ Funcionando |
-| Microsoft Entra ID OAuth | ⚠️ Pendiente configurar en Azure Portal |
-| DeepSeek | ✅ Funcionando |
-| Upstash Redis | ✅ Funcionando |
-| UploadThing | ✅ Token renovado |
-| Resend | ✅ Funcionando |
-| Stripe | ⚠️ Archivado — reemplazado por Lemon Squeezy |
-| Lemon Squeezy | ✅ Verificado — Pendiente crear productos en dashboard |
-| Inngest | ✅ Verificado (pospuesto a Fase 2) |
-| Vercel | ⚠️ Pendiente de despliegue |
-| Google Calendar | ⚠️ Planificado — Fase 2bis |
-| Microsoft Graph (Outlook) | ⚠️ Planificado — Fase 2bis |
-| WhatsApp Business Cloud | ⚠️ Planificado — Fase 2bis |
-| Firma electrónica HN | ⚠️ Planificado — Fase 2bis |
-| pgvector (Neon) | ⚠️ Planificado — Fase 2A |
-| Embeddings API | ⚠️ Planificado — Fase 2A |
-| SAR (Hacienda Honduras) | ⚠️ Planificado — Fase 2bis |
+| Servicio | Estado | Uso |
+|---|---|---|
+| Neon DB | ✅ Activo | Base de datos PostgreSQL |
+| Google OAuth | ✅ Activo | Login de abogados con cuenta Google |
+| Microsoft Entra ID OAuth | ✅ Activo | Login con cuenta Microsoft / Office 365 |
+| DeepSeek V4 Flash | ✅ Activo | IA jurídica, chat RAG, generación de borradores |
+| Upstash Redis | ✅ Activo | Caché, rate limiting, sesiones |
+| UploadThing | ✅ Activo | Subida de documentos legales |
+| Resend | ✅ Activo | Emails transaccionales (bienvenida, facturas, notificaciones) |
+| Lemon Squeezy | ✅ Activo — Pendiente crear productos | Pasarela de pagos MoR (suscripciones SaaS) |
+| Inngest | ✅ Activo | Workflows asíncronos (OCR documental) |
+| Vercel | ⚠️ Pendiente de despliegue | Hosting producción |
+| Google Calendar API | ⚠️ Planificado — Fase 2bis | Sincronización agenda con Google Calendar |
+| Microsoft Graph API | ⚠️ Planificado — Fase 2bis | Sincronización agenda con Outlook |
+| WhatsApp Business Cloud | ⚠️ Planificado — Fase 2bis | Notificaciones a clientes vía WhatsApp |
+| Firma Electrónica SAR (FEA) | ⚠️ Planificado — Fase 2bis | Firma digital de documentos con validez legal HN |
+| SAR Oficina Virtual | ⚠️ Planificado — Fase 2bis | Declaraciones ISV/ISR, gestión CAI, libros contables |
+| pgvector (Neon) | ✅ Activo | Búsqueda semántica en corpus legal |
+| Validación RTN | ⚠️ Planificado — Fase 2bis | Verificar RTN de clientes contra SAR |
+| Reportes SAR | ⚠️ Planificado — Fase 2bis | Libro de ventas ISV, reporte mensual, calendario fiscal |
 
 ---
 
@@ -857,46 +859,105 @@ curl -X POST "https://graph.facebook.com/v22.0/$WHATSAPP_PHONE_NUMBER_ID/message
 
 ---
 
-## 13. Firma Electrónica Hondureña
+## 13. Firma Electrónica Avanzada (FEA) — SAR Honduras
 
-> Honduras reconoce la firma electrónica como legalmente vinculante (Ley de Firmas Electrónicas, Decreto 149-2013). Los proveedores autorizados emiten certificados digitales que permiten firmar documentos PDF con validez jurídica.
+> El SAR emite su propia **Firma Electrónica Avanzada (FEA)** basada en infraestructura PKI propia. Es la opción recomendada sobre proveedores privados, ya que la FEA del SAR tiene validez plena para trámites fiscales, gubernamentales y privados en Honduras, y está respaldada por la Ley de Firmas Electrónicas (Decreto 149-2013) y su Reglamento (Decreto Ejecutivo 41-2014).
 
-### Proveedores a evaluar
+### ¿Por qué usar la FEA del SAR?
 
-| Proveedor | Sitio | Certificación | Estado |
-|---|---|---|---|
-| **Firma Virtual S.A.** | `https://www.firmavirtual.hn` | Autoridad Certificadora registrada | [PENDIENTE-EVALUAR] |
-| **ACERTA** | `https://www.acertahn.com` | Autoridad de Certificación | [PENDIENTE-EVALUAR] |
-| **GSE** | `https://www.gse.hn` | Gestión de Servicios Electrónicos | [PENDIENTE-EVALUAR] |
+| Razón | Detalle |
+|---|---|
+| Validez legal plena | Reconocida por todas las instituciones del gobierno y sector privado |
+| Integración SAR directa | Necesaria para facturación electrónica CFD en línea (Fase 3) |
+| Coste competitivo | L. 350 (pequeño), L. 700 (mediano), L. 1,500 (gran contribuyente) |
+| Vigencia | 3 años desde emisión |
+| Estándar | PKCS#7, PAdES, sellado de tiempo incluido |
 
-### Proceso de integración planificado
+### Proceso de obtención de la FEA pasó a paso
 
 ```text
-1. Seleccionar proveedor con API REST o SDK
-2. Obtener credenciales de integración (API key, certificado digital)
-3. Flujo: generar PDF → hash del documento → firma con API del proveedor
-   → certificado incrustado en PDF → documento firmado
+1. Realizar el pago en Institución 37 usando recibo TGR y rubro 12121
+   └─ Monto según categoría: L. 350 / L. 700 / L. 1,500
+2. Agendar cita en https://www.sar.gob.hn/citas-sar/
+3. Presentarse el día de la cita con:
+   ├─ Recibo TGR (pagado)
+   ├─ Copia del DNI con correo electrónico anotado
+   └─ Extranjeros: pasaporte
+4. El trámite es personal. Personas jurídicas: debe ir el representante legal.
+5. Recibir URL por correo para descargar el certificado e instalarlo.
 ```
 
-### Variables de entorno esperadas
+### URLs oficiales SAR
+
+| Recurso | URL |
+|---|---|
+| Portal FIRMA ELECTRÓNICA SAR | `https://www.sar.gob.hn/firmaelectronica` |
+| Citas SAR | `https://www.sar.gob.hn/citas-sar/` |
+| Reportar incidencias FEA | `https://sati.sar.gob.hn/usdkv8/#!/login/` |
+| Certificado Raíz (PKI) | `https://www.sar.gob.hn/download/autoridad-de-certificacion-raiz/` |
+| Certificado Subordinado | `https://www.sar.gob.hn/download/autoridad-de-certificacion-subordinada/` |
+| Sellado de Tiempo | `https://www.sar.gob.hn/download/sellado-de-tiempo/` |
+| Tutoriales YouTube | Videos en página de FEA (configuración, firma, validación) |
+
+### Documentos normativos
+
+| Documento | Descargar |
+|---|---|
+| Política de Certificado de FEA Persona Natural V1 | `https://www.sar.gob.hn/download/acuerdo-numero-sar-466-2024/` |
+| Política de Certificado de FEA Persona Jurídica V1 | `https://www.sar.gob.hn/download/acuerdo-numero-sar-465-2024/` |
+| Política de Sellado de Tiempo V1 | `https://www.sar.gob.hn/download/acuerdo-numero-sar-467-2024/` |
+| Declaración de Prácticas de Certificación | `https://www.sar.gob.hn/download/declaracion-de-practicas-de-certificacion-3/` |
+| Ley de Firmas Electrónicas | `https://www.sar.gob.hn/download/ley-sobre-firmas-electronicas/` |
+| Reglamento de Firma Electrónica | `https://www.sar.gob.hn/download/reglamento-firma-electronica/` |
+
+### Integración técnica planificada (Fase 2bis)
+
+```text
+1. El despacho obtiene su FEA (certificado digital PKCS#12)
+2. Configurar en Justicia Verdadera:
+   └─ Ruta del certificado en el servidor
+   └─ Contraseña del certificado
+   └─ Proveedor: "sar"
+3. Flujo de firma de documentos:
+   └─ Generar PDF desde plantilla o documento existente
+   └─ Calcular hash SHA-256 del PDF
+   └─ Firmar hash con certificado FEA (PKCS#7)
+   └─ Incrustar firma en PDF (PAdES)
+   └─ Añadir timestamp y metadata del certificado
+   └─ Documento firmado listo para descarga
+4. Flujo de verificación:
+   └─ Usar Validador de Documentos Fiscales del SAR
+   └─ O validar directamente con la CA Raíz del SAR
+```
+
+### Variables de entorno
 
 ```env
-FIRMA_ELECTRONICA_PROVIDER=firma_virtual|acerta|gse
-FIRMA_ELECTRONICA_API_KEY=
-FIRMA_ELECTRONICA_API_URL=
-FIRMA_ELECTRONICA_CERT_PATH=
+FIRMA_ELECTRONICA_PROVIDER=sar
+FIRMA_ELECTRONICA_CERT_PATH=/etc/certs/firma-sar.p12
+FIRMA_ELECTRONICA_CERT_PASSWORD=
+FIRMA_ELECTRONICA_CA_ROOT_PATH=/etc/certs/sar-root-ca.crt
 ```
+
+### Proveedores alternativos (si SAR no es viable)
+
+| Proveedor | Sitio | Tipo | Estado |
+|---|---|---|---|
+| **Firma Virtual S.A.** | `https://www.firmavirtual.hn` | AC privada registrada | [PENDIENTE-EVALUAR] |
+| **ACERTA** | `https://www.acertahn.com` | AC privada registrada | [PENDIENTE-EVALUAR] |
+| **GSE** | `https://www.gse.hn` | Proveedor servicios electrónicos | [PENDIENTE-EVALUAR] |
+| **Certicamara** | Internacional | AC con presencia regional | [PENDIENTE-EVALUAR] |
 
 ### Requisitos legales
 
-- Certificado digital emitido por Autoridad Certificadora acreditada.
+- Certificado digital emitido por Autoridad Certificadora acreditada (SAR o privada registrada).
 - Firma debe cumplir estándar PKCS#7 o PAdES (PDF Advanced Electronic Signatures).
 - El documento firmado debe incluir timestamp y metadata del certificado.
 - Conservación mínima de 5 años (Código Tributario Art. 112).
 
 ### Nota
 
-La integración con firma electrónica es **Fase 2bis**. Mientras tanto, los documentos pueden descargarse en PDF y firmarse manualmente o con herramientas externas.
+La integración con firma electrónica es **Fase 2bis**. Mientras tanto, los documentos pueden descargarse en PDF y firmarse manualmente o con herramientas externas. La FEA del SAR es la opción recomendada por su integración directa con el ecosistema fiscal hondureño.
 
 ---
 
@@ -1023,104 +1084,222 @@ EMBEDDINGS_PROVIDER=local
 
 ---
 
-## 16. SAR — Servicio de Administración de Rentas (Honduras)
+## 16. SAR — Servicio de Administración de Rentas (Honduras) — Integración Fiscal
 
-> El SAR es la autoridad fiscal hondureña. La facturación electrónica está en proceso de implementación obligatoria. Justicia Verdadera necesita generar facturas compatibles con el formato SAR.
+> El SAR es la autoridad fiscal hondureña. Este conjunto de integraciones permite a Justicia Verdadera gestionar la facturación SAR-compliant, declaraciones, libros contables y cumplimiento fiscal desde la plataforma. No existe una API REST pública del SAR (junio 2026), por lo que la integración se realiza mediante exportación de datos estructurados + automatización del portal web.
 
-### Estado actual
+### Visión general del ecosistema SAR digital
 
-| Concepto | Estado |
+| Portal / Herramienta | URL | Uso en JV |
+|---|---|---|
+| **Oficina Virtual SAR** | `https://oficinavirtual.sar.gob.hn` | Declaraciones ISV/ISR, gestión de CAI, presentación de libros |
+| **Portal SAR (informativo)** | `https://www.sar.gob.hn` | Normativa, calendario fiscal, guías |
+| **Calendario Fiscal** | `https://oficinavirtual.sar.gob.hn/calendario-fiscal` | Consulta de fechas límite |
+| **Validador de Documentos Fiscales** | `https://oficinavirtual.sar.gob.hn/fac/validador-doc-fiscales/` | Validación de facturas emitidas |
+| **Verificador de Documentos SAR** | `https://oficinavirtual.sar.gob.hn/csv/` | Verificar autenticidad de documentos |
+| **Tabla Pública de Imprentas** | `https://oficinavirtual.sar.gob.hn/imprentas-certificadas/` | Consultar imprentas autorizadas |
+| **Firma Electrónica Avanzada** | `https://www.sar.gob.hn/firmaelectronica/` | Certificados digitales para documentos |
+| **Escuela Tributaria Virtual** | `https://escuelavirtualtributaria.sar.gob.hn/` | Capacitación en temas fiscales |
+| **Educación Fiscal** | `https://educacionfiscal.sar.gob.hn/` | Recursos educativos |
+
+### 16.1 Marco normativo de facturación
+
+| Norma | Alcance |
 |---|---|
-| Factura electrónica obligatoria | En fase de implementación progresiva en Honduras |
-| Formato estándar | XML basado en estándar UBL 2.1 |
-| API pública SAR | **No disponible aún** (mayo 2026) |
-| Método actual | Portal web SAR para carga manual de facturas |
+| **Acuerdo 481-2017** (Reglamento del Régimen de Facturación, Otros Documentos Fiscales y Registro Fiscal de Imprentas) | Marco principal. Define tipos de documentos fiscales, requisitos de CAI, plazos, sanciones. |
+| **Acuerdo 609-2017** | Primera reforma al 481-2017 |
+| **Acuerdo 725-2018** | Segunda reforma al 481-2017 |
+| **Acuerdo 817-2018** | Tercera reforma al 481-2017 |
+| **Resolución SAR-GER-2020-001** | Establece marco de facturación electrónica (CFD) |
+| **Acuerdo CD-SAR-002-2025** | Nuevas disposiciones de facturación electrónica obligatoria |
 
-### Estrategia (Fase 2bis)
+### 16.2 Tipos de documentos fiscales que puede emitir un despacho
 
-**Fase beta — Exportación CSV:**
-- Generar archivo CSV compatible con el formato de carga del portal SAR.
-- El despacho sube manualmente el CSV al portal `www.sar.gob.hn`.
-- Formato columnas: RTN emisor, CAI, número factura, fecha, RTN receptor, subtotal, ISV, total.
+| Tipo | Código | Uso |
+|---|---|---|
+| Factura | FAC | Servicios profesionales generales |
+| Factura de Servicios Profesionales | FPE | Servicios legales a personas jurídicas (con retención ISR) |
+| Factura de Exportación | FEX | Servicios a clientes en el extranjero |
+| Recibo por Honorarios Profesionales | RHP | Pagos recibidos sin factura formal (no recomendado para SAR) |
+| Nota de Crédito | NCR | Anular o reducir monto de factura emitida |
+| Nota de Débito | NDE | Incrementar monto de factura emitida |
+| Comprobante de Retención | CRT | Constancia de retención ISR/ISV practicada |
 
-**Fase 2 — Integración API (cuando esté disponible):**
-- Monitorear `www.sar.gob.hn` para el endpoint de API de facturación electrónica.
-- Implementar envío automático de facturas vía API REST.
-- Recibir respuesta de validación SAR (aceptada/rechazada).
+### 16.3 Estrategia de integración por fases
 
-### Variables de entorno esperadas
+| Fase | Qué se integra | Cómo | Estado |
+|---|---|---|---|
+| **Beta (actual)** | Exportación CSV de facturas | GET `/api/invoices/export` genera CSV para subir manualmente al portal SAR | ✅ Implementado |
+| **Fase 1** | Gestión de CAIs en JV | CRUD de CAIs en Configuración → Facturación, alertas automáticas | [PENDIENTE] — Tabla `cais`, API, UI |
+| **Fase 2** | Reporte mensual ISV (Formulario SAR-ISV-1) | GET `/api/invoices/reporte-isv?month=` genera CSV estructurado para declaración | [PENDIENTE] |
+| **Fase 3** | Libro de Ventas ISV (Anexo LV-ISV) | GET `/api/invoices/libro-ventas?from=&to=` exporta libro mensual formato SAR | [PENDIENTE] |
+| **Fase 4** | Integración CFD en línea | API REST directa al SAR (cuando esté disponible) + firma electrónica | [PENDIENTE] — Sin API SAR pública aún |
 
-```env
-SAR_API_URL=
-SAR_API_KEY=
-SAR_CERT_PATH=
-SAR_CAI_CURRENT=
-SAR_CAI_RANGE_FROM=
-SAR_CAI_RANGE_TO=
-SAR_CAI_EXPIRATION=
+### 16.4 Exportación CSV — Portal SAR (Beta actual)
+
+**Formato del CSV generado por `/api/invoices/export`:**
+```csv
+RTN_EMISOR,RTN_RECEPTOR,NUMERO_FACTURA,FECHA_EMISION,FECHA_VENCIMIENTO,SUBTOTAL,ISV_15,TOTAL,CAI,ESTADO_SAR
+08019015239874,08011985012345,FAC-2026-0001,2026-01-15,2026-02-15,10000.00,1500.00,11500.00,CAI-001-2026-00001,pendiente_enviar
 ```
 
-### Obtención del CAI
+**Procedimiento para el despacho:**
+1. En JV: Ir a Facturación → Exportar → Seleccionar período
+2. Descargar archivo `facturas-sar-YYYY-MM-DD.csv`
+3. Ir a `https://oficinavirtual.sar.gob.hn` → Iniciar sesión con credenciales SAR del despacho
+4. Navegar a la sección de facturación → Carga de facturas
+5. Subir el archivo CSV → El SAR valida e incorpora las facturas
+6. Verificar estado en la respuesta del SAR (aceptadas/rechazadas)
 
-El CAI (Código de Autorización de Impresión) se obtiene directamente del SAR:
+### 16.5 Gestión de CAI (Código de Autorización de Impresión)
 
-1. El despacho solicita el CAI en la oficina del SAR correspondiente a su domicilio fiscal.
-2. El SAR asigna un rango de CAI (ej: `CAI-0801-2026-00001` a `CAI-0801-2026-01000`).
-3. El CAI tiene fecha de vencimiento (generalmente 1 año).
-4. El despacho debe ingresar el CAI manualmente en la configuración de Justicia Verdadera.
+**El CAI se obtiene fuera de JV** (trámite directo con el SAR), pero se gestiona dentro de la plataforma.
 
-### Documentación
+**Proceso de obtención del CAI:**
+1. El despacho solicita el CAI a través del portal SAR (`https://oficinavirtual.sar.gob.hn`) o mediante una imprenta autorizada (`https://oficinavirtual.sar.gob.hn/imprentas-certificadas/`)
+2. El SAR emite resolución con:
+   - Número de CAI (37 caracteres alfanuméricos)
+   - Rango numérico autorizado (desde–hasta)
+   - Fecha de emisión y fecha de vencimiento (máx 1 año)
+3. El CAI puede ser:
+   - **Auto-impresión** (el despacho imprime sus propias facturas con el CAI)
+   - **Imprenta autorizada** (una imprenta registrada imprime las facturas)
+4. Una vez obtenido, se registra en JV en Configuración → Facturación → CAIs
 
-- **https://www.sar.gob.hn** — portal oficial
-- **https://www.sar.gob.hn/facturacion-electronica** — información de facturación electrónica
+**Ciclo de vida del CAI en JV:**
+```text
+Registrar en JV (código, rango desde/hasta, vencimiento)
+→ Estado: "activo"
+→ JV asigna números correlativos automáticamente desde el rango
+→ Cuando se alcanza el 80% del rango → alerta al administrador
+→ Cuando faltan 30 días para el vencimiento → alerta al administrador
+→ Cuando se agota el rango o vence → estado: "agotado" o "vencido"
+→ Bloquear emisión de facturas si no hay CAI activo
+```
+
+### 16.6 Formularios y declaraciones SAR
+
+| Formulario | Frecuencia | Fecha límite | Integración JV |
+|---|---|---|---|
+| **SAR-ISV-1** — Declaración mensual ISV | Mensual | Día 15 del mes siguiente | [PENDIENTE] — Reporte prellenado descargable |
+| **SAR-ISR-1** — Declaración anual ISR (personas jurídicas) | Anual | 31 de marzo | [PENDIENTE] — Post-MVP |
+| **SAR-ISR-2** — Declaración anual ISR (personas naturales) | Anual | 30 de abril | [PENDIENTE] — Post-MVP |
+| **SAR-RET-1** — Declaración mensual de retenciones | Mensual | Día 10 del mes siguiente | [PENDIENTE] |
+| **Anexo LV-ISV** — Libro de Ventas ISV | Mensual | Junto con SAR-ISV-1 | [PENDIENTE] |
+| **Anexo LC-ISV** — Libro de Compras ISV | Mensual | Junto con SAR-ISV-1 | [PENDIENTE] — Requiere nueva tabla `purchase_invoices` |
+| **DMC** — Declaración Mensual de Compras | Mensual | Día 15 del mes siguiente | [PENDIENTE] |
+
+### 16.7 Calendario fiscal integrado
+
+El sistema mostrará un dashboard con las próximas obligaciones fiscales. Los datos provienen de:
+- **Calendario Fiscal oficial SAR:** `https://oficinavirtual.sar.gob.hn/calendario-fiscal`
+- **Configuración manual** de fechas recordatorio (opcional)
+- **Alertas automáticas** vía email/in-app 7 días antes de cada fecha límite
+
+### 16.8 Validación de RTN
+
+El SAR ofrece una herramienta pública de verificación de RTN en `https://www.sar.gob.hn/registro-tributario-nacional-rtn/`. Justicia Verdadera integrará:
+
+- **Validación de formato:** 14 dígitos con dígito verificador
+- **Formato oficial:** `X-XXXX-XXXX-XXXXX` (almacenado sin guiones en BD, con guiones en display)
+- **Validación contra SAR:** Consulta síncrona al validador del SAR (cuando esté disponible como API)
+- **Validación offline:** Algoritmo de dígito verificador (similar a módulo 11)
+
+### Variables de entorno del ecosistema SAR
+
+```env
+# Configuración del despacho (se gestiona en UI, no en .env)
+# Estas se almacenan en firms.settings y en la tabla cais:
+# firms.taxId → RTN del despacho (14 dígitos)
+# firms.isvRate → Tasa ISV (default 15)
+
+# Para integración futura CFD en línea:
+SAR_FEA_CERT_PATH=
+SAR_FEA_CERT_PASSWORD=
+SAR_API_URL=https://oficinavirtual.sar.gob.hn/api  # placeholder, no pública aún
+```
+
+### Documentación y recursos SAR
+
+| Recurso | URL |
+|---|---|
+| Portal oficial SAR | `https://www.sar.gob.hn` |
+| Oficina Virtual | `https://oficinavirtual.sar.gob.hn` |
+| Calendario Fiscal | `https://oficinavirtual.sar.gob.hn/calendario-fiscal` |
+| Validador Documentos Fiscales | `https://oficinavirtual.sar.gob.hn/fac/validador-doc-fiscales/` |
+| Verificador Documentos SAR | `https://oficinavirtual.sar.gob.hn/csv/` |
+| Facturación (normativa) | `https://www.sar.gob.hn/facturacion/` |
+| Firma Electrónica | `https://www.sar.gob.hn/firmaelectronica/` |
+| RTN (inscripción/consulta) | `https://www.sar.gob.hn/registro-tributario-nacional-rtn/` |
+| Leyes tributarias | `https://www.sar.gob.hn/leyes/` |
+| Impuesto Sobre Ventas (ISV) | `https://www.sar.gob.hn/impuesto-sobre-ventas-isv/` |
+| Impuesto Sobre Renta (ISR) | `https://www.sar.gob.hn/impuesto-sobre-renta-isr/` |
+| Declaración Mensual Retenciones | `https://www.sar.gob.hn/declaracion-mensual-de-retenciones-dmr/` |
+| Orientación tributaria | `asistencia@sar.gob.hn` — Tel: 2216-5800 |
+| Reportar incidencias FEA | `https://sati.sar.gob.hn/usdkv8/#!/login/` |
 
 ---
 
 ## Resumen Rápido — Checklist de Registro
 
-Marca cada servicio conforme lo configures:
+Marca cada servicio conforme lo configures. Los números corresponden a las secciones de esta guía.
+
+### ✅ Servicios activos (ya funcionando)
 
 ```
-[ ] 1. Neon DB          → https://neon.tech               → DATABASE_URL
-[ ] 2. AUTH_SECRET      → Local (npx auth secret o crypto) → AUTH_SECRET
-[ ] 3. Google OAuth     → https://console.cloud.google.com → AUTH_GOOGLE_ID + SECRET
-[ ] 4. Microsoft Entra ID → https://portal.azure.org       → AUTH_MICROSOFT_ENTRA_ID_ID + SECRET
-[ ] 5. DeepSeek         → https://platform.deepseek.com    → DEEPSEEK_API_KEY
-[ ] 6. Upstash Redis    → https://console.upstash.com      → UPSTASH_REDIS_REST_URL + TOKEN
-[ ] 7. UploadThing      → https://uploadthing.com          → UPLOADTHING_TOKEN
-[ ] 8. Resend           → https://resend.com               → RESEND_API_KEY + FROM_EMAIL
-[ ] 9. Lemon Squeezy    → https://lemonsqueezy.com         → LEMON_SQUEEZY_API_KEY
-[ ] 10. Inngest         → https://app.inngest.com          → INNGEST_EVENT_KEY
-[ ] 11. Vercel (prod)   → https://vercel.com               → Reemplazar variables con valores de producción
+[ ] 1.  Neon DB          → https://neon.tech               → DATABASE_URL
+[ ] 2.  AUTH_SECRET      → Local (npx auth secret)          → AUTH_SECRET
+[ ] 3.  Google OAuth     → https://console.cloud.google.com → AUTH_GOOGLE_ID + SECRET
+[ ] 4.  Microsoft Entra ID → https://portal.azure.com       → AUTH_MICROSOFT_ENTRA_ID_ID + SECRET
+[ ] 5.  DeepSeek V4      → https://platform.deepseek.com    → DEEPSEEK_API_KEY
+[ ] 6.  Upstash Redis    → https://console.upstash.com      → UPSTASH_REDIS_REST_URL + TOKEN
+[ ] 7.  UploadThing      → https://uploadthing.com          → UPLOADTHING_TOKEN
+[ ] 8.  Resend           → https://resend.com               → RESEND_API_KEY + FROM_EMAIL
+[ ] 9.  Lemon Squeezy    → https://lemonsqueezy.com         → LEMON_SQUEEZY_API_KEY + STORE_ID + productos
+[ ] 10. Inngest          → https://app.inngest.com          → INNGEST_EVENT_KEY
+[ ] 11. pgvector (Neon)  → Extensión nativa                  → N/A
+```
 
-[ ] 12. Google Calendar → https://console.cloud.google.com  → GOOGLE_CALENDAR_CLIENT_ID + SECRET
-[ ] 13. Microsoft Graph → https://portal.azure.com         → MS_GRAPH_CLIENT_ID + SECRET
-[ ] 14. WhatsApp Cloud  → https://business.facebook.com    → WHATSAPP_ACCESS_TOKEN + IDs
-[ ] 15. Firma Electrónica → https://firmavirtual.hn       → FIRMA_ELECTRONICA_API_KEY (Fase 2bis)
-[ ] 16. pgvector (Neon) → Sin registro (extensión nativa)  → N/A
-[ ] 17. OpenAI (embeddings) → https://platform.openai.com  → OPENAI_API_KEY (Fase 2A)
-[ ] 18. SAR (Hacienda)  → https://www.sar.gob.hn          → SAR_CAI_CURRENT (Fase 2bis)
+### ⚠️ Servicios pendientes (Fase 2 y 2bis)
+
+```
+[ ] 12. Vercel (prod)    → https://vercel.com               → Variables de producción
+[ ] 13. Google Calendar  → https://console.cloud.google.com  → GOOGLE_CALENDAR_CLIENT_ID + SECRET
+[ ] 14. Microsoft Graph  → https://portal.azure.com         → MS_GRAPH_CLIENT_ID + SECRET
+[ ] 15. WhatsApp Cloud   → https://business.facebook.com    → WHATSAPP_ACCESS_TOKEN + IDs
+[ ] 16. Firma Electrónica SAR → https://www.sar.gob.hn/firmaelectronica → Certificado FEA (L.350–L.1,500)
+[ ] 17. SAR Oficina Virtual  → https://oficinavirtual.sar.gob.hn → Cuenta SAR del despacho + CAI
+[ ] 18. Validación RTN       → https://www.sar.gob.hn/registro-tributario-nacional-rtn → N/A (herramienta pública)
 ```
 
 ## Orden recomendado de configuración
 
 Configura los servicios en este orden para ir desbloqueando funcionalidad progresivamente:
 
-1. **Neon DB** — necesario para que la app funcione (persistencia)
+### Fase 0 — Imprescindible (sin esto no funciona nada)
+1. **Neon DB** — base de datos
 2. **AUTH_SECRET** — se genera local, 1 minuto
-3. **Google OAuth** — principal método de login para abogados
-4. **Microsoft Entra ID** — segunda opción de login (muchos despachos usan Office 365)
-5. **DeepSeek** — desbloquea todas las features de IA
-6. **Upstash Redis** — rate limiting y cache
-7. **UploadThing** — subida de archivos y documentos
-8. **Resend** — envío de emails (bienvenida, notificaciones, facturas)
-9. **Lemon Squeezy** — pasarela de pagos MoR (apta para Honduras)
-10. **Inngest** — workflows automatizados (pospuesto a Fase 2)
-11. **Vercel** — deploy a producción
-12. **Google Calendar** — sincronización bidireccional de agenda (Fase 2bis)
-13. **Microsoft Graph** — sincronización con calendario Outlook (Fase 2bis)
-14. **WhatsApp Cloud** — notificaciones y recordatorios (Fase 2bis)
-15. **Firma Electrónica** — firma digital de documentos legales (Fase 2bis)
-16. **pgvector** — extensión PostgreSQL para búsqueda semántica (Fase 2A)
-17. **OpenAI Embeddings** — generación de vectores para texto legal (Fase 2A)
-18. **SAR (Hacienda)** — facturación electrónica y declaraciones (Fase 2bis)
+3. **Google OAuth** — login principal
+4. **Microsoft Entra ID** — login alternativo (Office 365)
+
+### Fase 1 — MVP Core
+5. **DeepSeek** — IA jurídica completa
+6. **Upstash Redis** — rate limiting y caché
+7. **UploadThing** — subida de documentos
+8. **Resend** — emails
+
+### Fase 1.5 — Monetización
+9. **Lemon Squeezy** — pasarela de pagos MoR (crear productos en dashboard)
+10. **Inngest** — workflows OCR
+
+### Fase 2 — IA y despliegue
+11. **pgvector** — extensión PostgreSQL (ya activa en Neon)
+12. **Vercel** — deploy a producción
+
+### Fase 2bis — Integraciones y facturación SAR
+13. **Google Calendar** — sincronización de agenda
+14. **Microsoft Graph** — sincronización con Outlook
+15. **WhatsApp Cloud** — notificaciones a clientes
+16. **Firma Electrónica SAR (FEA)** — firma digital de documentos
+17. **SAR Oficina Virtual** — facturación electrónica, declaraciones ISV/ISR
+18. **Validación RTN** — verificar RTN de clientes

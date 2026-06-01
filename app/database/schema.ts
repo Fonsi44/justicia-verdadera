@@ -538,7 +538,7 @@ export const portalTokens = pgTable(
 );
 
 // ─── EMBEDDINGS & VECTOR (pgvector) ─────
-// Columna vector personalizada para pgvector (1536 dims)
+// Columna vector personalizada para pgvector (384 dims)
 const vector = customType<{
   data: number[];
   config: { dimensions?: number };
@@ -546,7 +546,7 @@ const vector = customType<{
   driverData: string;
 }>({
   dataType(config) {
-    const dims = config?.dimensions ?? 1536;
+    const dims = config?.dimensions ?? 384;
     return `vector(${dims})`;
   },
   fromDriver(value: string) {
@@ -569,7 +569,7 @@ export const legalDocuments = pgTable(
     title: text("title").notNull(),
     content: text("content").notNull(),
     chunkIndex: integer("chunk_index").default(0).notNull(),
-    embedding: vector("embedding", { dimensions: 1536 }),
+    embedding: vector("embedding", { dimensions: 384 }),
     metadata: jsonb("metadata").$type<{
       fecha?: string;
       sala?: string;

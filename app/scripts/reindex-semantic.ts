@@ -8,7 +8,7 @@ import { pipeline } from "@xenova/transformers";
 
 // ─── Schema mínimo ────────────────────────────
 const vector = customType<{ data: number[]; config: { dimensions?: number }; driverData: string }>({
-  dataType(config) { return `vector(${config?.dimensions ?? 1536})`; },
+  dataType(config) { return `vector(${config?.dimensions ?? 384})`; },
   fromDriver(value: string) { return value?.replace(/[\[\]]/g, "").split(",").map(Number) || []; },
   toDriver(value: number[]) { return `[${value.join(",")}]`; },
 });
@@ -19,7 +19,7 @@ const legalDocs = pgTable("legal_documents", {
   title: text("title").notNull(),
   content: text("content").notNull(),
   chunkIndex: integer("chunk_index").default(0).notNull(),
-  embedding: vector("embedding", { dimensions: 1536 }),
+  embedding: vector("embedding", { dimensions: 384 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -91,14 +91,8 @@ async function main() {
         const result = await extractor(text, { pooling: "mean", normalize: true });
         const embedding = Array.from(result.data as Float32Array) as number[];
         
-        // Pad a 1536
-        const padded: number[] = new Array(1536).fill(0);
-        for (let i = 0; i < Math.min(embedding.length, 1536); i++) {
-          padded[i] = embedding[i];
-        }
-        
         await db.update(legalDocs)
-          .set({ embedding: padded })
+          .set({ embedding })
           .where(eq(legalDocs.id, row.id as string));
         
         processed++;

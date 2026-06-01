@@ -159,28 +159,34 @@ export default function SuscripcionPage() {
           <h2 className="font-display text-lg font-semibold text-foreground">Corpus Legal Especializado Honduras</h2>
         </div>
         <p className="text-sm text-muted-foreground mb-4">
-          Todos los planes incluyen acceso completo al corpus legal más extenso de Honduras en formato digital.
-          Textos extraídos directamente de los PDFs oficiales del Poder Judicial, TSC, SAR y Secretaría de Trabajo.
+          Todos los planes incluyen acceso completo al corpus legal hondureño, especializado en las 6 ramas del derecho de mayor práctica forense.
+          Textos extraídos de los PDFs oficiales del Poder Judicial, TSC, ONCAE, SAR y Colegio de Notarios.
         </p>
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="rounded-lg bg-muted p-4 text-center">
-            <p className="text-2xl font-bold text-foreground">9</p>
+            <p className="text-2xl font-bold text-foreground">7</p>
             <p className="text-xs text-muted-foreground">Códigos principales</p>
           </div>
           <div className="rounded-lg bg-muted p-4 text-center">
-            <p className="text-2xl font-bold text-foreground">877K</p>
-            <p className="text-xs text-muted-foreground">Palabras indexadas</p>
+            <p className="text-2xl font-bold text-foreground">27K</p>
+            <p className="text-xs text-muted-foreground">Fragmentos legales</p>
           </div>
           <div className="rounded-lg bg-muted p-4 text-center">
-            <p className="text-2xl font-bold text-foreground">24</p>
-            <p className="text-xs text-muted-foreground">Fuentes legales</p>
+            <p className="text-2xl font-bold text-foreground">50+</p>
+            <p className="text-xs text-muted-foreground">Documentos legales</p>
           </div>
         </div>
         <ul className="mt-4 space-y-1.5 text-sm text-muted-foreground">
-          <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 shrink-0 text-emerald-500" />Constitución, Civil, Penal, Trabajo, Comercio, Familia</li>
-          <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 shrink-0 text-emerald-500" />Procesal Civil, Procesal Penal, Tributario, ISR, Amparo</li>
-          <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 shrink-0 text-emerald-500" />Jurisprudencia CSJ, Leyes especiales, Tratados internacionales</li>
+          <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 shrink-0 text-emerald-500" /><strong className="text-foreground">Derecho Civil</strong> — Código Civil, Contratos, Propiedad, Notariado</li>
+          <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 shrink-0 text-emerald-500" /><strong className="text-foreground">Derecho Penal</strong> — Código Penal, Procesal Penal, Jurisprudencia</li>
+          <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 shrink-0 text-emerald-500" /><strong className="text-foreground">Derecho Laboral</strong> — Código de Trabajo, Prestaciones, IHSS</li>
+          <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 shrink-0 text-emerald-500" /><strong className="text-foreground">Derecho Mercantil</strong> — Código de Comercio, Contratación del Estado, Sociedades</li>
+          <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 shrink-0 text-emerald-500" /><strong className="text-foreground">Derecho Procesal</strong> — Procesal Civil, Procesal Penal, Recursos</li>
+          <li className="flex items-center gap-2"><Check className="h-3.5 w-3.5 shrink-0 text-emerald-500" /><strong className="text-foreground">Derecho de Familia</strong> — Código de Familia, Matrimonio, Divorcio, Alimentos</li>
         </ul>
+        <p className="mt-3 text-xs text-muted-foreground">
+          Próximamente: Derecho Constitucional, Tributario y Administrativo.
+        </p>
       </div>
 
       <div className="rounded-xl border bg-card ring-1 ring-foreground/10 p-6">

@@ -92,7 +92,7 @@ export default function LegalPage() {
     <div className="space-y-6">
       <PageHeader
         title="Asistente Jurídico IA"
-        description="Consulta el corpus legal hondureño con DeepSeek V4"
+        description="Consulta el corpus legal hondureño (Civil, Penal, Laboral, Mercantil, Procesal, Familia) con DeepSeek V4"
         breadcrumbs={[{ label: "Dashboard", href: "/dashboard" }, { label: "Asistente IA" }]}
       />
 
